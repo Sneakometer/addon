@@ -6,7 +6,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SkinClassTransformer implements IClassTransformer {
+
+    public static List<String> s = new ArrayList<>();
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
@@ -23,7 +28,6 @@ public class SkinClassTransformer implements IClassTransformer {
                 this.transform(method, name, name.equals("bnp$3"));
             }
         }
-
 
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         node.accept(writer);
@@ -50,7 +54,7 @@ public class SkinClassTransformer implements IClassTransformer {
 
                     list.add(new MethodInsnNode(
                             Opcodes.INVOKESTATIC,
-                            "de/hdskins/labymod/asm/HdTextureProvider",
+                            HdTextureProvider.class.getName(),
                             "fillProperties",
                             "(" + profileDesc + "Ljava/util/Map;)V",
                             false
