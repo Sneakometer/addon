@@ -3,6 +3,5 @@
   "name": "HDSkins",
   "mainClass": "de.hdskins.labymod.HdSkinsAddon",
   "author": "HDSkins",
-  "description": "Bring HDSkins to your LabyMod! Like BAC!",
-  "transformerClass": "de.hdskins.labymod.asm.SkinClassTransformer"
+  "description": "Bring HDSkins to your LabyMod! Like BAC!"
 }

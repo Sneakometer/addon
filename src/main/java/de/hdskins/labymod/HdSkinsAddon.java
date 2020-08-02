@@ -1,6 +1,6 @@
 package de.hdskins.labymod;
 
-import de.hdskins.labymod.asm.SkinClassTransformer;
+import de.hdskins.labymod.manager.SkinManagerInjector;
 import de.hdskins.labymod.gui.ButtonElement;
 import de.hdskins.labymod.gui.HdSkinManageElement;
 import de.hdskins.labymod.utils.ServerHelper;
@@ -24,15 +24,11 @@ public class HdSkinsAddon extends LabyModAddon {
 
     @Override
     public void onEnable() {
-        System.out.println("HD_SKINS SIND TUHL");
-        for (String s : SkinClassTransformer.s) {
-            System.out.println("HD-SKINS: " + s);
-        }
+        SkinManagerInjector.setNewSkinManager();
     }
 
     @Override
     public void loadConfig() {
-
     }
 
     @Override
