@@ -1,0 +1,7 @@
+{
+  "uuid": "%uuid%",
+  "name": "HDSkins",
+  "mainClass": "de.hdskins.labymod.core.HdSkinsAddon",
+  "author": "HDSkins",
+  "description": "Bring HDSkins to your LabyMod! Like BAC!"
+}
