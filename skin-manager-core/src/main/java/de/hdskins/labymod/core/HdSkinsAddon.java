@@ -45,7 +45,7 @@ public class HdSkinsAddon extends LabyModAddon {
                 break;
         }
 
-        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, this);
+        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig);
     }
 
     @Override

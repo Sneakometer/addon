@@ -6,7 +6,6 @@ import de.hdskins.labymod.shared.elements.ButtonElementHandler;
 import de.hdskins.labymod.shared.gui.ButtonElement;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.v18.gui.V18ButtonElement;
-import net.labymod.api.LabyModAddon;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.SettingsElement;
 import net.labymod.settings.elements.StringElement;
@@ -23,15 +22,17 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
     }
 
     @Override
-    public void fillSettings(List<SettingsElement> list, ConfigObject object, LabyModAddon addon) {
+    public void fillSettings(List<SettingsElement> list, ConfigObject object) {
         SettingsElement serverUrlElement = new StringElement(
-                "Server-Url", addon, new ControlElement.IconData(Material.DIAMOND_SWORD), "url", object.getServerUrl()
-        ).addCallback(new SettingsStringCallback(object::setServerUrl));
+                "Server-Url", new ControlElement.IconData(Material.DIAMOND_SWORD),
+                object.getServerUrl(), new SettingsStringCallback(object::setServerUrl)
+        );
         list.add(serverUrlElement);
 
         SettingsElement tokenElement = new StringElement(
-                "Token", addon, new ControlElement.IconData(Material.GOLDEN_APPLE), "token", object.getToken()
-        ).addCallback(new SettingsStringCallback(object::setToken));
+                "Token", new ControlElement.IconData(Material.GOLDEN_APPLE),
+                object.getToken(), new SettingsStringCallback(object::setToken)
+        );
         list.add(tokenElement);
 
         ButtonElement controlElement = new V18ButtonElement("Change skin", new ControlElement.IconData(Material.PAINTING), null);
