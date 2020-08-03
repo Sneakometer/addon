@@ -19,6 +19,9 @@ jobs:
           java-version: ${{ matrix.java }}
           architecture: x64
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle
         run: ./gradlew
 
