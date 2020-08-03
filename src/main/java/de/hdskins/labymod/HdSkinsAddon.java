@@ -1,8 +1,8 @@
 package de.hdskins.labymod;
 
-import de.hdskins.labymod.manager.SkinManagerInjector;
 import de.hdskins.labymod.gui.ButtonElement;
 import de.hdskins.labymod.gui.HdSkinManageElement;
+import de.hdskins.labymod.manager.SkinManagerInjector;
 import de.hdskins.labymod.utils.ServerHelper;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.LabyMod;

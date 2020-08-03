@@ -23,9 +23,9 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
     private final String imageUrl;
     private final IImageBuffer imageBuffer;
     private final CompletableFuture<Boolean> future;
-    private long loaded;
     private BufferedImage bufferedImage;
     private boolean textureUploaded;
+    private boolean wasLoaded;
 
     public InternalThreadDownloadImageData(File cacheFileIn, String imageUrlIn,
                                            ResourceLocation textureResourceLocation,
@@ -67,14 +67,17 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
     }
 
     @Override
-    public void loadTexture(IResourceManager resourceManager) throws IOException {
+    public void loadTexture(IResourceManager resourceManager) {
         try {
             if (this.bufferedImage == null && this.textureLocation != null) {
-                super.loadTexture(resourceManager);
+                try {
+                    super.loadTexture(resourceManager);
+                } catch (IOException ignored) {
+                }
             }
 
-            if (true) {//this.loaded == 0) {
-                if (false) {//this.cacheFile != null && this.cacheFile.isFile()) {
+            if (!this.wasLoaded) {
+                if (this.cacheFile != null && this.cacheFile.isFile()) {
                     try {
                         this.bufferedImage = ImageIO.read(this.cacheFile);
                         if (this.imageBuffer != null) {
@@ -94,7 +97,7 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
     }
 
     protected void loadTextureFromServer() {
-        this.loaded = System.currentTimeMillis();
+        this.wasLoaded = true;
         HDSkinManager.THREAD_POOL.execute(() -> {
             HttpURLConnection httpurlconnection = null;
 
@@ -121,6 +124,10 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
                     }
 
                     this.setBufferedImage(bufferedimage);
+                } else {
+                    if (this.future != null && !this.future.isDone()) {
+                        this.future.complete(false);
+                    }
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();

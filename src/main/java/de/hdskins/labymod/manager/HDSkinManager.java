@@ -1,5 +1,8 @@
 package de.hdskins.labymod.manager;
 
+import com.google.common.base.Ticker;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.InsecureTextureException;
@@ -21,16 +24,22 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+@SuppressWarnings("UnstableApiUsage")
 public class HDSkinManager extends SkinManager {
 
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private final File skinCacheDir;
+    private final TextureManager textureManager;
+    private final Cache<ResourceLocation, Boolean> cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(2, TimeUnit.MINUTES)
+            .ticker(Ticker.systemTicker())
+            .build();
 
     public HDSkinManager(TextureManager textureManagerInstance, File skinCacheDirectory, MinecraftSessionService sessionService) {
         super(textureManagerInstance, skinCacheDirectory, sessionService);
         this.skinCacheDir = skinCacheDirectory;
+        this.textureManager = textureManagerInstance;
     }
 
     @Override
@@ -46,12 +55,6 @@ public class HDSkinManager extends SkinManager {
                 throwable.printStackTrace();
             }
 
-            AtomicBoolean success = new AtomicBoolean();
-            try {
-                success.set(future.get(5, TimeUnit.SECONDS));
-            } catch (InterruptedException | TimeoutException | ExecutionException ignored) {
-            }
-
             Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = Maps.newHashMap();
             try {
                 map.putAll(Minecraft.getMinecraft().getSessionService().getTextures(profile, requireSecure));
@@ -65,15 +68,25 @@ public class HDSkinManager extends SkinManager {
             }
 
             try {
-                if (!success.get() && map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                    this.loadSkin0(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN, skinAvailableCallback, null);
-                }
+                future.thenAccept(success -> {
+                    if (!success && map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
+                        this.loadSkin0(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN, skinAvailableCallback, null);
+                    }
+                });
 
                 if (map.containsKey(MinecraftProfileTexture.Type.CAPE)) {
                     this.loadSkin0(map.get(MinecraftProfileTexture.Type.CAPE), MinecraftProfileTexture.Type.CAPE, skinAvailableCallback, null);
                 }
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
+            }
+
+            if (!future.isDone()) {
+                try {
+                    future.get(10, TimeUnit.SECONDS);
+                } catch (InterruptedException | TimeoutException | ExecutionException exception) {
+                    future.complete(false);
+                }
             }
         });
     }
@@ -83,17 +96,24 @@ public class HDSkinManager extends SkinManager {
                           SkinAvailableCallback skinAvailableCallback,
                           CompletableFuture<Boolean> future) {
         final ResourceLocation resourcelocation = new ResourceLocation("skins/" + profileTexture.getHash());
-        ITextureObject itextureobject = null;//Minecraft.getMinecraft().getTextureManager().getTexture(resourcelocation);
 
-        if (itextureobject != null) {
+        ITextureObject iTextureObject = this.textureManager.getTexture(resourcelocation);
+        Boolean loaded = this.cache.getIfPresent(resourcelocation);
+
+        if (iTextureObject != null && loaded != null) {
             if (skinAvailableCallback != null) {
                 skinAvailableCallback.skinAvailable(type, resourcelocation, profileTexture);
+            }
+
+            if (future != null) {
+                future.complete(true);
             }
         } else {
             File file1 = new File(this.skinCacheDir, profileTexture.getHash().length() > 2 ? profileTexture.getHash().substring(0, 2) : "xx");
             File file2 = new File(file1, profileTexture.getHash());
             final IImageBuffer iimagebuffer = type == MinecraftProfileTexture.Type.SKIN ? new ImageBufferDownload() : null;
             SimpleTexture texture = new InternalThreadDownloadImageData(file2, profileTexture.getUrl(), DefaultPlayerSkin.getDefaultSkinLegacy(), new IImageBuffer() {
+                @Override
                 public BufferedImage parseUserSkin(BufferedImage image) {
                     if (iimagebuffer != null) {
                         image = iimagebuffer.parseUserSkin(image);
@@ -102,6 +122,7 @@ public class HDSkinManager extends SkinManager {
                     return image;
                 }
 
+                @Override
                 public void skinAvailable() {
                     if (iimagebuffer != null) {
                         iimagebuffer.skinAvailable();
@@ -110,9 +131,11 @@ public class HDSkinManager extends SkinManager {
                     if (skinAvailableCallback != null) {
                         skinAvailableCallback.skinAvailable(type, resourcelocation, profileTexture);
                     }
+
+                    HDSkinManager.this.cache.put(resourcelocation, Boolean.TRUE);
                 }
             }, future);
-            Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().getTextureManager().loadTexture(resourcelocation, texture));
+            Minecraft.getMinecraft().addScheduledTask(() -> HDSkinManager.this.textureManager.loadTexture(resourcelocation, texture));
         }
     }
 }
