@@ -22,6 +22,8 @@ public class MainConfig implements ConfigObject {
         JsonElement serverUrl = addon.getConfig().get("server");
         if (serverUrl != null && !(serverUrl instanceof JsonNull)) {
             mainConfig.serverUrl = serverUrl.getAsString();
+        } else {
+            mainConfig.serverUrl = "https://api.hdskins.de";
         }
 
         JsonElement adminToken = addon.getConfig().get("token");
@@ -41,7 +43,7 @@ public class MainConfig implements ConfigObject {
 
     @Override
     public String getServerUrl() {
-        return serverUrl.endsWith("/") ? (this.serverUrl = this.serverUrl.substring(0, this.serverUrl.length() - 1)) : this.serverUrl;
+        return this.serverUrl == null ? null : serverUrl.endsWith("/") ? (this.serverUrl = this.serverUrl.substring(0, this.serverUrl.length() - 1)) : this.serverUrl;
     }
 
     @Override
