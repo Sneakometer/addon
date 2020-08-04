@@ -3,6 +3,7 @@ package de.hdskins.labymod.core;
 import de.hdskins.labymod.core.config.MainConfig;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.mappings.HandledMappings;
+import de.hdskins.labymod.shared.mappings.Mappings;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.Source;
@@ -24,7 +25,20 @@ public class HdSkinsAddon extends LabyModAddon {
         this.mappings = HandledMappings.getLoadedMappings();
         if (this.mappings == null) {
             System.err.println(Constants.LOG_PREFIX + "Unable to load correct mappings for minecraft version " + Source.ABOUT_MC_VERSION);
+            return;
         }
+
+        System.out.println("        __  ______  _____ __   _\n" +
+                "       / / / / __ \\/ ___// /__(_)___  _____\n" +
+                "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n" +
+                "     / __  / /_/ /___/ / ,< / / / / (__  )\n" +
+                "    /_/ /_/_____//____/_/|_/_/_/ /_/____/\n" +
+                "\n" +
+                "          Copyright (c) 2020 HDSkins\n" +
+                "   Support Discord: https://discord.gg/KN8rDZJ");
+
+        Mappings mappings = this.mappings.getMappings();
+        System.out.println(Constants.LOG_PREFIX + "Using mappings for " + mappings.getVersion() + " (Mappings version: " + mappings.getMappingsVersion() + ")");
     }
 
     @Override
