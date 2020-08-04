@@ -4,11 +4,14 @@ import net.labymod.settings.elements.ControlElement;
 
 public abstract class ButtonElement extends ControlElement {
 
+    public static boolean buttonsEnabledByDefault = true;
+
     protected Runnable runnable;
     protected boolean enabled;
 
     public ButtonElement(String displayName, ControlElement.IconData iconData) {
         super(displayName, iconData);
+        this.enabled = buttonsEnabledByDefault;
     }
 
     public abstract String getText();

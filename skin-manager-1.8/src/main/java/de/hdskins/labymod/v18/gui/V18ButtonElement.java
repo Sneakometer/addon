@@ -54,4 +54,10 @@ public class V18ButtonElement extends ButtonElement {
 
         LabyModCore.getMinecraft().drawButton(this.button, mouseX, mouseY);
     }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        this.button.enabled = enabled;
+    }
 }
