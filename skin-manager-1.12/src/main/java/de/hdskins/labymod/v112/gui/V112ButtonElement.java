@@ -12,9 +12,9 @@ public class V112ButtonElement extends ButtonElement {
 
     private final GuiButton button = new GuiButton(-2, 0, 0, 0, 20, "");
 
-    public V112ButtonElement(String displayName, ControlElement.IconData iconData, String text) {
+    public V112ButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName) {
         super(displayName, iconData);
-        this.button.displayString = text;
+        this.button.displayString = inButtonName;
     }
 
     @Override

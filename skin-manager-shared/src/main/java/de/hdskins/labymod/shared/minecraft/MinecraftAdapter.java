@@ -10,4 +10,8 @@ public interface MinecraftAdapter {
     String getSessionId();
 
     void fillSettings(List<SettingsElement> list, ConfigObject object);
+
+    void drawString(String text, double x, double y, double size);
+
+    int getWidth();
 }

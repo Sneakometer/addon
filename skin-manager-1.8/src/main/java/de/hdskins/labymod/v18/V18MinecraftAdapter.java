@@ -2,10 +2,11 @@ package de.hdskins.labymod.v18;
 
 import de.hdskins.labymod.shared.callbacks.SettingsStringCallback;
 import de.hdskins.labymod.shared.config.ConfigObject;
-import de.hdskins.labymod.shared.elements.ButtonElementHandler;
+import de.hdskins.labymod.shared.elements.UploadFileButtonClickHandler;
 import de.hdskins.labymod.shared.gui.ButtonElement;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.v18.gui.V18ButtonElement;
+import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.SettingsElement;
 import net.labymod.settings.elements.StringElement;
@@ -18,7 +19,7 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
 
     @Override
     public String getSessionId() {
-        return Minecraft.getMinecraft().getSession().getSessionID();
+        return Minecraft.getMinecraft().getSession().getToken();
     }
 
     @Override
@@ -27,17 +28,29 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
                 "Server-Url", new ControlElement.IconData(Material.DIAMOND_SWORD),
                 object.getServerUrl(), new SettingsStringCallback(object::setServerUrl)
         );
+        serverUrlElement.setDescriptionText("The server url to use to download the skins from/upload skins to");
         list.add(serverUrlElement);
 
         SettingsElement tokenElement = new StringElement(
                 "Token", new ControlElement.IconData(Material.GOLDEN_APPLE),
                 object.getToken(), new SettingsStringCallback(object::setToken)
         );
+        tokenElement.setDescriptionText("The admin token to bypass rate limits if available");
         list.add(tokenElement);
 
-        ButtonElement controlElement = new V18ButtonElement("Change skin", new ControlElement.IconData(Material.PAINTING), null);
+        ButtonElement controlElement = new V18ButtonElement("Change skin", new ControlElement.IconData(Material.PAINTING), "Click here");
         controlElement.setDescriptionText("Skins must not contain right-wing, narcissistic, offensive or sexual content.");
-        controlElement.setClickListener(new ButtonElementHandler());
+        controlElement.setClickListener(new UploadFileButtonClickHandler(this, object));
         list.add(controlElement);
+    }
+
+    @Override
+    public void drawString(String text, double x, double y, double size) {
+        LabyMod.getInstance().getDrawUtils().drawCenteredString(text, x, y, size);
+    }
+
+    @Override
+    public int getWidth() {
+        return LabyMod.getInstance().getDrawUtils().getWidth();
     }
 }

@@ -28,7 +28,7 @@ public class HdSkinsAddon extends LabyModAddon {
             return;
         }
 
-        System.out.println("        __  ______  _____ __   _\n" +
+        System.out.println("\n        __  ______  _____ __   _\n" +
                 "       / / / / __ \\/ ___// /__(_)___  _____\n" +
                 "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n" +
                 "     / __  / /_/ /___/ / ,< / / / / (__  )\n" +
