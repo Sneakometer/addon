@@ -57,7 +57,7 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
     public void setBufferedImage(BufferedImage bufferedImageIn) {
         this.bufferedImage = bufferedImageIn;
 
-        if (this.imageBuffer != null) {
+        if (this.bufferedImage != null && this.imageBuffer != null) {
             this.imageBuffer.skinAvailable();
         }
 
@@ -66,16 +66,13 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
         }
     }
 
+    public BufferedImage getBufferedImage() {
+        return bufferedImage;
+    }
+
     @Override
     public void loadTexture(IResourceManager resourceManager) {
         try {
-            if (this.bufferedImage == null && this.textureLocation != null) {
-                try {
-                    super.loadTexture(resourceManager);
-                } catch (IOException ignored) {
-                }
-            }
-
             if (!this.wasLoaded) {
                 if (this.cacheFile != null && this.cacheFile.isFile()) {
                     try {

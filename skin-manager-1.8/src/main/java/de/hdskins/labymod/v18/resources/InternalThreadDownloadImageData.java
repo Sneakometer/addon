@@ -48,6 +48,10 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
         }
     }
 
+    public BufferedImage getBufferedImage() {
+        return bufferedImage;
+    }
+
     @Override
     public int getGlTextureId() {
         this.checkTextureUploaded();
@@ -57,7 +61,7 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
     public void setBufferedImage(BufferedImage bufferedImageIn) {
         this.bufferedImage = bufferedImageIn;
 
-        if (this.imageBuffer != null) {
+        if (this.bufferedImage != null && this.imageBuffer != null) {
             this.imageBuffer.skinAvailable();
         }
 

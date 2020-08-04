@@ -1,8 +1,5 @@
 package de.hdskins.labymod.v112.manager;
 
-import com.google.common.base.Ticker;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.InsecureTextureException;
@@ -26,17 +23,12 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class HDSkinManager extends SkinManager {
 
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private final File skinCacheDir;
     private final TextureManager textureManager;
     private final ConfigObject configObject;
-    private final Cache<ResourceLocation, Boolean> cache = CacheBuilder.newBuilder()
-            .expireAfterWrite(2, TimeUnit.MINUTES)
-            .ticker(Ticker.systemTicker())
-            .build();
 
     public HDSkinManager(TextureManager textureManagerInstance, File skinCacheDirectory, MinecraftSessionService sessionService, ConfigObject configObject) {
         super(textureManagerInstance, skinCacheDirectory, sessionService);
@@ -108,11 +100,12 @@ public class HDSkinManager extends SkinManager {
                           SkinAvailableCallback skinAvailableCallback,
                           CompletableFuture<Boolean> future) {
         final ResourceLocation resourcelocation = new ResourceLocation("skins/" + profileTexture.getHash());
-
         ITextureObject iTextureObject = this.textureManager.getTexture(resourcelocation);
-        Boolean loaded = this.cache.getIfPresent(resourcelocation);
 
-        if (iTextureObject != null && loaded != null) {
+        boolean internal = profileTexture instanceof InternalMinecraftProfileTexture && iTextureObject instanceof InternalThreadDownloadImageData;
+        boolean canUseCachedData = internal && ((InternalThreadDownloadImageData) iTextureObject).getBufferedImage() != null;
+
+        if ((internal && canUseCachedData) || (!internal && iTextureObject != null)) {
             if (skinAvailableCallback != null) {
                 skinAvailableCallback.skinAvailable(type, resourcelocation, profileTexture);
             }
@@ -143,8 +136,6 @@ public class HDSkinManager extends SkinManager {
                     if (skinAvailableCallback != null) {
                         skinAvailableCallback.skinAvailable(type, resourcelocation, profileTexture);
                     }
-
-                    HDSkinManager.this.cache.put(resourcelocation, Boolean.TRUE);
                 }
             }, future);
             Minecraft.getMinecraft().addScheduledTask(() -> HDSkinManager.this.textureManager.loadTexture(resourcelocation, texture));

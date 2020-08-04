@@ -23,7 +23,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew
+        run: ./gradlew --no-daemon
 
       - uses: actions/upload-artifact@master
         with:
