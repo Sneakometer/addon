@@ -50,12 +50,14 @@ public class HdSkinsAddon extends LabyModAddon {
         super.init(addonName, uuid);
         switch (this.mappings) {
             case V1_8:
-                de.hdskins.labymod.v18.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
                 this.minecraftAdapter = new de.hdskins.labymod.v18.V18MinecraftAdapter();
+                de.hdskins.labymod.v18.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
+                de.hdskins.labymod.v18.report.ReportUserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
                 break;
             case V1_12:
-                de.hdskins.labymod.v112.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
                 this.minecraftAdapter = new de.hdskins.labymod.v112.V112MinecraftAdapter();
+                de.hdskins.labymod.v112.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
+                de.hdskins.labymod.v112.report.ReportUserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
                 break;
         }
 

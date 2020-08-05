@@ -7,6 +7,7 @@ import com.github.derklaro.requestbuilder.result.http.StatusCode;
 import com.github.derklaro.requestbuilder.types.MimeTypes;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.shared.profile.PlayerProfile;
 import net.labymod.main.LabyMod;
 
 import java.io.OutputStream;
@@ -25,22 +26,76 @@ public final class ServerHelper {
             return StatusCode.NOT_ACCEPTABLE;
         }
 
-        try (RequestResult requestResult = RequestBuilder.newBuilder(config.getServerUrl() + "/uploadSkin")
+        RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/uploadSkin")
                 .setRequestMethod(RequestMethod.PUT)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
                 .addHeader("session", minecraftAdapter.getSessionId())
                 .setMimeType(MimeTypes.getMimeType("png"))
                 .setConnectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches()
-                .enableOutput()
-                .fireAndForget()
-        ) {
+                .enableOutput();
+        if (config.getToken() != null) {
+            builder.addHeader("token", config.getToken());
+        }
+
+        try (RequestResult requestResult = builder.fireAndForget()) {
             byte[] bytes = Files.readAllBytes(path);
             try (OutputStream outputStream = requestResult.getOutputStream()) {
                 outputStream.write(bytes);
                 outputStream.flush();
             }
 
+            return requestResult.getStatus();
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return StatusCode.INTERNAL_SERVER_ERROR;
+    }
+
+    public static StatusCode reportSkin(PlayerProfile reportedPlayer, MinecraftAdapter minecraftAdapter, ConfigObject config) {
+        if (config.getServerUrl() == null) {
+            return StatusCode.NOT_ACCEPTABLE;
+        }
+
+        RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/reportSkin")
+                .setRequestMethod(RequestMethod.POST)
+                .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("name", LabyMod.getInstance().getPlayerName())
+                .addHeader("session", minecraftAdapter.getSessionId())
+                .addHeader("reportedUniqueId", reportedPlayer.getUniqueId().toString().replace("-", ""))
+                .addHeader("reportedName", reportedPlayer.getName())
+                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .disableCaches();
+        if (config.getToken() != null) {
+            builder.addHeader("token", config.getToken());
+        }
+
+        try (RequestResult requestResult = builder.fireAndForget()) {
+            return requestResult.getStatus();
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return StatusCode.INTERNAL_SERVER_ERROR;
+    }
+
+    public static StatusCode deleteSkin(MinecraftAdapter minecraftAdapter, ConfigObject config) {
+        if (config.getServerUrl() == null) {
+            return StatusCode.NOT_ACCEPTABLE;
+        }
+
+        RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/deleteSkin")
+                .setRequestMethod(RequestMethod.DELETE)
+                .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("session", minecraftAdapter.getSessionId())
+                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .disableCaches();
+        if (config.getToken() != null) {
+            builder.addHeader("token", config.getToken());
+        }
+
+        try (RequestResult requestResult = builder.fireAndForget()) {
             return requestResult.getStatus();
         } catch (final Exception ex) {
             ex.printStackTrace();

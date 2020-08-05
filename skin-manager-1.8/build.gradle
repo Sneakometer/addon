@@ -38,6 +38,7 @@ processResources {
 
 dependencies {
     compileOnly files('../libs/lm_api_mc1.8.9.jar')
+    compileOnly group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.3'
     compileOnly project(':skin-manager-shared')
 }
 

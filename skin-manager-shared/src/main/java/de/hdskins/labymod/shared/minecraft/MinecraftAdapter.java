@@ -1,9 +1,11 @@
 package de.hdskins.labymod.shared.minecraft;
 
 import de.hdskins.labymod.shared.config.ConfigObject;
+import de.hdskins.labymod.shared.profile.PlayerProfile;
 import net.labymod.settings.elements.SettingsElement;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MinecraftAdapter {
 
@@ -11,7 +13,9 @@ public interface MinecraftAdapter {
 
     void fillSettings(List<SettingsElement> list, ConfigObject object);
 
-    void drawString(String text, double x, double y, double size);
+    void displayMessageInChat(String message);
 
-    int getWidth();
+    void changeToIngame();
+
+    Optional<PlayerProfile> resolveUniqueId(String name);
 }
