@@ -31,6 +31,7 @@ public class MainConfig implements ConfigObject {
             mainConfig.token = adminToken.getAsString();
         }
 
+        mainConfig.save();
         return mainConfig;
     }
 
