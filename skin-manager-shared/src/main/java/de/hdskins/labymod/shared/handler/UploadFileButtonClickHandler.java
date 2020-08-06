@@ -10,11 +10,11 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UploadFileButtonClickHandler implements Runnable {
 
@@ -28,19 +28,23 @@ public class UploadFileButtonClickHandler implements Runnable {
     private final MinecraftAdapter minecraftAdapter;
     private final ConfigObject configObject;
 
-    private final AtomicBoolean chooserOpen = new AtomicBoolean();
+    private File lastUsedDirectory;
+    private JFileChooser currentChooser;
 
     @Override
     public void run() {
-        if (!chooserOpen.getAndSet(true)) {
+        if (this.currentChooser == null) {
             Constants.EXECUTOR.execute(() -> {
-                JFileChooser chooser = new JFileChooser();
-                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    UploadFileButtonClickHandler.this.handleApprove(chooser);
+                this.currentChooser = new JFileChooser(this.lastUsedDirectory);
+                if (this.currentChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    UploadFileButtonClickHandler.this.handleApprove(this.currentChooser);
                 }
 
-                UploadFileButtonClickHandler.this.chooserOpen.set(false);
+                this.lastUsedDirectory = this.currentChooser.getCurrentDirectory();
+                this.currentChooser = null;
             });
+        } else {
+            this.currentChooser.requestFocus();
         }
     }
 

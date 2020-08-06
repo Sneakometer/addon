@@ -51,16 +51,4 @@ public class MainConfig implements ConfigObject {
     public String getToken() {
         return token;
     }
-
-    @Override
-    public void setServerUrl(String url) {
-        this.serverUrl = url;
-        this.save();
-    }
-
-    @Override
-    public void setToken(String token) {
-        this.token = token;
-        this.save();
-    }
 }

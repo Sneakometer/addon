@@ -11,7 +11,7 @@ public interface MinecraftAdapter {
 
     String getSessionId();
 
-    void fillSettings(List<SettingsElement> list, ConfigObject object);
+    void fillSettings(List<SettingsElement> list, ConfigObject object, boolean slim);
 
     void displayMessageInChat(String message);
 

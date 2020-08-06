@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
@@ -23,18 +24,20 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
     private final String imageUrl;
     private final IImageBuffer imageBuffer;
     private final CompletableFuture<Boolean> future;
+    private final InternalMinecraftProfileTexture texture;
     private BufferedImage bufferedImage;
     private boolean textureUploaded;
     private boolean wasLoaded;
 
     public InternalThreadDownloadImageData(File cacheFileIn, String imageUrlIn,
-                                           ResourceLocation textureResourceLocation,
-                                           IImageBuffer imageBufferIn, CompletableFuture<Boolean> future) {
+                                           ResourceLocation textureResourceLocation, IImageBuffer imageBufferIn,
+                                           CompletableFuture<Boolean> future, InternalMinecraftProfileTexture texture) {
         super(textureResourceLocation);
         this.cacheFile = cacheFileIn;
         this.imageUrl = imageUrlIn;
         this.imageBuffer = imageBufferIn;
         this.future = future;
+        this.texture = texture;
     }
 
     private void checkTextureUploaded() {
@@ -106,21 +109,11 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
                 httpurlconnection.setDoOutput(false);
                 httpurlconnection.connect();
 
-                if (httpurlconnection.getResponseCode() == 200) {
-                    BufferedImage bufferedimage;
-
-                    if (this.cacheFile != null) {
-                        FileUtils.copyInputStreamToFile(httpurlconnection.getInputStream(), this.cacheFile);
-                        bufferedimage = ImageIO.read(this.cacheFile);
-                    } else {
-                        bufferedimage = TextureUtil.readBufferedImage(httpurlconnection.getInputStream());
-                    }
-
-                    if (this.imageBuffer != null) {
-                        bufferedimage = this.imageBuffer.parseUserSkin(bufferedimage);
-                    }
-
-                    this.setBufferedImage(bufferedimage);
+                if (httpurlconnection.getResponseCode() == 200 || this.texture == null) {
+                    this.handleSuccess(httpurlconnection);
+                } else if (httpurlconnection.getResponseCode() == 418) {
+                    this.texture.getMetadata().put("model", "slim");
+                    this.handleSuccess(httpurlconnection);
                 } else {
                     if (this.future != null && !this.future.isDone()) {
                         this.future.complete(false);
@@ -136,5 +129,23 @@ public class InternalThreadDownloadImageData extends SimpleTexture {
                 }
             }
         });
+    }
+
+    private void handleSuccess(HttpURLConnection httpURLConnection) throws IOException {
+        InputStream inputStream = httpURLConnection.getResponseCode() == 200 ? httpURLConnection.getInputStream() : httpURLConnection.getErrorStream();
+        BufferedImage bufferedimage;
+
+        if (this.cacheFile != null) {
+            FileUtils.copyInputStreamToFile(inputStream, this.cacheFile);
+            bufferedimage = ImageIO.read(this.cacheFile);
+        } else {
+            bufferedimage = TextureUtil.readBufferedImage(inputStream);
+        }
+
+        if (this.imageBuffer != null) {
+            bufferedimage = this.imageBuffer.parseUserSkin(bufferedimage);
+        }
+
+        this.setBufferedImage(bufferedimage);
     }
 }

@@ -5,6 +5,7 @@ import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.mappings.HandledMappings;
 import de.hdskins.labymod.shared.mappings.Mappings;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.shared.utils.ServerHelper;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.Source;
 import net.labymod.settings.elements.SettingsElement;
@@ -61,7 +62,7 @@ public class HdSkinsAddon extends LabyModAddon {
                 break;
         }
 
-        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig);
+        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, ServerHelper.isSlim(this.mainConfig));
     }
 
     @Override

@@ -38,6 +38,10 @@ public final class ServerHelper {
             builder.addHeader("token", config.getToken());
         }
 
+        if (path.toString().endsWith("~1")) {
+            builder.addHeader("slim", "1");
+        }
+
         try (RequestResult requestResult = builder.fireAndForget()) {
             byte[] bytes = Files.readAllBytes(path);
             try (OutputStream outputStream = requestResult.getOutputStream()) {
@@ -93,6 +97,57 @@ public final class ServerHelper {
                 .disableCaches();
         if (config.getToken() != null) {
             builder.addHeader("token", config.getToken());
+        }
+
+        try (RequestResult requestResult = builder.fireAndForget()) {
+            return requestResult.getStatus();
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return StatusCode.INTERNAL_SERVER_ERROR;
+    }
+
+    public static boolean isSlim(ConfigObject configObject) {
+        if (configObject.getServerUrl() == null) {
+            return false;
+        }
+
+        RequestBuilder builder = RequestBuilder.newBuilder(configObject.getServerUrl() + "/isSlim")
+                .setRequestMethod(RequestMethod.GET)
+                .addHeader("uuid", getUndashedPlayerUniqueId())
+                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .disableCaches();
+        if (configObject.getToken() != null) {
+            builder.addHeader("token", configObject.getToken());
+        }
+
+        try (RequestResult requestResult = builder.fireAndForget()) {
+            return requestResult.getStatusCode() == 200;
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static StatusCode setSlim(MinecraftAdapter minecraftAdapter, ConfigObject config, boolean slim) {
+        if (config.getServerUrl() == null) {
+            return StatusCode.NOT_ACCEPTABLE;
+        }
+
+        RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/setSlim")
+                .setRequestMethod(RequestMethod.POST)
+                .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("session", minecraftAdapter.getSessionId())
+                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .disableCaches();
+        if (config.getToken() != null) {
+            builder.addHeader("token", config.getToken());
+        }
+
+        if (slim) {
+            builder.addHeader("slim", "1");
         }
 
         try (RequestResult requestResult = builder.fireAndForget()) {
