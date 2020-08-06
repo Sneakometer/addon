@@ -8,15 +8,13 @@ public final class ReflectionUtils {
     private static final Field MODIFIERS_FIELD;
 
     static {
-        Field modifiersField = null;
         try {
-            modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
+            MODIFIERS_FIELD = Field.class.getDeclaredField("modifiers");
+            MODIFIERS_FIELD.setAccessible(true);
         } catch (NoSuchFieldException exception) {
-            exception.printStackTrace();
+            // unreachable code
+            throw new RuntimeException(exception);
         }
-
-        MODIFIERS_FIELD = modifiersField;
     }
 
     private ReflectionUtils() {

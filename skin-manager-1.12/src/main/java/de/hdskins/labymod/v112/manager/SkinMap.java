@@ -1,4 +1,4 @@
-package de.hdskins.labymod.v18.manager;
+package de.hdskins.labymod.v112.manager;
 
 import net.minecraft.util.ResourceLocation;
 

@@ -65,10 +65,8 @@ public class HDSkinManager extends SkinManager {
             }
 
             Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = Maps.newHashMap();
-
-            if (fillProperties &&
-                    Iterables.getFirst(profile.getProperties().get("textures"), null) == null &&
-                    !profile.getId().equals(LabyMod.getInstance().getPlayerUUID())) {
+            if (fillProperties && Iterables.getFirst(profile.getProperties().get("textures"), null) == null
+                    && !profile.getId().equals(LabyMod.getInstance().getPlayerUUID())) {
                 Minecraft.getMinecraft().getSessionService().fillProfileProperties(profile, false);
             }
 
@@ -107,12 +105,7 @@ public class HDSkinManager extends SkinManager {
         }
 
         this.loadProfileTextures0(profile, null, false, true);
-
-        return this.cache.get(profile.getId());
-    }
-
-    public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> loadSkinFromCache(UUID uniqueId) {
-        return this.loadSkinFromCache(new GameProfile(uniqueId, "Steve"));
+        return this.cache.getOrDefault(profile.getId(), Collections.emptyMap());
     }
 
     public void loadSkin0(MinecraftProfileTexture profileTexture,
@@ -190,12 +183,12 @@ public class HDSkinManager extends SkinManager {
     }
 
     public ResourceLocation loadSkinLocation(UUID uniqueId) {
-        MinecraftProfileTexture texture = this.loadSkinFromCache(uniqueId).get(MinecraftProfileTexture.Type.SKIN);
-        if (texture == null) {
+        Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textureMap = this.loadSkinFromCache(new GameProfile(uniqueId, "Steve"));
+        if (textureMap == null) {
             return null;
         }
 
-        return this.loadSkin(texture, MinecraftProfileTexture.Type.SKIN);
+        MinecraftProfileTexture texture = textureMap.get(MinecraftProfileTexture.Type.SKIN);
+        return texture == null ? null : this.loadSkin(texture, MinecraftProfileTexture.Type.SKIN);
     }
-
 }

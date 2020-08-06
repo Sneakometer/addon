@@ -24,13 +24,7 @@ public final class SkinManagerInjector {
         }
 
         HDSkinManager skinManager = new HDSkinManager(Minecraft.getMinecraft().getTextureManager(), cacheDir, Minecraft.getMinecraft().getSessionService(), configObject);
-
-        ReflectionUtils.set(
-                Minecraft.class,
-                Minecraft.getMinecraft(),
-                skinManager,
-                mappings.getSkinManagerMappings()
-        );
+        ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), skinManager, mappings.getSkinManagerMappings());
 
         try {
             DrawUtils drawUtils = LabyMod.getInstance().getDrawUtils();

@@ -3,6 +3,9 @@ package de.hdskins.labymod.v112.manager;
 import de.hdskins.labymod.shared.ReflectionUtils;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.mappings.Mappings;
+import net.labymod.main.LabyMod;
+import net.labymod.utils.DrawUtils;
+import net.labymod.utils.texture.PlayerSkinTextureCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.SkinManager;
 
@@ -21,11 +24,13 @@ public final class SkinManagerInjector {
             return;
         }
 
-        ReflectionUtils.set(
-                Minecraft.class,
-                Minecraft.getMinecraft(),
-                new HDSkinManager(Minecraft.getMinecraft().getTextureManager(), cacheDir, Minecraft.getMinecraft().getSessionService(), configObject),
-                mappings.getSkinManagerMappings()
-        );
+        HDSkinManager skinManager = new HDSkinManager(Minecraft.getMinecraft().getTextureManager(), cacheDir, Minecraft.getMinecraft().getSessionService(), configObject);
+        ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), skinManager, mappings.getSkinManagerMappings());
+
+        DrawUtils drawUtils = LabyMod.getInstance().getDrawUtils();
+        Object textureCache = ReflectionUtils.get(null, DrawUtils.class, drawUtils, "playerSkinTextureCache");
+
+        ReflectionUtils.set(PlayerSkinTextureCache.class, textureCache, new SkinMap(skinManager), "loadedSkins");
+        ReflectionUtils.set(PlayerSkinTextureCache.class, textureCache, skinManager, "skinManager");
     }
 }

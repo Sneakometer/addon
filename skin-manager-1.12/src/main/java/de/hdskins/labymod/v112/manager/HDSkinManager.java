@@ -1,5 +1,6 @@
 package de.hdskins.labymod.v112.manager;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.InsecureTextureException;
@@ -8,6 +9,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.v112.resources.InternalMinecraftProfileTexture;
 import de.hdskins.labymod.v112.resources.InternalThreadDownloadImageData;
+import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
 import net.minecraft.client.renderer.ImageBufferDownload;
@@ -20,7 +22,9 @@ import net.minecraft.util.ResourceLocation;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class HDSkinManager extends SkinManager {
@@ -41,6 +45,10 @@ public class HDSkinManager extends SkinManager {
 
     @Override
     public void loadProfileTextures(GameProfile profile, SkinAvailableCallback skinAvailableCallback, boolean requireSecure) {
+        loadProfileTextures0(profile, skinAvailableCallback, requireSecure, false);
+    }
+
+    private void loadProfileTextures0(GameProfile profile, SkinAvailableCallback skinAvailableCallback, boolean requireSecure, boolean fillProperties) {
         THREAD_POOL.execute(() -> {
             CompletableFuture<Boolean> future = null;
             InternalMinecraftProfileTexture texture = null;
@@ -57,6 +65,11 @@ public class HDSkinManager extends SkinManager {
             }
 
             Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = Maps.newHashMap();
+            if (fillProperties && Iterables.getFirst(profile.getProperties().get("textures"), null) == null
+                    && !profile.getId().equals(LabyMod.getInstance().getPlayerUUID())) {
+                Minecraft.getMinecraft().getSessionService().fillProfileProperties(profile, false);
+            }
+
             try {
                 map.putAll(Minecraft.getMinecraft().getSessionService().getTextures(profile, requireSecure));
             } catch (InsecureTextureException ignored) {
@@ -91,7 +104,8 @@ public class HDSkinManager extends SkinManager {
         } catch (Throwable ignored) {
         }
 
-        return this.cache.get(profile);
+        this.loadProfileTextures0(profile, null, false, true);
+        return this.cache.getOrDefault(profile.getId(), Collections.emptyMap());
     }
 
     public void loadSkin0(MinecraftProfileTexture profileTexture,
@@ -166,5 +180,15 @@ public class HDSkinManager extends SkinManager {
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
+    }
+
+    public ResourceLocation loadSkinLocation(UUID uniqueId) {
+        Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textureMap = this.loadSkinFromCache(new GameProfile(uniqueId, "Steve"));
+        if (textureMap == null) {
+            return null;
+        }
+
+        MinecraftProfileTexture texture = textureMap.get(MinecraftProfileTexture.Type.SKIN);
+        return texture == null ? null : this.loadSkin(texture, MinecraftProfileTexture.Type.SKIN);
     }
 }
