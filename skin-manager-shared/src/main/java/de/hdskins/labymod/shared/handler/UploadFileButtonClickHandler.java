@@ -3,6 +3,7 @@ package de.hdskins.labymod.shared.handler;
 import com.github.derklaro.requestbuilder.result.http.StatusCode;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.config.ConfigObject;
+import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.utils.ServerHelper;
 
@@ -52,26 +53,26 @@ public class UploadFileButtonClickHandler implements Runnable {
         try (InputStream inputStream = new FileInputStream(chooser.getSelectedFile())) {
             if (!this.isPngImage(inputStream)) {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat("§cThe provided file is not a png image");
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-not-png"));
                 return;
             }
 
             if (chooser.getSelectedFile().length() > MAX_FILE_SIZE) {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat("§cThe provided file is too large. Maximum is to 2MB.");
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-too-large"));
                 return;
             }
 
             StatusCode status = ServerHelper.uploadToServer(chooser.getSelectedFile().toPath(), this.minecraftAdapter, this.configObject);
             if (status == StatusCode.CREATED) {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat("§aUpload successfully completed. It may take up to two minutes until the changes are active.");
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-upload-completed"));
             } else if (status == StatusCode.TOO_MANY_REQUESTS) {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat("§cYou can only upload a skin every two minutes");
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-rate-limited"));
             } else {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat("§cUpload failed with status " + status);
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-upload-failed-unknown", status));
             }
         } catch (IOException exception) {
             exception.printStackTrace();

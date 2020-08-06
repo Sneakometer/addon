@@ -2,6 +2,7 @@ package de.hdskins.labymod.core;
 
 import de.hdskins.labymod.core.config.MainConfig;
 import de.hdskins.labymod.shared.Constants;
+import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.mappings.HandledMappings;
 import de.hdskins.labymod.shared.mappings.Mappings;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
@@ -63,6 +64,7 @@ public class HdSkinsAddon extends LabyModAddon {
         }
 
         this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, ServerHelper.isSlim(this.mainConfig));
+        LanguageManager.setMinecraftAdapter(this.minecraftAdapter);
     }
 
     @Override

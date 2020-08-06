@@ -18,4 +18,6 @@ public interface MinecraftAdapter {
     void changeToIngame();
 
     Optional<PlayerProfile> resolveUniqueId(String name);
+
+    String getCurrentLanguageCode();
 }

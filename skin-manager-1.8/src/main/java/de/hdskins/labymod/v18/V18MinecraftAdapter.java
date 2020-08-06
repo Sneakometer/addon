@@ -5,6 +5,7 @@ import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.gui.ButtonElement;
 import de.hdskins.labymod.shared.handler.DeleteSkinButtonClickHandler;
 import de.hdskins.labymod.shared.handler.UploadFileButtonClickHandler;
+import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
 import de.hdskins.labymod.v18.gui.V18BooleanElement;
@@ -17,6 +18,7 @@ import net.labymod.utils.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.resources.Language;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,23 +32,30 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
 
     @Override
     public void fillSettings(List<SettingsElement> list, ConfigObject object, boolean slim) {
-        ButtonElement uploadSkinElement = new V18ButtonElement("Change skin", new ControlElement.IconData(Material.PAINTING), "Click here");
-        uploadSkinElement.setDescriptionText("Skins must not contain right-wing, narcissistic, offensive or sexual content.");
+        ButtonElement uploadSkinElement = new V18ButtonElement(
+                LanguageManager.getTranslation("change-skin-option-name"),
+                new ControlElement.IconData(Material.PAINTING),
+                LanguageManager.getTranslation("button-click-here")
+        );
+        uploadSkinElement.setDescriptionText(LanguageManager.getTranslation("change-skin-option-description"));
         uploadSkinElement.setClickListener(new UploadFileButtonClickHandler(this, object));
         list.add(uploadSkinElement);
 
-        ButtonElement deleteSkinElement = new V18ButtonElement("Delete skin", new ControlElement.IconData(Material.BARRIER), "Click here");
-        deleteSkinElement.setDescriptionText("Deletes your skin permanently from the skin server. If you just want to change your skin, user the change skin option. " +
-                "After this operation uploading a new skin is blocked for 2 minutes");
+        ButtonElement deleteSkinElement = new V18ButtonElement(
+                LanguageManager.getTranslation("delete-skin-option-name"),
+                new ControlElement.IconData(Material.BARRIER),
+                LanguageManager.getTranslation("button-click-here")
+        );
+        deleteSkinElement.setDescriptionText(LanguageManager.getTranslation("delete-skin-option-description"));
         deleteSkinElement.setClickListener(new DeleteSkinButtonClickHandler(this, object));
         list.add(deleteSkinElement);
 
         BooleanElement slimElement = new V18BooleanElement(
-                "Slim skin", new ControlElement.IconData(Material.REDSTONE_COMPARATOR),
-                "Slim", "Default",
+                LanguageManager.getTranslation("slim-skin-change-option"), new ControlElement.IconData(Material.REDSTONE_COMPARATOR),
+                LanguageManager.getTranslation("slim-skin-option-on"), LanguageManager.getTranslation("slim-skin-option-off"),
                 slim, new SlimElementChangeConsumer(object, this)
         );
-        slimElement.setDescriptionText("Sets weather your skin is a slim (small) or default skin");
+        slimElement.setDescriptionText(LanguageManager.getTranslation("slim-skin-option-description"));
         list.add(slimElement);
     }
 
@@ -73,5 +82,11 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
         }
 
         return Optional.of(new PlayerProfile(playerInfo.getGameProfile().getName(), playerInfo.getGameProfile().getId()));
+    }
+
+    @Override
+    public String getCurrentLanguageCode() {
+        Language language = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage();
+        return language == null ? null : language.getLanguageCode();
     }
 }
