@@ -61,7 +61,7 @@ public class UploadFileButtonClickHandler implements Runnable {
             StatusCode status = ServerHelper.uploadToServer(chooser.getSelectedFile().toPath(), this.minecraftAdapter, this.configObject);
             if (status == StatusCode.CREATED) {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat("§aUploaded successfully completed. It may take up to two minutes until the changes are active.");
+                this.minecraftAdapter.displayMessageInChat("§aUpload successfully completed. It may take up to two minutes until the changes are active.");
             } else if (status == StatusCode.TOO_MANY_REQUESTS) {
                 this.minecraftAdapter.changeToIngame();
                 this.minecraftAdapter.displayMessageInChat("§cYou can only upload a skin every two minutes");
