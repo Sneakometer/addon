@@ -27,18 +27,19 @@ public class SlimElementChangeConsumer implements Function<Boolean, CompletableF
             CompletableFuture<Boolean> future = new CompletableFuture<>();
             Constants.EXECUTOR.execute(() -> {
                 StatusCode statusCode = ServerHelper.setSlim(this.minecraftAdapter, this.configObject, aBoolean);
+                String s = aBoolean ? "slim" : "default";
                 if (statusCode == StatusCode.OK) {
                     this.minecraftAdapter.changeToIngame();
-                    this.minecraftAdapter.displayMessageInChat("§aSuccessfully made your skin a slim skin. This process may take up to two minutes");
-                    future.complete(true);
+                    this.minecraftAdapter.displayMessageInChat("§aSuccessfully made your skin a " + s + " skin. This process may take up to two minutes");
+                    future.complete(aBoolean);
                 } else if (statusCode == StatusCode.TOO_MANY_REQUESTS) {
                     this.minecraftAdapter.changeToIngame();
-                    this.minecraftAdapter.displayMessageInChat("§cYou can only set your skin a slim skin every two minutes");
-                    future.complete(false);
+                    this.minecraftAdapter.displayMessageInChat("§cYou can only set your skin a slim/default skin every two minutes");
+                    future.complete(!aBoolean);
                 } else {
                     this.minecraftAdapter.changeToIngame();
-                    this.minecraftAdapter.displayMessageInChat("§cFailed to set your skin a slim skin! Server answer status code was: " + statusCode);
-                    future.complete(false);
+                    this.minecraftAdapter.displayMessageInChat("§cFailed to set your skin a " + s + " skin! Server answer status code was: " + statusCode);
+                    future.complete(!aBoolean);
                 }
 
                 SlimElementChangeConsumer.this.updateProcessRunning.set(false);
