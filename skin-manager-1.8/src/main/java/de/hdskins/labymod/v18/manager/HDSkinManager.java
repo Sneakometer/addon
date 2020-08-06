@@ -1,5 +1,6 @@
 package de.hdskins.labymod.v18.manager;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.InsecureTextureException;
@@ -8,6 +9,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.v18.resources.InternalMinecraftProfileTexture;
 import de.hdskins.labymod.v18.resources.InternalThreadDownloadImageData;
+import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
 import net.minecraft.client.renderer.ImageBufferDownload;
@@ -20,7 +22,9 @@ import net.minecraft.util.ResourceLocation;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class HDSkinManager extends SkinManager {
@@ -30,7 +34,7 @@ public class HDSkinManager extends SkinManager {
     private final TextureManager textureManager;
     private final ConfigObject configObject;
 
-    private final Map<GameProfile, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> cache = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> cache = new ConcurrentHashMap<>();
 
     public HDSkinManager(TextureManager textureManagerInstance, File skinCacheDirectory, MinecraftSessionService sessionService, ConfigObject configObject) {
         super(textureManagerInstance, skinCacheDirectory, sessionService);
@@ -41,6 +45,10 @@ public class HDSkinManager extends SkinManager {
 
     @Override
     public void loadProfileTextures(GameProfile profile, SkinAvailableCallback skinAvailableCallback, boolean requireSecure) {
+        this.loadProfileTextures0(profile, skinAvailableCallback, requireSecure, false);
+    }
+
+    private void loadProfileTextures0(GameProfile profile, SkinAvailableCallback skinAvailableCallback, boolean requireSecure, boolean fillProperties) {
         THREAD_POOL.execute(() -> {
             CompletableFuture<Boolean> future = null;
             InternalMinecraftProfileTexture texture = null;
@@ -57,6 +65,13 @@ public class HDSkinManager extends SkinManager {
             }
 
             Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = Maps.newHashMap();
+
+            if (fillProperties &&
+                    Iterables.getFirst(profile.getProperties().get("textures"), null) == null &&
+                    !profile.getId().equals(LabyMod.getInstance().getPlayerUUID())) {
+                Minecraft.getMinecraft().getSessionService().fillProfileProperties(profile, false);
+            }
+
             try {
                 map.putAll(Minecraft.getMinecraft().getSessionService().getTextures(profile, requireSecure));
             } catch (InsecureTextureException ignored) {
@@ -82,16 +97,22 @@ public class HDSkinManager extends SkinManager {
 
     @Override
     public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> loadSkinFromCache(GameProfile profile) {
-        if (this.cache.containsKey(profile)) {
-            return this.cache.get(profile);
+        if (this.cache.containsKey(profile.getId())) {
+            return this.cache.get(profile.getId());
         }
 
         try {
-            this.cache.put(profile, Minecraft.getMinecraft().getSessionService().getTextures(profile, false));
+            this.cache.put(profile.getId(), Minecraft.getMinecraft().getSessionService().getTextures(profile, false));
         } catch (Throwable ignored) {
         }
 
-        return this.cache.get(profile);
+        this.loadProfileTextures0(profile, null, false, true);
+
+        return this.cache.get(profile.getId());
+    }
+
+    public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> loadSkinFromCache(UUID uniqueId) {
+        return this.loadSkinFromCache(new GameProfile(uniqueId, "Steve"));
     }
 
     public void loadSkin0(MinecraftProfileTexture profileTexture,
@@ -162,9 +183,19 @@ public class HDSkinManager extends SkinManager {
                 this.loadSkin0(map.get(MinecraftProfileTexture.Type.CAPE), MinecraftProfileTexture.Type.CAPE, skinAvailableCallback, null);
             }
 
-            this.cache.put(profile, map);
+            this.cache.put(profile.getId(), map);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
     }
+
+    public ResourceLocation loadSkinLocation(UUID uniqueId) {
+        MinecraftProfileTexture texture = this.loadSkinFromCache(uniqueId).get(MinecraftProfileTexture.Type.SKIN);
+        if (texture == null) {
+            return null;
+        }
+
+        return this.loadSkin(texture, MinecraftProfileTexture.Type.SKIN);
+    }
+
 }

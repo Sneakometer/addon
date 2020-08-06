@@ -1,8 +1,23 @@
 package de.hdskins.labymod.shared;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public final class ReflectionUtils {
+
+    private static final Field MODIFIERS_FIELD;
+
+    static {
+        Field modifiersField = null;
+        try {
+            modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+        } catch (NoSuchFieldException exception) {
+            exception.printStackTrace();
+        }
+
+        MODIFIERS_FIELD = modifiersField;
+    }
 
     private ReflectionUtils() {
         throw new UnsupportedOperationException();
@@ -34,6 +49,10 @@ public final class ReflectionUtils {
         }
 
         try {
+            if (MODIFIERS_FIELD != null && Modifier.isFinal(field.getModifiers())) {
+                MODIFIERS_FIELD.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            }
+
             field.setAccessible(true);
             field.set(instance, newValue);
         } catch (IllegalAccessException exception) {
