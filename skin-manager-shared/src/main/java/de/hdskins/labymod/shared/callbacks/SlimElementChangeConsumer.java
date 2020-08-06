@@ -34,7 +34,7 @@ public class SlimElementChangeConsumer implements Function<Boolean, CompletableF
                     future.complete(aBoolean);
                 } else if (statusCode == StatusCode.TOO_MANY_REQUESTS) {
                     this.minecraftAdapter.changeToIngame();
-                    this.minecraftAdapter.displayMessageInChat("§cYou can only set your skin a slim/default skin every two minutes");
+                    this.minecraftAdapter.displayMessageInChat("§cYou can only set your skin a slim/default skin every 30 seconds");
                     future.complete(!aBoolean);
                 } else {
                     this.minecraftAdapter.changeToIngame();
