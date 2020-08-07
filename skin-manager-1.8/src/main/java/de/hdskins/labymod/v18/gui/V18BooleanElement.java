@@ -15,9 +15,9 @@ public class V18BooleanElement extends BooleanElement {
 
     private final Function<Boolean, CompletableFuture<Boolean>> toggleListener;
     private final AtomicBoolean currentValue;
-    private final String stringEnabled;
-    private final String stringDisabled;
 
+    private String stringEnabled;
+    private String stringDisabled;
     private GuiButton buttonToggle;
 
     public V18BooleanElement(String displayName, IconData iconData, String on, String off, boolean currentValue, Function<Boolean, CompletableFuture<Boolean>> toggleListener1) {
@@ -79,5 +79,18 @@ public class V18BooleanElement extends BooleanElement {
     @Override
     public boolean getCurrentValue() {
         return currentValue.get();
+    }
+
+    @Override
+    public BooleanElement custom(String... args) {
+        if (args.length >= 1) {
+            this.stringEnabled = args[0];
+        }
+
+        if (args.length >= 2) {
+            this.stringDisabled = args[1];
+        }
+
+        return this;
     }
 }

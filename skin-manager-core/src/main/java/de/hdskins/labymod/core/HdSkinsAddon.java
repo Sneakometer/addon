@@ -13,8 +13,9 @@ import net.labymod.settings.elements.SettingsElement;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
-public class HdSkinsAddon extends LabyModAddon {
+public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
 
     private MainConfig mainConfig;
     private HandledMappings mappings;
@@ -63,8 +64,9 @@ public class HdSkinsAddon extends LabyModAddon {
                 break;
         }
 
-        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, ServerHelper.isSlim(this.mainConfig));
         LanguageManager.setMinecraftAdapter(this.minecraftAdapter);
+        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, ServerHelper.isSlim(this.mainConfig));
+        LanguageManager.registerLanguageUpdateListener(this);
     }
 
     @Override
@@ -74,5 +76,17 @@ public class HdSkinsAddon extends LabyModAddon {
 
     @Override
     protected void fillSettings(List<SettingsElement> list) {
+    }
+
+    @Override
+    public void onRenderPreview(int mouseX, int mouseY, float partialTicks) {
+        LanguageManager.ensureLanguageSync();
+    }
+
+    @Override
+    public void accept(String s) {
+        if (this.minecraftAdapter != null) {
+            this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, false);
+        }
     }
 }

@@ -4,9 +4,12 @@ import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 public final class LanguageManager {
 
@@ -15,6 +18,7 @@ public final class LanguageManager {
     }
 
     private static final Map<String, Properties> LOADED_LANGUAGES = new ConcurrentHashMap<>();
+    private static final Collection<Consumer<String>> LANGUAGE_UPDATE_LISTENER = new CopyOnWriteArrayList<>();
     private static final String DEFAULT_LANGUAGE = "en_US";
 
     private static MinecraftAdapter theMinecraftAdapter;
@@ -31,7 +35,7 @@ public final class LanguageManager {
         }
 
         if (LOADED_LANGUAGES.containsKey(currentLanguage)) {
-            currentLanguageCode = currentLanguage;
+            setCurrentLanguageCode(currentLanguage);
             return;
         }
 
@@ -44,14 +48,10 @@ public final class LanguageManager {
             LOADED_LANGUAGES.put(currentLanguage, languageFile);
         }
 
-        currentLanguageCode = currentLanguage;
+        setCurrentLanguageCode(currentLanguage);
     }
 
-    public static String getTranslation(String key, Object... objects) {
-        return getTranslation(key, "<translation '" + key + "' missing>", objects);
-    }
-
-    public static String getTranslation(String key, String def, Object... objects) {
+    public static void ensureLanguageSync() {
         if (currentLanguageCode == null) {
             updateLanguage();
         }
@@ -60,6 +60,14 @@ public final class LanguageManager {
         if (mcLanguage != null && currentLanguageCode != null && !mcLanguage.equals(currentLanguageCode)) {
             updateLanguage();
         }
+    }
+
+    public static String getTranslation(String key, Object... objects) {
+        return getTranslation(key, "<translation '" + key + "' missing>", objects);
+    }
+
+    public static String getTranslation(String key, String def, Object... objects) {
+        ensureLanguageSync();
 
         Properties properties = LOADED_LANGUAGES.get(currentLanguageCode == null ? DEFAULT_LANGUAGE : currentLanguageCode);
         if (properties == null) {
@@ -67,6 +75,10 @@ public final class LanguageManager {
         }
 
         return properties == null ? def : MessageFormat.format(properties.getProperty(key, def), objects);
+    }
+
+    public static void registerLanguageUpdateListener(Consumer<String> listener) {
+        LANGUAGE_UPDATE_LISTENER.add(listener);
     }
 
     private static Properties loadLanguage(String lang) {
@@ -80,6 +92,15 @@ public final class LanguageManager {
             return properties;
         } catch (Throwable throwable) {
             return null;
+        }
+    }
+
+    private static void setCurrentLanguageCode(String newLanguageCode) {
+        if (currentLanguageCode == null || !currentLanguageCode.equals(newLanguageCode)) {
+            currentLanguageCode = newLanguageCode;
+            for (Consumer<String> stringConsumer : LANGUAGE_UPDATE_LISTENER) {
+                stringConsumer.accept(newLanguageCode);
+            }
         }
     }
 }
