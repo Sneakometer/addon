@@ -63,10 +63,10 @@ public final class LanguageManager {
     }
 
     public static String getTranslation(String key, Object... objects) {
-        return getTranslation(key, "<translation '" + key + "' missing>", objects);
+        return getTranslationDef(key, "<translation '" + key + "' missing>", objects);
     }
 
-    public static String getTranslation(String key, String def, Object... objects) {
+    public static String getTranslationDef(String key, String def, Object... objects) {
         ensureLanguageSync();
 
         Properties properties = LOADED_LANGUAGES.get(currentLanguageCode == null ? DEFAULT_LANGUAGE : currentLanguageCode);
