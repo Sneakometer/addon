@@ -3,5 +3,8 @@
   "name": "HDSkins",
   "mainClass": "de.hdskins.labymod.core.HdSkinsAddon",
   "author": "HDSkins",
-  "description": "Bring HDSkins to your LabyMod! Like BAC!"
+  "description": "Bring HDSkins to your LabyMod! Like BAC!",
+  "icon": "https://i.imgur.com/MQXufLh.png",
+  "version": 1,
+  "category": 4
 }
