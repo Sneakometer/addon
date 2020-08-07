@@ -45,10 +45,10 @@ public class HDSkinManager extends SkinManager {
 
     @Override
     public void loadProfileTextures(GameProfile profile, SkinAvailableCallback skinAvailableCallback, boolean requireSecure) {
-        loadProfileTextures0(profile, skinAvailableCallback, requireSecure, false);
+        loadProfileTextures0(profile, skinAvailableCallback, requireSecure, false, false);
     }
 
-    private void loadProfileTextures0(GameProfile profile, SkinAvailableCallback skinAvailableCallback, boolean requireSecure, boolean fillProperties) {
+    private void loadProfileTextures0(GameProfile profile, SkinAvailableCallback skinAvailableCallback, boolean requireSecure, boolean fillProperties, boolean force) {
         THREAD_POOL.execute(() -> {
             CompletableFuture<Boolean> future = null;
             InternalMinecraftProfileTexture texture = null;
@@ -56,7 +56,7 @@ public class HDSkinManager extends SkinManager {
                 future = new CompletableFuture<>();
                 String undashed = profile.getId().toString().replace("-", "");
 
-                texture = new InternalMinecraftProfileTexture(this.configObject.getServerUrl() + "/downloadSkin?uuid=" + undashed, undashed);
+                texture = new InternalMinecraftProfileTexture(this.configObject.getServerUrl() + "/downloadSkin?uuid=" + undashed, undashed, force);
                 try {
                     this.loadSkin0(texture, MinecraftProfileTexture.Type.SKIN, skinAvailableCallback, future);
                 } catch (Throwable throwable) {
@@ -108,7 +108,7 @@ public class HDSkinManager extends SkinManager {
         } catch (Throwable ignored) {
         }
 
-        this.loadProfileTextures0(profile, null, false, true);
+        this.loadProfileTextures0(profile, null, false, true, true);
         return this.cache.getOrDefault(profile.getId(), Collections.emptyMap());
     }
 

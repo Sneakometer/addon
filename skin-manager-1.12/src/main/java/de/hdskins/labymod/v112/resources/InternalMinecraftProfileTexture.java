@@ -23,9 +23,13 @@ public class InternalMinecraftProfileTexture extends MinecraftProfileTexture {
                 }
             });
 
-    public InternalMinecraftProfileTexture(String url, String hash) {
+    public InternalMinecraftProfileTexture(String url, String hash, boolean force) {
         super(url, null);
-        this.hash = hash + CACHE.getUnchecked(hash);
+        if (force) {
+            this.hash = hash + System.nanoTime();
+        } else {
+            this.hash = hash + CACHE.getUnchecked(hash);
+        }
     }
 
     private final String hash;
