@@ -95,6 +95,10 @@ public class HDSkinManager extends SkinManager {
 
     @Override
     public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> loadSkinFromCache(GameProfile profile) {
+        if (profile.getId() == null) {
+            return Collections.emptyMap();
+        }
+
         if (this.cache.containsKey(profile.getId())) {
             return this.cache.get(profile.getId());
         }

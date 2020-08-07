@@ -34,7 +34,7 @@ public class HDSkinManager extends SkinManager {
     private final TextureManager textureManager;
     private final ConfigObject configObject;
 
-    private final Map<GameProfile, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> cache = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> cache = new ConcurrentHashMap<>();
 
     public HDSkinManager(TextureManager textureManagerInstance, File skinCacheDirectory, MinecraftSessionService sessionService, ConfigObject configObject) {
         super(textureManagerInstance, skinCacheDirectory, sessionService);
@@ -95,12 +95,16 @@ public class HDSkinManager extends SkinManager {
 
     @Override
     public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> loadSkinFromCache(GameProfile profile) {
-        if (this.cache.containsKey(profile)) {
-            return this.cache.get(profile);
+        if (profile.getId() == null) {
+            return Collections.emptyMap();
+        }
+
+        if (this.cache.containsKey(profile.getId())) {
+            return this.cache.get(profile.getId());
         }
 
         try {
-            this.cache.put(profile, Minecraft.getMinecraft().getSessionService().getTextures(profile, false));
+            this.cache.put(profile.getId(), Minecraft.getMinecraft().getSessionService().getTextures(profile, false));
         } catch (Throwable ignored) {
         }
 
@@ -176,7 +180,7 @@ public class HDSkinManager extends SkinManager {
                 this.loadSkin0(map.get(MinecraftProfileTexture.Type.CAPE), MinecraftProfileTexture.Type.CAPE, skinAvailableCallback, null);
             }
 
-            this.cache.put(profile, map);
+            this.cache.put(profile.getId(), map);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
