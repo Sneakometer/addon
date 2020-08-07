@@ -37,6 +37,10 @@ public class SlimElementChangeConsumer implements Function<Boolean, CompletableF
                     this.minecraftAdapter.changeToIngame();
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-rate-limited"));
                     future.complete(!aBoolean);
+                } else if (statusCode == StatusCode.NO_CONTENT) {
+                    this.minecraftAdapter.changeToIngame();
+                    this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-no-hd-skin"));
+                    future.complete(!aBoolean);
                 } else {
                     this.minecraftAdapter.changeToIngame();
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-toggle-failed-unknown", s, statusCode));
