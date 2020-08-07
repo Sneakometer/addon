@@ -23,7 +23,7 @@ public class MainConfig implements ConfigObject {
         if (serverUrl != null && !(serverUrl instanceof JsonNull)) {
             mainConfig.serverUrl = serverUrl.getAsString();
         } else {
-            mainConfig.serverUrl = "https://api.hdskins.de";
+            mainConfig.serverUrl = "http://api.hdskins.de";
         }
 
         JsonElement adminToken = addon.getConfig().get("token");
