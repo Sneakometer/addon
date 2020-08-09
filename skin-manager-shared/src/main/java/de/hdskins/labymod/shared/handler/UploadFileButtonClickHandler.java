@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -51,9 +52,17 @@ public class UploadFileButtonClickHandler implements Runnable {
 
     private void handleApprove(JFileChooser chooser) {
         try (InputStream inputStream = new FileInputStream(chooser.getSelectedFile())) {
-            if (!this.isPngImage(inputStream)) {
+            ImageCheckResult imageCheckResult = this.isPngImage(inputStream);
+            if (imageCheckResult != ImageCheckResult.OK) {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-not-png"));
+                if (imageCheckResult == ImageCheckResult.NOT_PNG) {
+                    this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-not-png"));
+                } else if (imageCheckResult == ImageCheckResult.NOT_HD) {
+                    this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-not-hd"));
+                } else if (imageCheckResult == ImageCheckResult.WRONG_PROPORTIONS) {
+                    this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-wrong-proportions"));
+                }
+
                 return;
             }
 
@@ -79,22 +88,43 @@ public class UploadFileButtonClickHandler implements Runnable {
         }
     }
 
-    private boolean isPngImage(InputStream inputStream) {
+    private ImageCheckResult isPngImage(InputStream inputStream) {
         try (ImageInputStream stream = ImageIO.createImageInputStream(inputStream)) {
             Iterator<ImageReader> imageReaderIterator = ImageIO.getImageReaders(stream);
             if (!imageReaderIterator.hasNext()) {
-                return false;
+                return ImageCheckResult.NOT_PNG;
             }
 
             ImageReader imageReader = imageReaderIterator.next();
             imageReader.setInput(stream);
             if (!imageReader.getFormatName().equals("png")) {
-                return false;
+                return ImageCheckResult.NOT_PNG;
             }
 
-            return imageReader.read(0) != null;
+            BufferedImage bufferedImage = imageReader.read(0);
+            if (bufferedImage == null) {
+                return ImageCheckResult.NOT_PNG;
+            }
+
+            if (bufferedImage.getHeight() <= 64 || bufferedImage.getWidth() <= 64) {
+                return ImageCheckResult.NOT_HD;
+            }
+
+            if (bufferedImage.getHeight() != bufferedImage.getWidth() && bufferedImage.getHeight() != bufferedImage.getWidth() / 2) {
+                return ImageCheckResult.WRONG_PROPORTIONS;
+            }
+
+            return ImageCheckResult.OK;
         } catch (IOException exception) {
-            return false;
+            return ImageCheckResult.NOT_PNG;
         }
+    }
+
+    private enum ImageCheckResult {
+
+        NOT_PNG,
+        NOT_HD,
+        WRONG_PROPORTIONS,
+        OK
     }
 }
