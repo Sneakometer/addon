@@ -1,5 +1,9 @@
 package de.hdskins.labymod.v112.manager;
 
+import com.google.common.base.Ticker;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
@@ -27,6 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class HDSkinManager extends SkinManager {
 
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
@@ -35,6 +40,16 @@ public class HDSkinManager extends SkinManager {
     private final ConfigObject configObject;
 
     private final Map<UUID, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> cache = new ConcurrentHashMap<>();
+    private final LoadingCache<UUID, InternalMinecraftProfileTexture> textureCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(2, TimeUnit.MINUTES)
+            .ticker(Ticker.systemTicker())
+            .build(new CacheLoader<UUID, InternalMinecraftProfileTexture>() {
+                @Override
+                public InternalMinecraftProfileTexture load(UUID key) {
+                    String undashed = key.toString().replace("-", "");
+                    return new InternalMinecraftProfileTexture(HDSkinManager.this.configObject.getServerUrl() + "/downloadSkin?uuid=" + undashed, undashed);
+                }
+            });
 
     public HDSkinManager(TextureManager textureManagerInstance, File skinCacheDirectory, MinecraftSessionService sessionService, ConfigObject configObject) {
         super(textureManagerInstance, skinCacheDirectory, sessionService);
@@ -54,9 +69,16 @@ public class HDSkinManager extends SkinManager {
             InternalMinecraftProfileTexture texture = null;
             if (this.configObject.getServerUrl() != null && !this.configObject.getServerUrl().trim().isEmpty()) {
                 future = new CompletableFuture<>();
-                String undashed = profile.getId().toString().replace("-", "");
+                if (force) {
+                    String undashed = profile.getId().toString().replace("-", "");
+                    texture = new InternalMinecraftProfileTexture(
+                            HDSkinManager.this.configObject.getServerUrl() + "/downloadSkin?uuid=" + undashed,
+                            undashed + System.currentTimeMillis()
+                    );
+                } else {
+                    texture = this.textureCache.getUnchecked(profile.getId());
+                }
 
-                texture = new InternalMinecraftProfileTexture(this.configObject.getServerUrl() + "/downloadSkin?uuid=" + undashed, undashed, force);
                 try {
                     this.loadSkin0(texture, MinecraftProfileTexture.Type.SKIN, skinAvailableCallback, future);
                 } catch (Throwable throwable) {
