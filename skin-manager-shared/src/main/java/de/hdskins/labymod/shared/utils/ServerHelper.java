@@ -38,10 +38,6 @@ public final class ServerHelper {
             builder.addHeader("token", config.getToken());
         }
 
-        if (path.toString().endsWith("~1")) {
-            builder.addHeader("slim", "1");
-        }
-
         try (RequestResult requestResult = builder.fireAndForget()) {
             byte[] bytes = Files.readAllBytes(path);
             try (OutputStream outputStream = requestResult.getOutputStream()) {
