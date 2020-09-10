@@ -13,6 +13,8 @@ public interface MinecraftAdapter {
 
     void fillSettings(List<SettingsElement> list, ConfigObject object, boolean slim);
 
+    void updateSlimState();
+
     void displayMessageInChat(String message);
 
     void changeToIngame();
@@ -20,4 +22,7 @@ public interface MinecraftAdapter {
     Optional<PlayerProfile> resolveUniqueId(String name);
 
     String getCurrentLanguageCode();
+
+    ConfigObject getConfig();
+
 }

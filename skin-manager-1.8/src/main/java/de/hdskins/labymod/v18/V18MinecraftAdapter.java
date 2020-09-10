@@ -3,6 +3,8 @@ package de.hdskins.labymod.v18;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
+import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.v18.listener.TickListener;
 import de.hdskins.labymod.v18.settings.V18SettingsManager;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
@@ -16,6 +18,7 @@ import java.util.Optional;
 
 public class V18MinecraftAdapter implements MinecraftAdapter {
 
+    private ConfigObject config;
     private final V18SettingsManager settingsManager = new V18SettingsManager();
 
     @Override
@@ -25,11 +28,19 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
 
     @Override
     public void fillSettings(List<SettingsElement> list, ConfigObject object, boolean slim) {
+        this.config = object;
         if (this.settingsManager.shouldRedraw() || !list.isEmpty()) {
             this.settingsManager.redraw();
         } else {
             this.settingsManager.draw(this, list, object, slim);
         }
+
+        LabyMod.getInstance().getLabyModAPI().registerForgeListener(new TickListener(this));
+    }
+
+    @Override
+    public void updateSlimState() {
+        this.settingsManager.setSlim(ServerHelper.isSlim(this.config));
     }
 
     @Override
@@ -62,4 +73,10 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
         Language language = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage();
         return language == null ? null : language.getLanguageCode();
     }
+
+    @Override
+    public ConfigObject getConfig() {
+        return this.config;
+    }
+
 }

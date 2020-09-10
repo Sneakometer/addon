@@ -9,7 +9,6 @@ import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.v112.gui.V112BooleanElement;
 import de.hdskins.labymod.v112.gui.V112ButtonElement;
-import net.labymod.settings.elements.BooleanElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.SettingsElement;
 import net.labymod.utils.Material;
@@ -20,7 +19,7 @@ public class V112SettingsManager {
 
     private ButtonElement uploadSkinElement;
     private ButtonElement deleteSkinElement;
-    private BooleanElement slimElement;
+    private V112BooleanElement slimElement;
 
     public void draw(MinecraftAdapter minecraftAdapter, List<SettingsElement> list, ConfigObject object, boolean slim) {
         this.uploadSkinElement = new V112ButtonElement(
@@ -73,4 +72,13 @@ public class V112SettingsManager {
     public boolean shouldRedraw() {
         return this.uploadSkinElement != null && this.deleteSkinElement != null && this.slimElement != null;
     }
+
+    public void setSlim(boolean slim) {
+        if (this.slimElement == null) {
+            return;
+        }
+
+        this.slimElement.setCurrentValue(slim);
+    }
+
 }
