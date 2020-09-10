@@ -32,6 +32,7 @@ public class SlimElementChangeConsumer implements Function<Boolean, CompletableF
                 if (statusCode == StatusCode.OK) {
                     this.minecraftAdapter.changeToIngame();
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-successfully-toggled", s));
+                    this.minecraftAdapter.invalidateSkinCache();
                     future.complete(aBoolean);
                 } else if (statusCode == StatusCode.TOO_MANY_REQUESTS) {
                     this.minecraftAdapter.changeToIngame();

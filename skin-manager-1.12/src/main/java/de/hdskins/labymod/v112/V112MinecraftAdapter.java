@@ -5,6 +5,7 @@ import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
 import de.hdskins.labymod.shared.utils.ServerHelper;
 import de.hdskins.labymod.v112.listener.TickListener;
+import de.hdskins.labymod.v112.manager.HDSkinManager;
 import de.hdskins.labymod.v112.settings.V112SettingsManager;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
@@ -12,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.resources.Language;
+import net.minecraft.client.resources.SkinManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +80,14 @@ public class V112MinecraftAdapter implements MinecraftAdapter {
     @Override
     public ConfigObject getConfig() {
         return this.config;
+    }
+
+    @Override
+    public void invalidateSkinCache() {
+        SkinManager skinManager = Minecraft.getMinecraft().getSkinManager();
+        if (skinManager instanceof HDSkinManager) {
+            ((HDSkinManager) skinManager).invalidateCache();
+        }
     }
 
 }

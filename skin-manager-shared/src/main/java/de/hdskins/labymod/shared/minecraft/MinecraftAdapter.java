@@ -25,4 +25,6 @@ public interface MinecraftAdapter {
 
     ConfigObject getConfig();
 
+    void invalidateSkinCache();
+
 }

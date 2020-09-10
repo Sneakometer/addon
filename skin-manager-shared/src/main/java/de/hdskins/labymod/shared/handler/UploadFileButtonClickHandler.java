@@ -76,6 +76,7 @@ public class UploadFileButtonClickHandler implements Runnable {
             if (status == StatusCode.CREATED) {
                 this.minecraftAdapter.changeToIngame();
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-upload-completed"));
+                this.minecraftAdapter.invalidateSkinCache();
             } else if (status == StatusCode.TOO_MANY_REQUESTS) {
                 this.minecraftAdapter.changeToIngame();
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-rate-limited"));
