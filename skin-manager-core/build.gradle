@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly files('../libs/lm_api_mc1.8.9.jar')
+    compileOnly files('../libs/lm_api.jar')
     compileOnly 'com.google.code.gson:gson:2.2.4'
 
     shadow project(':skin-manager-shared')
@@ -36,4 +36,14 @@ dependencies {
 
 artifacts {
     archives shadowJar
+}
+
+shadowJar.doLast {
+    copy {
+        from 'build/libs/HDSkins.jar'
+        into '../build/libs'
+    }
+    delete fileTree('../build/libs') {
+        include 'skin-manager-root-*.jar'
+    }
 }

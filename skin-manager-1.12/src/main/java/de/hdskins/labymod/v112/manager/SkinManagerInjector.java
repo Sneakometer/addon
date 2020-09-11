@@ -5,7 +5,6 @@ import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.mappings.Mappings;
 import net.labymod.main.LabyMod;
 import net.labymod.utils.DrawUtils;
-import net.labymod.utils.texture.PlayerSkinTextureCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.SkinManager;
 
@@ -30,7 +29,13 @@ public final class SkinManagerInjector {
         DrawUtils drawUtils = LabyMod.getInstance().getDrawUtils();
         Object textureCache = ReflectionUtils.get(null, DrawUtils.class, drawUtils, "playerSkinTextureCache");
 
-        ReflectionUtils.set(PlayerSkinTextureCache.class, textureCache, new SkinMap(skinManager), "loadedSkins");
-        ReflectionUtils.set(PlayerSkinTextureCache.class, textureCache, skinManager, "skinManager");
+        try {
+            Class<?> textureCacheClass = Class.forName("net.labymod.utils.texture.PlayerSkinTextureCache");
+            ReflectionUtils.set(textureCacheClass, textureCache, new SkinMap(skinManager), "loadedSkins");
+            ReflectionUtils.set(textureCacheClass, textureCache, skinManager, "skinManager");
+        } catch (ClassNotFoundException exception) {
+            exception.printStackTrace();
+        }
+
     }
 }
