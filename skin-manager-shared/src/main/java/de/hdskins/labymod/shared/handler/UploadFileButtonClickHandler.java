@@ -107,7 +107,7 @@ public class UploadFileButtonClickHandler implements Runnable {
                 return ImageCheckResult.NOT_PNG;
             }
 
-            if (bufferedImage.getHeight() <= 64 || bufferedImage.getWidth() <= 64) {
+            if (bufferedImage.getHeight() <= 32 || bufferedImage.getWidth() <= 64) {
                 return ImageCheckResult.NOT_HD;
             }
 
