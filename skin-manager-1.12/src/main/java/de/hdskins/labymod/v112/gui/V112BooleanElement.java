@@ -67,7 +67,7 @@ public class V112BooleanElement extends BooleanElement {
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         if (this.buttonToggle.mousePressed(Minecraft.getMinecraft(), mouseX, mouseY)) {
             if (this.toggleListener != null) {
-                this.toggleListener.apply(!this.currentValue.get()).thenAccept(result -> this.currentValue.set(result));
+                this.toggleListener.apply(!this.currentValue.get()).thenAccept(this::setCurrentValue);
             } else {
                 this.currentValue.set(!this.currentValue.get());
             }
@@ -79,6 +79,10 @@ public class V112BooleanElement extends BooleanElement {
     @Override
     public boolean getCurrentValue() {
         return currentValue.get();
+    }
+
+    public void setCurrentValue(boolean currentValue) {
+        this.currentValue.set(currentValue);
     }
 
     @Override

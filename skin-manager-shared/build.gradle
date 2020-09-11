@@ -6,6 +6,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly files('../libs/lm_api_mc1.8.9.jar')
+    compileOnly files('../libs/lm_api.jar')
     compileOnly group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.4'
 }

@@ -217,4 +217,10 @@ public class HDSkinManager extends SkinManager {
         MinecraftProfileTexture texture = textureMap.get(MinecraftProfileTexture.Type.SKIN);
         return texture == null ? null : this.loadSkin(texture, MinecraftProfileTexture.Type.SKIN);
     }
+
+    public void invalidateCache() {
+        this.cache.clear();
+        this.textureCache.invalidateAll();
+    }
+
 }
