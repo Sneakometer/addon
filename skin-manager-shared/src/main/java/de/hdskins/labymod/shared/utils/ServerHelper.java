@@ -32,6 +32,7 @@ public final class ServerHelper {
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/uploadSkin")
                 .setRequestMethod(RequestMethod.PUT)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .addBody("")
                 .setMimeType(MimeTypes.getMimeType("png"))
                 .setConnectTimeout(5, TimeUnit.SECONDS)
@@ -96,6 +97,7 @@ public final class ServerHelper {
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/deleteSkin")
                 .setRequestMethod(RequestMethod.DELETE)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .setConnectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (config.getToken() != null) {
@@ -119,6 +121,7 @@ public final class ServerHelper {
         RequestBuilder builder = RequestBuilder.newBuilder(configObject.getServerUrl() + "/isSlim")
                 .setRequestMethod(RequestMethod.GET)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .setConnectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (configObject.getToken() != null) {
@@ -145,6 +148,7 @@ public final class ServerHelper {
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/setSlim")
                 .setRequestMethod(RequestMethod.POST)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .setConnectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (config.getToken() != null) {
