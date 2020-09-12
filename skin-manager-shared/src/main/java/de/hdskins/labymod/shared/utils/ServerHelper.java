@@ -30,10 +30,10 @@ public final class ServerHelper {
             return StatusCode.FORBIDDEN;
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/uploadSkin")
-                .setRequestMethod(RequestMethod.PUT)
+                .requestMethod(RequestMethod.PUT)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
-                .setMimeType(MimeTypes.getMimeType("png"))
-                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .mimeType(MimeTypes.getMimeType("png"))
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches()
                 .enableOutput();
         if (config.getToken() != null) {
@@ -64,12 +64,12 @@ public final class ServerHelper {
             return StatusCode.FORBIDDEN;
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/reportSkin")
-                .setRequestMethod(RequestMethod.POST)
+                .requestMethod(RequestMethod.POST)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
                 .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .addHeader("reportedUniqueId", reportedPlayer.getUniqueId().toString().replace("-", ""))
                 .addHeader("reportedName", reportedPlayer.getName())
-                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (config.getToken() != null) {
             builder.addHeader("token", config.getToken());
@@ -93,9 +93,9 @@ public final class ServerHelper {
             return StatusCode.FORBIDDEN;
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/deleteSkin")
-                .setRequestMethod(RequestMethod.DELETE)
+                .requestMethod(RequestMethod.DELETE)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
-                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (config.getToken() != null) {
             builder.addHeader("token", config.getToken());
@@ -116,9 +116,9 @@ public final class ServerHelper {
         }
 
         RequestBuilder builder = RequestBuilder.newBuilder(configObject.getServerUrl() + "/isSlim")
-                .setRequestMethod(RequestMethod.GET)
+                .requestMethod(RequestMethod.GET)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
-                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (configObject.getToken() != null) {
             builder.addHeader("token", configObject.getToken());
@@ -142,9 +142,9 @@ public final class ServerHelper {
             return StatusCode.FORBIDDEN;
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/setSlim")
-                .setRequestMethod(RequestMethod.POST)
+                .requestMethod(RequestMethod.POST)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
-                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (config.getToken() != null) {
             builder.addHeader("token", config.getToken());
