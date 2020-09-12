@@ -1,5 +1,7 @@
 package de.hdskins.labymod.v112;
 
+import com.mojang.authlib.exceptions.AuthenticationException;
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
@@ -14,6 +16,7 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.resources.Language;
 import net.minecraft.client.resources.SkinManager;
+import net.minecraft.util.Session;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +26,6 @@ public class V112MinecraftAdapter implements MinecraftAdapter {
     private final V112SettingsManager settingsManager = new V112SettingsManager();
 
     private ConfigObject config;
-
-    @Override
-    public String getSessionId() {
-        return Minecraft.getMinecraft().getSession().getToken();
-    }
 
     @Override
     public void fillSettings(List<SettingsElement> list, ConfigObject object, boolean slim) {
@@ -87,6 +85,22 @@ public class V112MinecraftAdapter implements MinecraftAdapter {
         SkinManager skinManager = Minecraft.getMinecraft().getSkinManager();
         if (skinManager instanceof HDSkinManager) {
             ((HDSkinManager) skinManager).invalidateCache();
+        }
+    }
+
+    @Override
+    public boolean authorize() {
+        Session session = Minecraft.getMinecraft().getSession();
+        if (session == null) {
+            return false;
+        }
+
+        try {
+            Minecraft.getMinecraft().getSessionService().joinServer(session.getProfile(), session.getToken(), Constants.SERVER_ID);
+            return true;
+        } catch (AuthenticationException exception) {
+            exception.printStackTrace();
+            return false;
         }
     }
 

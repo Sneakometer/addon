@@ -13,4 +13,7 @@ public final class Constants {
 
     public static String aboutMcVersion = "unknown";
     public static final String LOG_PREFIX = "[HD-Skins] ";
+
+    public static final String SERVER_ID = "7c9d5b0044c130109a5d7b5fb5c317c02b4e28c1";
+
 }

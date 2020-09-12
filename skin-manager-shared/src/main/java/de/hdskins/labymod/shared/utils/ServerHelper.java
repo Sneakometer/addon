@@ -26,10 +26,12 @@ public final class ServerHelper {
             return StatusCode.NOT_ACCEPTABLE;
         }
 
+        if (!minecraftAdapter.authorize()) {
+            return StatusCode.FORBIDDEN;
+        }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/uploadSkin")
                 .setRequestMethod(RequestMethod.PUT)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
-                .addHeader("session", minecraftAdapter.getSessionId())
                 .setMimeType(MimeTypes.getMimeType("png"))
                 .setConnectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches()
@@ -58,11 +60,13 @@ public final class ServerHelper {
             return StatusCode.NOT_ACCEPTABLE;
         }
 
+        if (!minecraftAdapter.authorize()) {
+            return StatusCode.FORBIDDEN;
+        }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/reportSkin")
                 .setRequestMethod(RequestMethod.POST)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
                 .addHeader("name", LabyMod.getInstance().getPlayerName())
-                .addHeader("session", minecraftAdapter.getSessionId())
                 .addHeader("reportedUniqueId", reportedPlayer.getUniqueId().toString().replace("-", ""))
                 .addHeader("reportedName", reportedPlayer.getName())
                 .setConnectTimeout(5, TimeUnit.SECONDS)
@@ -85,10 +89,12 @@ public final class ServerHelper {
             return StatusCode.NOT_ACCEPTABLE;
         }
 
+        if (!minecraftAdapter.authorize()) {
+            return StatusCode.FORBIDDEN;
+        }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/deleteSkin")
                 .setRequestMethod(RequestMethod.DELETE)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
-                .addHeader("session", minecraftAdapter.getSessionId())
                 .setConnectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (config.getToken() != null) {
@@ -132,10 +138,12 @@ public final class ServerHelper {
             return StatusCode.NOT_ACCEPTABLE;
         }
 
+        if (!minecraftAdapter.authorize()) {
+            return StatusCode.FORBIDDEN;
+        }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/setSlim")
                 .setRequestMethod(RequestMethod.POST)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
-                .addHeader("session", minecraftAdapter.getSessionId())
                 .setConnectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
         if (config.getToken() != null) {
