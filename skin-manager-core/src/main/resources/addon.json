@@ -4,7 +4,7 @@
   "mainClass": "de.hdskins.labymod.core.HdSkinsAddon",
   "author": "HDSkins",
   "description": "Upload your own HD Skin for your player! Everyone with this addon can see it. Support: www.HDSkins.de/Discord",
-  "icon": "https://i.imgur.com/MQXufLh.png",
+  "icon": "https://hdskins.de/assets/img/addon.png",
   "version": 1,
   "category": 4
 }
