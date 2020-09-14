@@ -9,19 +9,37 @@ import de.hdskins.labymod.shared.utils.ServerHelper;
 import de.hdskins.labymod.v18.listener.TickListener;
 import de.hdskins.labymod.v18.manager.HDSkinManager;
 import de.hdskins.labymod.v18.settings.V18SettingsManager;
+import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
+import net.labymod.utils.DrawUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.resources.Language;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.util.Session;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
 public class V18MinecraftAdapter implements MinecraftAdapter {
+
+    private static final Field TEXTURES_LOADED_FIELD;
+
+    static {
+        Field texturesLoadedField = null;
+
+        try {
+            texturesLoadedField = ReflectionHelper.findField(NetworkPlayerInfo.class, "playerTexturesLoaded", "e", "field_178864_d");
+            texturesLoadedField.setAccessible(true);
+        } catch (ReflectionHelper.UnableToFindFieldException exception) {
+        }
+
+        TEXTURES_LOADED_FIELD = texturesLoadedField;
+    }
 
     private ConfigObject config;
     private final V18SettingsManager settingsManager = new V18SettingsManager();
@@ -85,6 +103,20 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
         if (skinManager instanceof HDSkinManager) {
             ((HDSkinManager) skinManager).invalidateCache();
         }
+
+        if (TEXTURES_LOADED_FIELD == null || Minecraft.getMinecraft().getNetHandler() == null) {
+            return;
+        }
+        NetworkPlayerInfo info = Minecraft.getMinecraft().getNetHandler().getPlayerInfo(LabyMod.getInstance().getPlayerUUID());
+        if (info == null) {
+            return;
+        }
+
+        try {
+            TEXTURES_LOADED_FIELD.setBoolean(info, false);
+        } catch (IllegalAccessException exception) {
+            exception.printStackTrace();
+        }
     }
 
     @Override
@@ -101,6 +133,25 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
             exception.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public int getWindowHeight() {
+        return LabyMod.getInstance().getDrawUtils().getScaledResolution().getScaledHeight();
+    }
+
+    @Override
+    public int getWindowWidth() {
+        return LabyMod.getInstance().getDrawUtils().getScaledResolution().getScaledWidth();
+    }
+
+    @Override
+    public void renderPlayer(int x, int y, int mouseX, int mouseY, int size, int rotation) {
+        if (LabyModCore.getMinecraft().getPlayer() == null) {
+            return;
+        }
+
+        DrawUtils.drawEntityOnScreen(x, y, size, mouseX, mouseY, rotation, 0, 0, LabyModCore.getMinecraft().getPlayer());
     }
 
 }

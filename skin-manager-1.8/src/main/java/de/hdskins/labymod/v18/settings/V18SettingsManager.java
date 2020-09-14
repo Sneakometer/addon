@@ -3,10 +3,12 @@ package de.hdskins.labymod.v18.settings;
 import de.hdskins.labymod.shared.callbacks.SlimElementChangeConsumer;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.gui.ButtonElement;
+import de.hdskins.labymod.shared.gui.SkinRenderElement;
 import de.hdskins.labymod.shared.handler.DeleteSkinButtonClickHandler;
 import de.hdskins.labymod.shared.handler.UploadFileButtonClickHandler;
 import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.shared.utils.Side;
 import de.hdskins.labymod.v18.gui.V18BooleanElement;
 import de.hdskins.labymod.v18.gui.V18ButtonElement;
 import net.labymod.settings.elements.ControlElement;
@@ -47,6 +49,8 @@ public class V18SettingsManager {
         );
         slimElement.setDescriptionText(LanguageManager.getTranslation("slim-skin-option-description"));
         list.add(slimElement);
+
+        list.add(new SkinRenderElement(minecraftAdapter, Side.RIGHT));
     }
 
     public void redraw() {

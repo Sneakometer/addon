@@ -1,6 +1,5 @@
 package de.hdskins.labymod.shared.minecraft;
 
-import com.github.derklaro.requestbuilder.RequestBuilder;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
 import net.labymod.settings.elements.SettingsElement;
@@ -27,5 +26,11 @@ public interface MinecraftAdapter {
     void invalidateSkinCache();
 
     boolean authorize();
+
+    int getWindowHeight();
+
+    int getWindowWidth();
+
+    void renderPlayer(int x, int y, int mouseX, int mouseY, int size, int rotation);
 
 }

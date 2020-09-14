@@ -30,7 +30,6 @@ public class SlimElementChangeConsumer implements Function<Boolean, CompletableF
                 StatusCode statusCode = ServerHelper.setSlim(this.minecraftAdapter, this.configObject, aBoolean);
                 String s = aBoolean ? "slim" : "default";
                 if (statusCode == StatusCode.OK) {
-                    this.minecraftAdapter.changeToIngame();
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-successfully-toggled", s));
                     this.minecraftAdapter.invalidateSkinCache();
                     future.complete(aBoolean);

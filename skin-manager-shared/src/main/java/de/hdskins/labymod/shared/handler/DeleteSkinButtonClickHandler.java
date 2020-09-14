@@ -27,7 +27,6 @@ public class DeleteSkinButtonClickHandler implements Runnable {
             Constants.EXECUTOR.execute(() -> {
                 StatusCode statusCode = ServerHelper.deleteSkin(this.minecraftAdapter, this.configObject);
                 if (statusCode == StatusCode.OK) {
-                    this.minecraftAdapter.changeToIngame();
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("delete-skin-success"));
                     this.minecraftAdapter.invalidateSkinCache();
                 } else if (statusCode == StatusCode.TOO_MANY_REQUESTS) {

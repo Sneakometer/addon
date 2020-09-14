@@ -20,12 +20,12 @@ public class V112BooleanElement extends BooleanElement {
     private String stringDisabled;
     private GuiButton buttonToggle;
 
-    public V112BooleanElement(String displayName, IconData iconData, String on, String off, boolean currentValue, Function<Boolean, CompletableFuture<Boolean>> toggleListener1) {
+    public V112BooleanElement(String displayName, IconData iconData, String on, String off, boolean currentValue, Function<Boolean, CompletableFuture<Boolean>> toggleListener) {
         super(displayName, iconData, null, currentValue);
         this.stringEnabled = on;
         this.stringDisabled = off;
         this.currentValue = new AtomicBoolean(currentValue);
-        this.toggleListener = toggleListener1;
+        this.toggleListener = toggleListener;
         this.createButton();
     }
 

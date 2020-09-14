@@ -74,7 +74,6 @@ public class UploadFileButtonClickHandler implements Runnable {
 
             StatusCode status = ServerHelper.uploadToServer(chooser.getSelectedFile().toPath(), this.minecraftAdapter, this.configObject);
             if (status == StatusCode.CREATED) {
-                this.minecraftAdapter.changeToIngame();
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-upload-completed"));
                 this.minecraftAdapter.invalidateSkinCache();
             } else if (status == StatusCode.TOO_MANY_REQUESTS) {
