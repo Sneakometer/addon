@@ -21,6 +21,7 @@ public class V112SettingsManager {
 
     private ButtonElement uploadSkinElement;
     private ButtonElement deleteSkinElement;
+    private ButtonElement refreshCacheElement;
     private V112BooleanElement slimElement;
 
     public void draw(MinecraftAdapter minecraftAdapter, List<SettingsElement> list, ConfigObject object, boolean slim) {
@@ -50,6 +51,15 @@ public class V112SettingsManager {
         slimElement.setDescriptionText(LanguageManager.getTranslation("slim-skin-option-description"));
         list.add(slimElement);
 
+        this.refreshCacheElement = new V112ButtonElement(
+                LanguageManager.getTranslation("refresh-skin-cache"),
+                new ControlElement.IconData(Material.ARROW),
+                LanguageManager.getTranslation("button-click-here")
+        );
+        this.refreshCacheElement.setDescriptionText(LanguageManager.getTranslation("refresh-skin-cache-description"));
+        this.refreshCacheElement.setClickListener(minecraftAdapter::invalidateSkinCache);
+        list.add(this.refreshCacheElement);
+
         list.add(new SkinRenderElement(minecraftAdapter, Side.RIGHT));
     }
 
@@ -70,6 +80,12 @@ public class V112SettingsManager {
             this.slimElement.custom(LanguageManager.getTranslation("slim-skin-option-on"), LanguageManager.getTranslation("slim-skin-option-off"));
             this.slimElement.setDisplayName(LanguageManager.getTranslation("slim-skin-change-option"));
             this.slimElement.setDescriptionText(LanguageManager.getTranslation("slim-skin-option-description"));
+        }
+
+        if (this.refreshCacheElement != null) {
+            this.refreshCacheElement.setDisplayName(LanguageManager.getTranslation("refresh-skin-cache"));
+            this.refreshCacheElement.setText(LanguageManager.getTranslation("button-click-here"));
+            this.refreshCacheElement.setDescriptionText(LanguageManager.getTranslation("refresh-skin-cache-description"));
         }
     }
 

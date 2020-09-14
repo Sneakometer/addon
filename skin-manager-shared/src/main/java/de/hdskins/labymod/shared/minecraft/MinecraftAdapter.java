@@ -25,6 +25,8 @@ public interface MinecraftAdapter {
 
     void invalidateSkinCache();
 
+    void updateSelfSkin();
+
     boolean authorize();
 
     int getWindowHeight();

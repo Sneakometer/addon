@@ -29,7 +29,7 @@ public class DeleteSkinButtonClickHandler implements Runnable {
                 ServerResult result = ServerHelper.deleteSkin(this.minecraftAdapter, this.configObject);
                 if (result.getCode() == StatusCode.OK) {
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("delete-skin-success"));
-                    this.minecraftAdapter.invalidateSkinCache();
+                    this.minecraftAdapter.updateSelfSkin();
                 } else if (result.getCode() == StatusCode.TOO_MANY_REQUESTS) {
                     this.minecraftAdapter.changeToIngame();
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("delete-skin-rate-limited"));

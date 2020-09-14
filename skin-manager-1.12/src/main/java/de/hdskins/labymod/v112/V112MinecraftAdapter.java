@@ -24,6 +24,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class V112MinecraftAdapter implements MinecraftAdapter {
 
@@ -100,16 +101,38 @@ public class V112MinecraftAdapter implements MinecraftAdapter {
 
     @Override
     public void invalidateSkinCache() {
+        this.clearSkinCache();
+
+        if (Minecraft.getMinecraft().getConnection() != null) {
+            for (NetworkPlayerInfo info : Minecraft.getMinecraft().getConnection().getPlayerInfoMap()) {
+                this.updateSkin(info);
+            }
+        }
+    }
+
+    private void clearSkinCache() {
         SkinManager skinManager = Minecraft.getMinecraft().getSkinManager();
         if (skinManager instanceof HDSkinManager) {
             ((HDSkinManager) skinManager).invalidateCache();
         }
+    }
 
-        if (TEXTURES_LOADED_FIELD == null || Minecraft.getMinecraft().getConnection() == null) {
+    @Override
+    public void updateSelfSkin() {
+        this.clearSkinCache();
+        this.updateSkin(LabyMod.getInstance().getPlayerUUID());
+    }
+
+    private void updateSkin(UUID uniqueId) {
+        if (Minecraft.getMinecraft().getConnection() == null) {
             return;
         }
-        NetworkPlayerInfo info = Minecraft.getMinecraft().getConnection().getPlayerInfo(LabyMod.getInstance().getPlayerUUID());
-        if (info == null) {
+        NetworkPlayerInfo info = Minecraft.getMinecraft().getConnection().getPlayerInfo(uniqueId);
+        this.updateSkin(info);
+    }
+
+    private void updateSkin(NetworkPlayerInfo info) {
+        if (TEXTURES_LOADED_FIELD == null || info == null) {
             return;
         }
 

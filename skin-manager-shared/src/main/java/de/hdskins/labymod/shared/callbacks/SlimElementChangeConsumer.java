@@ -37,7 +37,7 @@ public class SlimElementChangeConsumer implements Function<Boolean, CompletableF
             String s = aBoolean ? "slim" : "default";
             if (result.getCode() == StatusCode.OK) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-successfully-toggled", s));
-                this.minecraftAdapter.invalidateSkinCache();
+                this.minecraftAdapter.updateSelfSkin();
                 future.complete(aBoolean);
             } else if (result.getCode() == StatusCode.TOO_MANY_REQUESTS) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-rate-limited"));
