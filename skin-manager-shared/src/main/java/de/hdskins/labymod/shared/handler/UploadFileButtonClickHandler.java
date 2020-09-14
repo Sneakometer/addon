@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 public class UploadFileButtonClickHandler implements Runnable {
 
-    private static final int MAX_FILE_SIZE = 2 * 1024 * 1024;
+    private static final int MAX_FILE_SIZE = 4 * 1024 * 1024;
 
     public UploadFileButtonClickHandler(MinecraftAdapter minecraftAdapter, ConfigObject configObject) {
         this.minecraftAdapter = minecraftAdapter;
