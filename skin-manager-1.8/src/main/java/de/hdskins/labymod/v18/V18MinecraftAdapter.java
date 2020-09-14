@@ -33,7 +33,7 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
         Field texturesLoadedField = null;
 
         try {
-            texturesLoadedField = ReflectionHelper.findField(NetworkPlayerInfo.class, "playerTexturesLoaded", "e", "field_178864_d");
+            texturesLoadedField = ReflectionHelper.findField(NetworkPlayerInfo.class, "playerTexturesLoaded", "d", "field_178864_d");
             texturesLoadedField.setAccessible(true);
         } catch (ReflectionHelper.UnableToFindFieldException exception) {
         }

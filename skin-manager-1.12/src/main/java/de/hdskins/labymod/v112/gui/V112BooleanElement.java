@@ -20,6 +20,8 @@ public class V112BooleanElement extends BooleanElement {
     private String stringDisabled;
     private GuiButton buttonToggle;
 
+    private boolean pressable = true;
+
     public V112BooleanElement(String displayName, IconData iconData, String on, String off, boolean currentValue, Function<Boolean, CompletableFuture<Boolean>> toggleListener) {
         super(displayName, iconData, null, currentValue);
         this.stringEnabled = on;
@@ -65,14 +67,31 @@ public class V112BooleanElement extends BooleanElement {
 
     @Override
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+        if (!this.pressable) {
+            return;
+        }
+
         if (this.buttonToggle.mousePressed(Minecraft.getMinecraft(), mouseX, mouseY)) {
+            boolean playSound = true;
+
             if (this.toggleListener != null) {
-                this.toggleListener.apply(!this.currentValue.get()).thenAccept(this::setCurrentValue);
+                CompletableFuture<Boolean> future = this.toggleListener.apply(!this.currentValue.get());
+                if (future != null) {
+                    this.pressable = false;
+                    future.thenAccept(value -> {
+                        this.pressable = true;
+                        this.setCurrentValue(value);
+                    });
+                }
+
+                playSound = future != null;
             } else {
                 this.currentValue.set(!this.currentValue.get());
             }
 
-            this.buttonToggle.playPressSound(this.mc.getSoundHandler());
+            if (playSound) {
+                this.buttonToggle.playPressSound(this.mc.getSoundHandler());
+            }
         }
     }
 
