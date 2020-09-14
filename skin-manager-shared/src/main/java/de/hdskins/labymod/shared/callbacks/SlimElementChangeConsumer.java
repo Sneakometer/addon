@@ -6,6 +6,7 @@ import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.shared.utils.ServerResult;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,21 +33,21 @@ public class SlimElementChangeConsumer implements Function<Boolean, CompletableF
 
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         Constants.EXECUTOR.execute(() -> {
-            StatusCode statusCode = ServerHelper.setSlim(this.minecraftAdapter, this.configObject, aBoolean);
+            ServerResult result = ServerHelper.setSlim(this.minecraftAdapter, this.configObject, aBoolean);
             String s = aBoolean ? "slim" : "default";
-            if (statusCode == StatusCode.OK) {
+            if (result.getCode() == StatusCode.OK) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-successfully-toggled", s));
                 this.minecraftAdapter.invalidateSkinCache();
                 future.complete(aBoolean);
-            } else if (statusCode == StatusCode.TOO_MANY_REQUESTS) {
+            } else if (result.getCode() == StatusCode.TOO_MANY_REQUESTS) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-rate-limited"));
                 future.complete(!aBoolean);
-            } else if (statusCode == StatusCode.NO_CONTENT) {
+            } else if (result.getCode() == StatusCode.NO_CONTENT) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-no-hd-skin"));
                 future.complete(!aBoolean);
             } else {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-toggle-failed-unknown", s, statusCode));
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("slim-toggle-failed-unknown", s, result.getCode(), result.getMessage()));
                 future.complete(!aBoolean);
             }
         });

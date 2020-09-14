@@ -7,6 +7,7 @@ import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
 import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.shared.utils.ServerResult;
 import net.labymod.user.User;
 import net.labymod.user.util.UserActionEntry;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -27,15 +28,15 @@ public class ReportUserActionEntry extends UserActionEntry {
     public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
         Constants.EXECUTOR.execute(() -> {
             PlayerProfile playerProfile = new PlayerProfile(entityPlayer.getName(), entityPlayer.getGameProfile().getId());
-            StatusCode statusCode = ServerHelper.reportSkin(playerProfile, this.minecraftAdapter, this.configObject);
-            if (statusCode == StatusCode.OK) {
+            ServerResult result = ServerHelper.reportSkin(playerProfile, this.minecraftAdapter, this.configObject);
+            if (result.getCode() == StatusCode.OK) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("user-skin-report-success", playerProfile.getName()));
-            } else if (statusCode == StatusCode.TOO_MANY_REQUESTS) {
+            } else if (result.getCode() == StatusCode.TOO_MANY_REQUESTS) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("user-skin-report-rate-limited"));
-            } else if (statusCode == StatusCode.I_AM_A_TEAPOT) {
+            } else if (result.getCode() == StatusCode.I_AM_A_TEAPOT) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("user-skin-report-no-hd-skin"));
             } else {
-                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("user-skin-report-failed-unknown", statusCode));
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("user-skin-report-failed-unknown", result.getCode(), result.getMessage()));
             }
         });
     }

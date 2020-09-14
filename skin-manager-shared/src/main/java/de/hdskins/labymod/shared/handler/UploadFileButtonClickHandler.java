@@ -6,6 +6,7 @@ import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.shared.utils.ServerResult;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -72,16 +73,16 @@ public class UploadFileButtonClickHandler implements Runnable {
                 return;
             }
 
-            StatusCode status = ServerHelper.uploadToServer(chooser.getSelectedFile().toPath(), this.minecraftAdapter, this.configObject);
-            if (status == StatusCode.CREATED) {
+            ServerResult result = ServerHelper.uploadToServer(chooser.getSelectedFile().toPath(), this.minecraftAdapter, this.configObject);
+            if (result.getCode() == StatusCode.CREATED) {
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-upload-completed"));
                 this.minecraftAdapter.invalidateSkinCache();
-            } else if (status == StatusCode.TOO_MANY_REQUESTS) {
+            } else if (result.getCode() == StatusCode.TOO_MANY_REQUESTS) {
                 this.minecraftAdapter.changeToIngame();
                 this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-rate-limited"));
             } else {
                 this.minecraftAdapter.changeToIngame();
-                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-upload-failed-unknown", status));
+                this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-upload-failed-unknown", result.getCode(), result.getMessage()));
             }
         } catch (IOException exception) {
             exception.printStackTrace();

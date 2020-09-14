@@ -21,21 +21,20 @@ public final class ServerHelper {
         throw new UnsupportedOperationException();
     }
 
-    public static StatusCode uploadToServer(Path path, MinecraftAdapter minecraftAdapter, ConfigObject config) {
+    public static ServerResult uploadToServer(Path path, MinecraftAdapter minecraftAdapter, ConfigObject config) {
         if (config.getServerUrl() == null) {
-            return StatusCode.NOT_ACCEPTABLE;
+            return ServerResult.of(StatusCode.NOT_ACCEPTABLE, "No server url in the config");
         }
 
         if (!minecraftAdapter.authorize()) {
-            return StatusCode.FORBIDDEN;
+            return ServerResult.of(StatusCode.FORBIDDEN, "Authorization failed");
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/uploadSkin")
-                .setRequestMethod(RequestMethod.PUT)
+                .requestMethod(RequestMethod.PUT)
                 .addHeader("uuid", getUndashedPlayerUniqueId())
                 .addHeader("name", LabyMod.getInstance().getPlayerName())
-                .addBody("")
-                .setMimeType(MimeTypes.getMimeType("png"))
-                .setConnectTimeout(5, TimeUnit.SECONDS)
+                .mimeType(MimeTypes.getMimeType("png"))
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches()
                 .enableOutput();
         if (config.getToken() != null) {
@@ -49,21 +48,20 @@ public final class ServerHelper {
                 outputStream.flush();
             }
 
-            return requestResult.getStatus();
+            return ServerResult.of(requestResult);
         } catch (final Exception ex) {
             ex.printStackTrace();
+            return ServerResult.of(ex);
         }
-
-        return StatusCode.INTERNAL_SERVER_ERROR;
     }
 
-    public static StatusCode reportSkin(PlayerProfile reportedPlayer, MinecraftAdapter minecraftAdapter, ConfigObject config) {
+    public static ServerResult reportSkin(PlayerProfile reportedPlayer, MinecraftAdapter minecraftAdapter, ConfigObject config) {
         if (config.getServerUrl() == null) {
-            return StatusCode.NOT_ACCEPTABLE;
+            return ServerResult.of(StatusCode.NOT_ACCEPTABLE, "No server url in the config");
         }
 
         if (!minecraftAdapter.authorize()) {
-            return StatusCode.FORBIDDEN;
+            return ServerResult.of(StatusCode.FORBIDDEN, "Authorization failed");
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/reportSkin")
                 .setRequestMethod(RequestMethod.POST)
@@ -77,22 +75,16 @@ public final class ServerHelper {
             builder.addHeader("token", config.getToken());
         }
 
-        try (RequestResult requestResult = builder.fireAndForget()) {
-            return requestResult.getStatus();
-        } catch (final Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return StatusCode.INTERNAL_SERVER_ERROR;
+        return ServerResult.of(builder);
     }
 
-    public static StatusCode deleteSkin(MinecraftAdapter minecraftAdapter, ConfigObject config) {
+    public static ServerResult deleteSkin(MinecraftAdapter minecraftAdapter, ConfigObject config) {
         if (config.getServerUrl() == null) {
-            return StatusCode.NOT_ACCEPTABLE;
+            return ServerResult.of(StatusCode.NOT_ACCEPTABLE, "No server url in the config");
         }
 
         if (!minecraftAdapter.authorize()) {
-            return StatusCode.FORBIDDEN;
+            return ServerResult.of(StatusCode.FORBIDDEN, "Authorization failed");
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/deleteSkin")
                 .setRequestMethod(RequestMethod.DELETE)
@@ -104,13 +96,7 @@ public final class ServerHelper {
             builder.addHeader("token", config.getToken());
         }
 
-        try (RequestResult requestResult = builder.fireAndForget()) {
-            return requestResult.getStatus();
-        } catch (final Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return StatusCode.INTERNAL_SERVER_ERROR;
+        return ServerResult.of(builder);
     }
 
     public static boolean isSlim(ConfigObject configObject) {
@@ -137,13 +123,13 @@ public final class ServerHelper {
         return false;
     }
 
-    public static StatusCode setSlim(MinecraftAdapter minecraftAdapter, ConfigObject config, boolean slim) {
+    public static ServerResult setSlim(MinecraftAdapter minecraftAdapter, ConfigObject config, boolean slim) {
         if (config.getServerUrl() == null) {
-            return StatusCode.NOT_ACCEPTABLE;
+            return ServerResult.of(StatusCode.NOT_ACCEPTABLE, "No server url in the config");
         }
 
         if (!minecraftAdapter.authorize()) {
-            return StatusCode.FORBIDDEN;
+            return ServerResult.of(StatusCode.FORBIDDEN, "Authorization failed");
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/setSlim")
                 .setRequestMethod(RequestMethod.POST)
@@ -159,13 +145,7 @@ public final class ServerHelper {
             builder.addHeader("slim", "1");
         }
 
-        try (RequestResult requestResult = builder.fireAndForget()) {
-            return requestResult.getStatus();
-        } catch (final Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return StatusCode.INTERNAL_SERVER_ERROR;
+        return ServerResult.of(builder);
     }
 
     private static String getUndashedPlayerUniqueId() {
