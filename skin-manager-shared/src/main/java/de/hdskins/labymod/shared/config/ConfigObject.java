@@ -4,5 +4,4 @@ public interface ConfigObject {
 
     String getServerUrl();
 
-    String getToken();
 }

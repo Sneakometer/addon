@@ -37,9 +37,6 @@ public final class ServerHelper {
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches()
                 .enableOutput();
-        if (config.getToken() != null) {
-            builder.addHeader("token", config.getToken());
-        }
 
         try (RequestResult requestResult = builder.fireAndForget()) {
             byte[] bytes = Files.readAllBytes(path);
@@ -71,9 +68,6 @@ public final class ServerHelper {
                 .addHeader("reportedName", reportedPlayer.getName())
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
-        if (config.getToken() != null) {
-            builder.addHeader("token", config.getToken());
-        }
 
         return ServerResult.of(builder);
     }
@@ -92,9 +86,6 @@ public final class ServerHelper {
                 .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
-        if (config.getToken() != null) {
-            builder.addHeader("token", config.getToken());
-        }
 
         return ServerResult.of(builder);
     }
@@ -110,9 +101,6 @@ public final class ServerHelper {
                 .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
-        if (configObject.getToken() != null) {
-            builder.addHeader("token", configObject.getToken());
-        }
 
         try (RequestResult requestResult = builder.fireAndForget()) {
             return requestResult.getStatusCode() == 200;
@@ -137,9 +125,6 @@ public final class ServerHelper {
                 .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
-        if (config.getToken() != null) {
-            builder.addHeader("token", config.getToken());
-        }
 
         if (slim) {
             builder.addHeader("slim", "1");
