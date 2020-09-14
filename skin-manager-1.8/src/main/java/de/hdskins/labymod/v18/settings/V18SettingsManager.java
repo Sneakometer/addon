@@ -57,7 +57,10 @@ public class V18SettingsManager {
                 LanguageManager.getTranslation("button-click-here")
         );
         this.refreshCacheElement.setDescriptionText(LanguageManager.getTranslation("refresh-skin-cache-description"));
-        this.refreshCacheElement.setClickListener(minecraftAdapter::invalidateSkinCache);
+        this.refreshCacheElement.setClickListener(() -> {
+            minecraftAdapter.invalidateSkinCache();
+            minecraftAdapter.changeToIngame();
+        });
         list.add(this.refreshCacheElement);
 
         list.add(new SkinRenderElement(minecraftAdapter, Side.RIGHT));
