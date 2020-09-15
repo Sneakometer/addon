@@ -31,7 +31,7 @@ dependencies {
     shadow project(':skin-manager-shared')
     shadow project(':skin-manager-1.8')
     shadow project(':skin-manager-1.12')
-    shadow group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.5'
+    shadow group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.6'
 }
 
 artifacts {
