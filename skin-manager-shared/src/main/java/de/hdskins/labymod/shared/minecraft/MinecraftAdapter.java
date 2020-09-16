@@ -6,6 +6,7 @@ import net.labymod.settings.elements.SettingsElement;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface MinecraftAdapter {
 
@@ -35,4 +36,5 @@ public interface MinecraftAdapter {
 
     void renderPlayer(int x, int y, int mouseX, int mouseY, int size, int rotation);
 
+    <T> T getJsonElement(String result, String key, Function<String, T> mapper);
 }

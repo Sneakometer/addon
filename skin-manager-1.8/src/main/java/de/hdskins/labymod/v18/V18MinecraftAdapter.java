@@ -1,5 +1,6 @@
 package de.hdskins.labymod.v18;
 
+import com.google.gson.JsonElement;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.config.ConfigObject;
@@ -13,6 +14,7 @@ import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
 import net.labymod.utils.DrawUtils;
+import net.labymod.utils.JsonParse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -25,6 +27,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class V18MinecraftAdapter implements MinecraftAdapter {
 
@@ -175,6 +178,12 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
         }
 
         DrawUtils.drawEntityOnScreen(x, y, size, mouseX, mouseY, rotation, 0, 0, LabyModCore.getMinecraft().getPlayer());
+    }
+
+    @Override
+    public <T> T getJsonElement(String result, String key, Function<String, T> mapper) {
+        JsonElement jsonElement = JsonParse.parse(result);
+        return mapper.apply(jsonElement.getAsJsonObject().get(key).getAsString());
     }
 
 }

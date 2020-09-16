@@ -8,11 +8,13 @@ import com.github.derklaro.requestbuilder.types.MimeTypes;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
+import de.hdskins.labymod.shared.role.UserRole;
 import net.labymod.main.LabyMod;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public final class ServerHelper {
@@ -72,7 +74,15 @@ public final class ServerHelper {
         return ServerResult.of(builder);
     }
 
+    public static ServerResult forceDeleteSkin(MinecraftAdapter minecraftAdapter, ConfigObject config, UUID target) {
+        return deleteSkin0(minecraftAdapter, config, target.toString().replace("-", ""), getUndashedPlayerUniqueId());
+    }
+
     public static ServerResult deleteSkin(MinecraftAdapter minecraftAdapter, ConfigObject config) {
+        return deleteSkin0(minecraftAdapter, config, getUndashedPlayerUniqueId(), getUndashedPlayerUniqueId());
+    }
+
+    public static ServerResult deleteSkin0(MinecraftAdapter minecraftAdapter, ConfigObject config, String target, String executor) {
         if (config.getServerUrl() == null) {
             return ServerResult.of(StatusCode.NOT_ACCEPTABLE, "No server url in the config");
         }
@@ -82,12 +92,17 @@ public final class ServerHelper {
         }
         RequestBuilder builder = RequestBuilder.newBuilder(config.getServerUrl() + "/deleteSkin")
                 .requestMethod(RequestMethod.DELETE)
-                .addHeader("uuid", getUndashedPlayerUniqueId())
+                .addHeader("uuid", executor)
+                .addHeader("target", target)
                 .addHeader("name", LabyMod.getInstance().getPlayerName())
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .disableCaches();
 
-        return ServerResult.of(builder);
+        try (RequestResult result = builder.fireAndForget()) {
+            return ServerResult.ofEmpty(result);
+        } catch (Exception ex) {
+            return ServerResult.of(ex);
+        }
     }
 
     public static boolean isSlim(ConfigObject configObject) {
@@ -131,6 +146,37 @@ public final class ServerHelper {
         }
 
         return ServerResult.of(builder);
+    }
+
+    public static UserRole getSelfRank(ConfigObject config, MinecraftAdapter minecraftAdapter) {
+        return getRankOfUser(config, minecraftAdapter, getUndashedPlayerUniqueId());
+    }
+
+    public static UserRole getRankOfUser(ConfigObject config, MinecraftAdapter minecraftAdapter, String uniqueId) {
+        if (config.getServerUrl() == null) {
+            return UserRole.USER;
+        }
+
+        if (!minecraftAdapter.authorize()) {
+            return UserRole.USER;
+        }
+
+        try (RequestResult result = RequestBuilder.newBuilder(config.getServerUrl() + "/getUserRank")
+                .requestMethod(RequestMethod.POST)
+                .addHeader("uuid", uniqueId)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .disableCaches()
+                .fireAndForget()
+        ) {
+            if (result.getStatusCode() != 200) {
+                return UserRole.USER;
+            }
+
+            return minecraftAdapter.getJsonElement(result.getSuccessResultAsString(), "name", name -> UserRole.getByName(name).orElse(UserRole.USER));
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return UserRole.USER;
+        }
     }
 
     private static String getUndashedPlayerUniqueId() {

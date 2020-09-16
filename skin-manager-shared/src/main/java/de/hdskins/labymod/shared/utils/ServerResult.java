@@ -27,6 +27,10 @@ public class ServerResult {
         }
     }
 
+    public static ServerResult ofEmpty(RequestResult requestResult) {
+        return of(requestResult.getStatus(), requestResult.getStatusCode() >= 200 && requestResult.getStatusCode() < 300 ? "success" : "failed");
+    }
+
     public static ServerResult of(RequestResult requestResult) {
         return of(requestResult.getStatus(), requestResult.getStatusCode() >= 200 && requestResult.getStatusCode() < 300 ? "success" : requestResult.getResultAsString());
     }
