@@ -157,10 +157,6 @@ public final class ServerHelper {
             return UserRole.USER;
         }
 
-        if (!minecraftAdapter.authorize()) {
-            return UserRole.USER;
-        }
-
         try (RequestResult result = RequestBuilder.newBuilder(config.getServerUrl() + "/getUserRank")
                 .requestMethod(RequestMethod.POST)
                 .addHeader("uuid", uniqueId)
