@@ -62,6 +62,8 @@ public class UploadFileButtonClickHandler implements Runnable {
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-not-hd"));
                 } else if (imageCheckResult == ImageCheckResult.WRONG_PROPORTIONS) {
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-wrong-proportions"));
+                } else if (imageCheckResult == ImageCheckResult.INVALID_RESOLUTION) {
+                    this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("change-skin-file-wrong-resolution"));
                 }
 
                 return;
@@ -115,17 +117,33 @@ public class UploadFileButtonClickHandler implements Runnable {
                 return ImageCheckResult.WRONG_PROPORTIONS;
             }
 
+            if (bufferedImage.getHeight() > 2048 || bufferedImage.getWidth() > 2048) {
+                return ImageCheckResult.INVALID_RESOLUTION;
+            }
+
+            if (bufferedImage.getHeight() <= 64 || (bufferedImage.getHeight() != bufferedImage.getWidth() && bufferedImage.getHeight() != bufferedImage.getWidth() / 2)) {
+                return ImageCheckResult.INVALID_RESOLUTION;
+            }
+
+            if (!this.isPowerOfTwo(bufferedImage.getHeight())) {
+                return ImageCheckResult.INVALID_RESOLUTION;
+            }
+
             return ImageCheckResult.OK;
         } catch (IOException exception) {
             return ImageCheckResult.NOT_PNG;
         }
     }
 
-    private enum ImageCheckResult {
+    private boolean isPowerOfTwo(int number) {
+        return number > 0 && ((number & (number - 1)) == 0);
+    }
 
+    private enum ImageCheckResult {
         NOT_PNG,
         NOT_HD,
         WRONG_PROPORTIONS,
+        INVALID_RESOLUTION,
         OK
     }
 }
