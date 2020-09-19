@@ -121,14 +121,20 @@ public class V18MinecraftAdapter implements MinecraftAdapter {
 
     @Override
     public void updateSelfSkin() {
-        this.clearSkinCache();
         this.updateSkin(LabyMod.getInstance().getPlayerUUID());
     }
 
-    private void updateSkin(UUID uniqueId) {
+    @Override
+    public void updateSkin(UUID uniqueId) {
         if (Minecraft.getMinecraft().getNetHandler() == null) {
             return;
         }
+
+        SkinManager skinManager = Minecraft.getMinecraft().getSkinManager();
+        if (skinManager instanceof HDSkinManager) {
+            ((HDSkinManager) skinManager).removeFromCache(uniqueId);
+        }
+
         NetworkPlayerInfo info = Minecraft.getMinecraft().getNetHandler().getPlayerInfo(uniqueId);
         this.updateSkin(info);
     }

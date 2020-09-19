@@ -7,6 +7,7 @@ import de.hdskins.labymod.shared.mappings.HandledMappings;
 import de.hdskins.labymod.shared.mappings.Mappings;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.v18.useraction.UserActionEntryInvoker;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.Source;
 import net.labymod.settings.elements.SettingsElement;
@@ -55,12 +56,12 @@ public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
             case V1_8:
                 this.minecraftAdapter = new de.hdskins.labymod.v18.V18MinecraftAdapter();
                 de.hdskins.labymod.v18.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
-                de.hdskins.labymod.v18.report.ReportUserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
+                UserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
                 break;
             case V1_12:
                 this.minecraftAdapter = new de.hdskins.labymod.v112.V112MinecraftAdapter();
                 de.hdskins.labymod.v112.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
-                de.hdskins.labymod.v112.report.ReportUserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
+                de.hdskins.labymod.v112.useraction.UserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
                 break;
         }
 

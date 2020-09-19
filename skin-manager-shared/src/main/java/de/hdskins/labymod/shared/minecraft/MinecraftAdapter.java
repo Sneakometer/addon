@@ -6,6 +6,7 @@ import net.labymod.settings.elements.SettingsElement;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 public interface MinecraftAdapter {
@@ -25,6 +26,8 @@ public interface MinecraftAdapter {
     ConfigObject getConfig();
 
     void invalidateSkinCache();
+
+    void updateSkin(UUID uniqueId);
 
     void updateSelfSkin();
 

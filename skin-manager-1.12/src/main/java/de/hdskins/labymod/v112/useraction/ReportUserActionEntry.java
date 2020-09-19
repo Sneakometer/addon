@@ -1,4 +1,4 @@
-package de.hdskins.labymod.v112.report;
+package de.hdskins.labymod.v112.useraction;
 
 import com.github.derklaro.requestbuilder.result.http.StatusCode;
 import de.hdskins.labymod.shared.Constants;

@@ -223,4 +223,9 @@ public class HDSkinManager extends SkinManager {
         this.textureCache.invalidateAll();
     }
 
+    public void removeFromCache(UUID uniqueId) {
+        this.cache.remove(uniqueId);
+        this.textureCache.invalidate(uniqueId);
+    }
+
 }
