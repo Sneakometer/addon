@@ -3,6 +3,7 @@ package de.hdskins.labymod.shared.handler;
 import com.github.derklaro.requestbuilder.result.http.StatusCode;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.config.ConfigObject;
+import de.hdskins.labymod.shared.gui.AdvancedBooleanElement;
 import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.utils.ServerHelper;
@@ -12,13 +13,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DeleteSkinButtonClickHandler implements Runnable {
 
-    public DeleteSkinButtonClickHandler(MinecraftAdapter minecraftAdapter, ConfigObject configObject) {
+    public DeleteSkinButtonClickHandler(MinecraftAdapter minecraftAdapter, ConfigObject configObject, AdvancedBooleanElement slimElement) {
         this.minecraftAdapter = minecraftAdapter;
         this.configObject = configObject;
+        this.slimElement = slimElement;
     }
 
     private final MinecraftAdapter minecraftAdapter;
     private final ConfigObject configObject;
+    private final AdvancedBooleanElement slimElement;
 
     private final AtomicBoolean deleteProcess = new AtomicBoolean();
 
@@ -38,6 +41,7 @@ public class DeleteSkinButtonClickHandler implements Runnable {
                     this.minecraftAdapter.displayMessageInChat(LanguageManager.getTranslation("delete-skin-failed-unknown", result.getCode(), result.getMessage()));
                 }
 
+                this.slimElement.setCurrentValue(false);
                 DeleteSkinButtonClickHandler.this.deleteProcess.set(false);
             });
         }

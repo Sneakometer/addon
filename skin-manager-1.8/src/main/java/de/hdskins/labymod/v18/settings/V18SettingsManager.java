@@ -25,6 +25,13 @@ public class V18SettingsManager {
     private V18BooleanElement slimElement;
 
     public void draw(MinecraftAdapter minecraftAdapter, List<SettingsElement> list, ConfigObject object, boolean slim) {
+        this.slimElement = new V18BooleanElement(
+                LanguageManager.getTranslation("slim-skin-change-option"), new ControlElement.IconData(Material.REDSTONE_COMPARATOR),
+                LanguageManager.getTranslation("slim-skin-option-on"), LanguageManager.getTranslation("slim-skin-option-off"),
+                slim, new SlimElementChangeConsumer(object, minecraftAdapter)
+        );
+        this.slimElement.setDescriptionText(LanguageManager.getTranslation("slim-skin-option-description"));
+
         this.uploadSkinElement = new V18ButtonElement(
                 LanguageManager.getTranslation("change-skin-option-name"),
                 new ControlElement.IconData(Material.PAINTING),
@@ -40,16 +47,10 @@ public class V18SettingsManager {
                 LanguageManager.getTranslation("button-click-here")
         );
         deleteSkinElement.setDescriptionText(LanguageManager.getTranslation("delete-skin-option-description"));
-        deleteSkinElement.setClickListener(new DeleteSkinButtonClickHandler(minecraftAdapter, object));
+        deleteSkinElement.setClickListener(new DeleteSkinButtonClickHandler(minecraftAdapter, object, this.slimElement));
         list.add(deleteSkinElement);
 
-        this.slimElement = new V18BooleanElement(
-                LanguageManager.getTranslation("slim-skin-change-option"), new ControlElement.IconData(Material.REDSTONE_COMPARATOR),
-                LanguageManager.getTranslation("slim-skin-option-on"), LanguageManager.getTranslation("slim-skin-option-off"),
-                slim, new SlimElementChangeConsumer(object, minecraftAdapter)
-        );
-        slimElement.setDescriptionText(LanguageManager.getTranslation("slim-skin-option-description"));
-        list.add(slimElement);
+        list.add(this.slimElement);
 
         this.refreshCacheElement = new V18ButtonElement(
                 LanguageManager.getTranslation("refresh-skin-cache"),

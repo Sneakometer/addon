@@ -1,5 +1,6 @@
 package de.hdskins.labymod.v112.gui;
 
+import de.hdskins.labymod.shared.gui.AdvancedBooleanElement;
 import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.BooleanElement;
@@ -11,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-public class V112BooleanElement extends BooleanElement {
+public class V112BooleanElement extends BooleanElement implements AdvancedBooleanElement {
 
     private final Function<Boolean, CompletableFuture<Boolean>> toggleListener;
     private final AtomicBoolean currentValue;
@@ -100,6 +101,7 @@ public class V112BooleanElement extends BooleanElement {
         return currentValue.get();
     }
 
+    @Override
     public void setCurrentValue(boolean currentValue) {
         this.currentValue.set(currentValue);
     }
