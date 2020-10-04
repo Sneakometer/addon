@@ -4,4 +4,8 @@ public interface ConfigObject {
 
     String getServerUrl();
 
+    void setShowAllSkins(boolean enabled);
+
+    boolean shouldShowAllSkins();
+
 }

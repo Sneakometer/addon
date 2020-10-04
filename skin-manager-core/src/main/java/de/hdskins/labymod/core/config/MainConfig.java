@@ -10,6 +10,7 @@ public class MainConfig implements ConfigObject {
     private final HdSkinsAddon addon;
 
     private String serverUrl;
+    private boolean showAllSkins;
 
     private MainConfig(HdSkinsAddon addon) {
         this.addon = addon;
@@ -25,12 +26,15 @@ public class MainConfig implements ConfigObject {
             mainConfig.serverUrl = "http://api.hdskins.de";
         }
 
+        mainConfig.showAllSkins = !addon.getConfig().has("allSkins") || addon.getConfig().get("allSkins").getAsBoolean();
+
         mainConfig.save();
         return mainConfig;
     }
 
     public void save() {
         this.addon.getConfig().addProperty("server", this.serverUrl);
+        this.addon.getConfig().addProperty("allSkins", this.showAllSkins);
 
         this.addon.saveConfig();
     }
@@ -38,6 +42,20 @@ public class MainConfig implements ConfigObject {
     @Override
     public String getServerUrl() {
         return this.serverUrl == null ? null : serverUrl.endsWith("/") ? (this.serverUrl = this.serverUrl.substring(0, this.serverUrl.length() - 1)) : this.serverUrl;
+    }
+
+    @Override
+    public void setShowAllSkins(boolean enabled) {
+        if (this.showAllSkins == enabled) {
+            return;
+        }
+        this.showAllSkins = enabled;
+        this.save();
+    }
+
+    @Override
+    public boolean shouldShowAllSkins() {
+        return this.showAllSkins;
     }
 
 }

@@ -67,7 +67,8 @@ public class HDSkinManager extends SkinManager {
         THREAD_POOL.execute(() -> {
             CompletableFuture<Boolean> future = null;
             InternalMinecraftProfileTexture texture = null;
-            if (this.configObject.getServerUrl() != null && !this.configObject.getServerUrl().trim().isEmpty()) {
+            if (this.configObject.getServerUrl() != null && !this.configObject.getServerUrl().trim().isEmpty() &&
+                    (this.configObject.shouldShowAllSkins() || LabyMod.getInstance().getPlayerUUID().equals(profile.getId()))) {
                 future = new CompletableFuture<>();
                 if (force) {
                     String undashed = profile.getId().toString().replace("-", "");

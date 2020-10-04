@@ -1,5 +1,6 @@
 package de.hdskins.labymod.v18.settings;
 
+import de.hdskins.labymod.shared.callbacks.ShowSkinElementChangeConsumer;
 import de.hdskins.labymod.shared.callbacks.SlimElementChangeConsumer;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.gui.ButtonElement;
@@ -8,7 +9,6 @@ import de.hdskins.labymod.shared.handler.DeleteSkinButtonClickHandler;
 import de.hdskins.labymod.shared.handler.UploadFileButtonClickHandler;
 import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
-import de.hdskins.labymod.shared.utils.Side;
 import de.hdskins.labymod.v18.gui.V18BooleanElement;
 import de.hdskins.labymod.v18.gui.V18ButtonElement;
 import net.labymod.settings.elements.ControlElement;
@@ -22,6 +22,7 @@ public class V18SettingsManager {
     private ButtonElement uploadSkinElement;
     private ButtonElement deleteSkinElement;
     private ButtonElement refreshCacheElement;
+    private V18BooleanElement showSkinsElement;
     private V18BooleanElement slimElement;
 
     public void draw(MinecraftAdapter minecraftAdapter, List<SettingsElement> list, ConfigObject object, boolean slim) {
@@ -64,7 +65,21 @@ public class V18SettingsManager {
         });
         list.add(this.refreshCacheElement);
 
-        list.add(new SkinRenderElement(minecraftAdapter, Side.RIGHT));
+        this.showSkinsElement = new V18BooleanElement(
+                LanguageManager.getTranslation("show-all-skins"),
+                new ControlElement.IconData(Material.SKULL_ITEM),
+                LanguageManager.getTranslation("show-all-skins-option-on"), LanguageManager.getTranslation("show-all-skins-option-off"),
+                slim, new ShowSkinElementChangeConsumer(minecraftAdapter)
+        ) {
+            @Override
+            public boolean getCurrentValue() {
+                return minecraftAdapter.getConfig().shouldShowAllSkins();
+            }
+        };
+        this.showSkinsElement.setDescriptionText(LanguageManager.getTranslation("show-all-skins-description"));
+        list.add(this.showSkinsElement);
+
+        list.add(new SkinRenderElement(minecraftAdapter));
     }
 
     public void redraw() {
@@ -81,15 +96,21 @@ public class V18SettingsManager {
         }
 
         if (this.slimElement != null) {
-            this.slimElement.custom(LanguageManager.getTranslation("slim-skin-option-on"), LanguageManager.getTranslation("slim-skin-option-off"));
             this.slimElement.setDisplayName(LanguageManager.getTranslation("slim-skin-change-option"));
             this.slimElement.setDescriptionText(LanguageManager.getTranslation("slim-skin-option-description"));
+            this.slimElement.custom(LanguageManager.getTranslation("slim-skin-option-on"), LanguageManager.getTranslation("slim-skin-option-off"));
         }
 
         if (this.refreshCacheElement != null) {
             this.refreshCacheElement.setDisplayName(LanguageManager.getTranslation("refresh-skin-cache"));
             this.refreshCacheElement.setText(LanguageManager.getTranslation("button-click-here"));
             this.refreshCacheElement.setDescriptionText(LanguageManager.getTranslation("refresh-skin-cache-description"));
+        }
+
+        if (this.showSkinsElement != null) {
+            this.showSkinsElement.setDisplayName(LanguageManager.getTranslation("show-all-skins"));
+            this.showSkinsElement.setDescriptionText(LanguageManager.getTranslation("show-all-skins"));
+            this.showSkinsElement.custom(LanguageManager.getTranslation("show-all-skins-option-on"), LanguageManager.getTranslation("show-all-skins-option-off"));
         }
     }
 

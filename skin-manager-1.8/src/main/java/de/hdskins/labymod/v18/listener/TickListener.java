@@ -27,6 +27,7 @@ public class TickListener {
         if (LabyMod.getInstance().getPlayerUUID().equals(this.currentUniqueId)) {
             return;
         }
+        // account changed using the account manager
 
         this.minecraftAdapter.updateSlimState();
         this.currentUniqueId = LabyMod.getInstance().getPlayerUUID();

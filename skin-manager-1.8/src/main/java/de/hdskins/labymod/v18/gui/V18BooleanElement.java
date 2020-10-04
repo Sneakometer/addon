@@ -39,7 +39,7 @@ public class V18BooleanElement extends BooleanElement implements AdvancedBoolean
         }
 
         this.buttonToggle = new GuiButton(-2, 0, 0, 0, 20, "");
-        this.setSettingEnabled(this.currentValue.get());
+        this.setSettingEnabled(this.getCurrentValue());
     }
 
     @Override
@@ -54,15 +54,15 @@ public class V18BooleanElement extends BooleanElement implements AdvancedBoolean
             LabyModCore.getMinecraft().drawButton(this.buttonToggle, mouseX, mouseY);
             this.buttonToggle.enabled = true;
             int buttonWidth = this.buttonToggle.getButtonWidth();
-            int valueXPos = this.currentValue.get() ? (buttonWidth - 4) / 2 : (buttonWidth - 4) / 2 + 6;
-            String displayString = (this.buttonToggle.isMouseOver() ? ModColor.YELLOW : (this.currentValue.get() ? ModColor.WHITE : ModColor.GRAY)) + (this.currentValue.get() ? this.stringEnabled : this.stringDisabled);
+            int valueXPos = this.getCurrentValue() ? (buttonWidth - 4) / 2 : (buttonWidth - 4) / 2 + 6;
+            String displayString = (this.buttonToggle.isMouseOver() ? ModColor.YELLOW : (this.getCurrentValue() ? ModColor.WHITE : ModColor.GRAY)) + (this.getCurrentValue() ? this.stringEnabled : this.stringDisabled);
             LabyMod.getInstance().getDrawUtils().drawCenteredString(displayString, LabyModCore.getMinecraft().getXPosition(this.buttonToggle) + valueXPos, LabyModCore.getMinecraft().getYPosition(this.buttonToggle) + 6);
-            LabyMod.getInstance().getDrawUtils().drawString(this.currentValue.get() ? ModColor.GREEN.toString() : ModColor.RED.toString(), 0.0D, 0.0D);
+            LabyMod.getInstance().getDrawUtils().drawString(this.getCurrentValue() ? ModColor.GREEN.toString() : ModColor.RED.toString(), 0.0D, 0.0D);
             this.mc.getTextureManager().bindTexture(buttonTextures);
-            int pos = (this.currentValue.get() ? maxX - 8 : maxX - width) - 2;
+            int pos = (this.getCurrentValue() ? maxX - 8 : maxX - width) - 2;
             LabyMod.getInstance().getDrawUtils().drawTexturedModalRect(pos, y + 1, 0, 66, 4, 20);
             LabyMod.getInstance().getDrawUtils().drawTexturedModalRect(pos + 4, y + 1, 196, 66, 4, 20);
-            LabyMod.getInstance().getDrawUtils().drawRectangle(x - 1, y, x, maxY, this.currentValue.get() ? ModColor.toRGB(20, 120, 20, 120) : ModColor.toRGB(120, 20, 20, 120));
+            LabyMod.getInstance().getDrawUtils().drawRectangle(x - 1, y, x, maxY, this.getCurrentValue() ? ModColor.toRGB(20, 120, 20, 120) : ModColor.toRGB(120, 20, 20, 120));
         }
     }
 
@@ -76,7 +76,7 @@ public class V18BooleanElement extends BooleanElement implements AdvancedBoolean
             boolean playSound = true;
 
             if (this.toggleListener != null) {
-                CompletableFuture<Boolean> future = this.toggleListener.apply(!this.currentValue.get());
+                CompletableFuture<Boolean> future = this.toggleListener.apply(!this.getCurrentValue());
                 if (future != null) {
                     this.pressable = false;
                     future.thenAccept(value -> {
@@ -87,7 +87,7 @@ public class V18BooleanElement extends BooleanElement implements AdvancedBoolean
 
                 playSound = future != null;
             } else {
-                this.currentValue.set(!this.currentValue.get());
+                this.setCurrentValue(!this.getCurrentValue());
             }
 
             if (playSound) {
@@ -98,7 +98,7 @@ public class V18BooleanElement extends BooleanElement implements AdvancedBoolean
 
     @Override
     public boolean getCurrentValue() {
-        return currentValue.get();
+        return this.currentValue.get();
     }
 
     @Override
