@@ -8,7 +8,6 @@ import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
 import de.hdskins.labymod.shared.utils.ServerHelper;
 import de.hdskins.labymod.v18.listener.TickListener;
-import de.hdskins.labymod.v18.manager.HDSkinManager;
 import de.hdskins.labymod.v18.settings.V18SettingsManager;
 import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;

@@ -4,6 +4,7 @@ import com.github.derklaro.requestbuilder.RequestBuilder;
 import com.github.derklaro.requestbuilder.method.RequestMethod;
 import com.github.derklaro.requestbuilder.result.RequestResult;
 import com.github.derklaro.requestbuilder.result.http.StatusCode;
+import com.github.derklaro.requestbuilder.result.stream.StreamType;
 import com.github.derklaro.requestbuilder.types.MimeTypes;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
@@ -11,6 +12,8 @@ import de.hdskins.labymod.shared.profile.PlayerProfile;
 import de.hdskins.labymod.shared.role.UserRole;
 import net.labymod.main.LabyMod;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -173,6 +176,34 @@ public final class ServerHelper {
             exception.printStackTrace();
             return UserRole.USER;
         }
+    }
+
+    public static DownloadedSkin downloadSkin(ConfigObject config, String uniqueId) {
+        if (config.getServerUrl() == null) {
+            return null;
+        }
+
+        try (RequestResult result = RequestBuilder.newBuilder(config.getServerUrl() + "/downloadSkin?uuid=" + uniqueId)
+             .connectTimeout(5, TimeUnit.SECONDS)
+             .disableCaches()
+             .fireAndForget()
+        ) {
+            if (result.getStatusCode() == 404) {
+                return null;
+            }
+
+            BufferedImage image = ImageIO.read(result.getStream(StreamType.CHOOSE));
+            boolean slim = result.getStatusCode() == 418;
+            if (image == null) {
+                return null;
+            }
+
+            return new DownloadedSkin(image, slim);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static String getUndashedPlayerUniqueId() {

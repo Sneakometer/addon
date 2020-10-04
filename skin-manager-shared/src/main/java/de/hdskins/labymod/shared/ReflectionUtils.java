@@ -46,6 +46,10 @@ public final class ReflectionUtils {
             return;
         }
 
+        set(instance, newValue, field);
+    }
+
+    public static void set(Object instance, Object newValue, Field field) {
         try {
             if (MODIFIERS_FIELD != null && Modifier.isFinal(field.getModifiers())) {
                 MODIFIERS_FIELD.setInt(field, field.getModifiers() & ~Modifier.FINAL);

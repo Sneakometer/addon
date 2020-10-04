@@ -23,7 +23,7 @@ public final class SkinManagerInjector {
             return;
         }
 
-        HDSkinManager skinManager = new HDSkinManager(Minecraft.getMinecraft().getTextureManager(), cacheDir, Minecraft.getMinecraft().getSessionService(), configObject);
+        HDSkinManager skinManager = new HDSkinManager(configObject, Minecraft.getMinecraft().getTextureManager(), cacheDir, Minecraft.getMinecraft().getSessionService());
         ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), skinManager, mappings.getSkinManagerMappings());
 
         try {
@@ -32,7 +32,7 @@ public final class SkinManagerInjector {
             Class<?> textureCacheClass = Class.forName("net.labymod.utils.texture.PlayerSkinTextureCache");
             Object textureCache = ReflectionUtils.get(null, DrawUtils.class, drawUtils, "playerSkinTextureCache");
 
-            ReflectionUtils.set(textureCacheClass, textureCache, new SkinMap(skinManager), "loadedSkins");
+            //ReflectionUtils.set(textureCacheClass, textureCache, new SkinMap(skinManager), "loadedSkins"); TODO
             ReflectionUtils.set(textureCacheClass, textureCache, skinManager, "skinManager");
         } catch (ClassNotFoundException exception) {
             exception.printStackTrace();

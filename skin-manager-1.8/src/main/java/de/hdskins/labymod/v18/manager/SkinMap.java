@@ -34,7 +34,7 @@ public class SkinMap implements Map<UUID, ResourceLocation> {
 
     @Override
     public ResourceLocation get(Object key) {
-        return this.skinManager.loadSkinLocation((UUID) key);
+        return this.skinManager.getSkinLocation((UUID) key);
     }
 
     @Override
