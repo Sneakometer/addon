@@ -2,11 +2,11 @@ package de.hdskins.labymod.v18;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.exceptions.AuthenticationException;
-import de.hdskins.labymod.shared.Constants;
-import de.hdskins.labymod.shared.config.ConfigObject;
-import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
-import de.hdskins.labymod.shared.profile.PlayerProfile;
-import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.test.Constants;
+import de.hdskins.labymod.test.config.ConfigObject;
+import de.hdskins.labymod.test.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.test.profile.PlayerProfile;
+import de.hdskins.labymod.test.utils.ServerHelper;
 import de.hdskins.labymod.v18.listener.TickListener;
 import de.hdskins.labymod.v18.settings.V18SettingsManager;
 import net.labymod.core.LabyModCore;

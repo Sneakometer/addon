@@ -1,6 +1,6 @@
 package de.hdskins.labymod.v18.listener;
 
-import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.test.minecraft.MinecraftAdapter;
 import net.labymod.main.LabyMod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;

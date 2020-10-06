@@ -1,8 +1,8 @@
 package de.hdskins.labymod.v18.manager;
 
-import de.hdskins.labymod.shared.ReflectionUtils;
-import de.hdskins.labymod.shared.config.ConfigObject;
-import de.hdskins.labymod.shared.mappings.Mappings;
+import de.hdskins.labymod.test.ReflectionUtils;
+import de.hdskins.labymod.test.config.ConfigObject;
+import de.hdskins.labymod.test.mappings.Mappings;
 import net.labymod.main.LabyMod;
 import net.labymod.utils.DrawUtils;
 import net.minecraft.client.Minecraft;

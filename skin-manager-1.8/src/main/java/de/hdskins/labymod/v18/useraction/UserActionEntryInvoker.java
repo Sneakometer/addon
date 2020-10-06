@@ -1,10 +1,10 @@
 package de.hdskins.labymod.v18.useraction;
 
-import de.hdskins.labymod.shared.ReflectionUtils;
-import de.hdskins.labymod.shared.config.ConfigObject;
-import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
-import de.hdskins.labymod.shared.role.UserRole;
-import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.test.ReflectionUtils;
+import de.hdskins.labymod.test.config.ConfigObject;
+import de.hdskins.labymod.test.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.test.role.UserRole;
+import de.hdskins.labymod.test.utils.ServerHelper;
 import net.labymod.main.LabyMod;
 import net.labymod.user.gui.UserActionGui;
 import net.labymod.user.util.UserActionEntry;

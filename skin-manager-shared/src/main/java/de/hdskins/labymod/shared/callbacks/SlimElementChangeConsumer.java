@@ -2,11 +2,11 @@ package de.hdskins.labymod.shared.callbacks;
 
 import com.github.derklaro.requestbuilder.result.http.StatusCode;
 import de.hdskins.labymod.shared.Constants;
+import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.shared.utils.ServerResult;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
-import de.hdskins.labymod.shared.utils.ServerHelper;
-import de.hdskins.labymod.shared.utils.ServerResult;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;

@@ -1,8 +1,32 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+
 repositories {
     maven {
         name 'jitpack.io'
         url 'https://jitpack.io'
     }
+}
+
+minecraft {
+    version = "1.12.2-14.23.0.2512"
+    runDir = "run"
+    mappings = "snapshot_20171003"
 }
 
 dependencies {

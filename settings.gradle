@@ -2,5 +2,5 @@ rootProject.name = 'skin-manager-root'
 
 include 'skin-manager-shared'
 include 'skin-manager-1.12'
-include 'skin-manager-1.8'
+//include 'skin-manager-1.8'
 include 'skin-manager-core'

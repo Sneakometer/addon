@@ -29,7 +29,7 @@ dependencies {
     compileOnly 'com.google.code.gson:gson:2.2.4'
 
     shadow project(':skin-manager-shared')
-    shadow project(':skin-manager-1.8')
+    //shadow project(':skin-manager-1.8')
     shadow project(':skin-manager-1.12')
     shadow group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.6'
 }

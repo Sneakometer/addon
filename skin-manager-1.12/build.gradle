@@ -14,7 +14,31 @@ buildscript {
     }
 }
 
+apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle.forge'
+
+compileJava.doFirst {
+    // Copy the shared source files between minecraft 1.8 and up
+    copy {
+        from './../skin-manager-shared/src/main/java'
+        into './build/sources/main/java'
+    }
+    // Copy the shared resources files between minecraft 1.8 and up
+    copy {
+        from './../skin-manager-shared/src/main/resources'
+        into './build/sources/main/java'
+    }
+    // Copy the source files which are created in the module
+    copy {
+        from './src/main/java'
+        into './build/sources/main/java'
+    }
+    // Copy the resource files which are created in the module
+    copy {
+        from './src/main/resource'
+        into './build/sources/main/java'
+    }
+}
 
 minecraft {
     version = "1.12.2-14.23.0.2512"
@@ -39,11 +63,10 @@ processResources {
 dependencies {
     compileOnly files('../libs/lm_api.jar')
     compileOnly group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.6'
-    compileOnly project(':skin-manager-shared')
 }
 
 reobf {
     jar {
-        useNotchSrg()
+        setMappingType(net.minecraftforge.gradle.user.ReobfMappingType.NOTCH)
     }
 }

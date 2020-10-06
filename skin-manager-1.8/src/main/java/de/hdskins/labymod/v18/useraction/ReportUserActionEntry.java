@@ -1,13 +1,13 @@
 package de.hdskins.labymod.v18.useraction;
 
 import com.github.derklaro.requestbuilder.result.http.StatusCode;
-import de.hdskins.labymod.shared.Constants;
-import de.hdskins.labymod.shared.config.ConfigObject;
-import de.hdskins.labymod.shared.language.LanguageManager;
-import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
-import de.hdskins.labymod.shared.profile.PlayerProfile;
-import de.hdskins.labymod.shared.utils.ServerHelper;
-import de.hdskins.labymod.shared.utils.ServerResult;
+import de.hdskins.labymod.test.Constants;
+import de.hdskins.labymod.test.config.ConfigObject;
+import de.hdskins.labymod.test.language.LanguageManager;
+import de.hdskins.labymod.test.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.test.profile.PlayerProfile;
+import de.hdskins.labymod.test.utils.ServerHelper;
+import de.hdskins.labymod.test.utils.ServerResult;
 import net.labymod.user.User;
 import net.labymod.user.util.UserActionEntry;
 import net.minecraft.client.network.NetworkPlayerInfo;

@@ -1,7 +1,7 @@
 package de.hdskins.labymod.v18.useraction;
 
-import de.hdskins.labymod.shared.language.LanguageManager;
-import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.test.language.LanguageManager;
+import de.hdskins.labymod.test.minecraft.MinecraftAdapter;
 import net.labymod.user.User;
 import net.labymod.user.util.UserActionEntry;
 import net.minecraft.client.network.NetworkPlayerInfo;

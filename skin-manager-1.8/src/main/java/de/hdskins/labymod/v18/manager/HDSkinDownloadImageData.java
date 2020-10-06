@@ -1,8 +1,8 @@
 package de.hdskins.labymod.v18.manager;
 
-import de.hdskins.labymod.shared.config.ConfigObject;
-import de.hdskins.labymod.shared.utils.DownloadedSkin;
-import de.hdskins.labymod.shared.utils.ServerHelper;
+import de.hdskins.labymod.test.config.ConfigObject;
+import de.hdskins.labymod.test.utils.DownloadedSkin;
+import de.hdskins.labymod.test.utils.ServerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
 import net.minecraft.client.renderer.texture.SimpleTexture;

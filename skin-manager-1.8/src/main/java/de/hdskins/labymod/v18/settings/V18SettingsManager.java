@@ -1,14 +1,14 @@
 package de.hdskins.labymod.v18.settings;
 
-import de.hdskins.labymod.shared.callbacks.ShowSkinElementChangeConsumer;
-import de.hdskins.labymod.shared.callbacks.SlimElementChangeConsumer;
-import de.hdskins.labymod.shared.config.ConfigObject;
-import de.hdskins.labymod.shared.gui.ButtonElement;
-import de.hdskins.labymod.shared.gui.SkinRenderElement;
-import de.hdskins.labymod.shared.handler.DeleteSkinButtonClickHandler;
-import de.hdskins.labymod.shared.handler.UploadFileButtonClickHandler;
-import de.hdskins.labymod.shared.language.LanguageManager;
-import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
+import de.hdskins.labymod.test.callbacks.ShowSkinElementChangeConsumer;
+import de.hdskins.labymod.test.callbacks.SlimElementChangeConsumer;
+import de.hdskins.labymod.test.config.ConfigObject;
+import de.hdskins.labymod.test.gui.ButtonElement;
+import de.hdskins.labymod.test.gui.SkinRenderElement;
+import de.hdskins.labymod.test.handler.DeleteSkinButtonClickHandler;
+import de.hdskins.labymod.test.handler.UploadFileButtonClickHandler;
+import de.hdskins.labymod.test.language.LanguageManager;
+import de.hdskins.labymod.test.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.v18.gui.V18BooleanElement;
 import de.hdskins.labymod.v18.gui.V18ButtonElement;
 import net.labymod.settings.elements.ControlElement;

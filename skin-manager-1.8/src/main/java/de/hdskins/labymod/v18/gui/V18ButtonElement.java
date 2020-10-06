@@ -1,6 +1,6 @@
 package de.hdskins.labymod.v18.gui;
 
-import de.hdskins.labymod.shared.gui.ButtonElement;
+import de.hdskins.labymod.test.gui.ButtonElement;
 import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.ControlElement;

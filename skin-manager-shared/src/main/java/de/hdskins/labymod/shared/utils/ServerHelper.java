@@ -6,10 +6,10 @@ import com.github.derklaro.requestbuilder.result.RequestResult;
 import com.github.derklaro.requestbuilder.result.http.StatusCode;
 import com.github.derklaro.requestbuilder.result.stream.StreamType;
 import com.github.derklaro.requestbuilder.types.MimeTypes;
+import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.config.ConfigObject;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.profile.PlayerProfile;
-import de.hdskins.labymod.shared.role.UserRole;
 import net.labymod.main.LabyMod;
 
 import javax.imageio.ImageIO;
