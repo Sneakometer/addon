@@ -1,0 +1,10 @@
+{
+  "uuid": "%uuid%",
+  "name": "HDSkins",
+  "mainClass": "de.hdskins.labymod.v2512.HdSkinsAddon",
+  "author": "HDSkins",
+  "description": "Upload your own HD Skin for your player! Everyone with this addon can see it. Support: www.HDSkins.de/Discord",
+  "icon": "http://icon.hdskins.de/favicon.png",
+  "version": 1,
+  "category": 4
+}

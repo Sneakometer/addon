@@ -1,35 +1,34 @@
-package de.hdskins.labymod.core.config;
+package de.hdskins.labymod.shared.config;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
-import de.hdskins.labymod.core.HdSkinsAddon;
-import de.hdskins.labymod.shared.config.ConfigObject;
+import net.labymod.api.LabyModAddon;
 
-public class MainConfig implements ConfigObject {
+public class LabyModAddonConfig implements ConfigObject {
 
-    private final HdSkinsAddon addon;
+    private final LabyModAddon addon;
 
     private String serverUrl;
     private boolean showAllSkins;
 
-    private MainConfig(HdSkinsAddon addon) {
+    private LabyModAddonConfig(LabyModAddon addon) {
         this.addon = addon;
     }
 
-    public static MainConfig loadConfig(HdSkinsAddon addon) {
-        MainConfig mainConfig = new MainConfig(addon);
+    public static LabyModAddonConfig loadConfig(LabyModAddon addon) {
+        LabyModAddonConfig labyModAddonConfig = new LabyModAddonConfig(addon);
 
         JsonElement serverUrl = addon.getConfig().get("server");
         if (serverUrl != null && !(serverUrl instanceof JsonNull)) {
-            mainConfig.serverUrl = serverUrl.getAsString();
+            labyModAddonConfig.serverUrl = serverUrl.getAsString();
         } else {
-            mainConfig.serverUrl = "http://api.hdskins.de";
+            labyModAddonConfig.serverUrl = "http://api.hdskins.de";
         }
 
-        mainConfig.showAllSkins = !addon.getConfig().has("allSkins") || addon.getConfig().get("allSkins").getAsBoolean();
+        labyModAddonConfig.showAllSkins = !addon.getConfig().has("allSkins") || addon.getConfig().get("allSkins").getAsBoolean();
 
-        mainConfig.save();
-        return mainConfig;
+        labyModAddonConfig.save();
+        return labyModAddonConfig;
     }
 
     public void save() {

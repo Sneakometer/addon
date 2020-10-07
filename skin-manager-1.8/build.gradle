@@ -10,11 +10,55 @@ buildscript {
     }
 
     dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
 
+apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+configurations {
+    provided
+    compile.extendsFrom provided
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveName 'HDSkins-1.8.jar'
+
+    exclude 'com/google/gson/**'
+    exclude 'net/labymod/**'
+    exclude 'net/jpountz/**'
+    exclude 'assets/minecraft/labymod/**'
+    exclude 'BytecodeMethods.class'
+    exclude 'dummyThing'
+    exclude 'mcmod.info'
+}
+
+compileJava.doFirst {
+    // Copy the shared source files between minecraft 1.8 and up
+    copy {
+        from './../skin-manager-shared/src/main/java'
+        into './build/sources/main/java'
+    }
+    // Copy the shared resources files between minecraft 1.8 and up
+    copy {
+        from './../skin-manager-shared/src/main/resources'
+        into './build/resources/main'
+    }
+    // Copy the source files which are created in the module
+    copy {
+        from './src/main/java'
+        into './build/sources/main/java'
+    }
+    // Copy the resource files which are created in the module
+    copy {
+        from './src/main/resources'
+        into './build/resources/main'
+    }
+}
 
 minecraft {
     version = "1.8.9-11.15.1.1855"
@@ -37,13 +81,28 @@ processResources {
 }
 
 dependencies {
-    compileOnly files('../libs/lm_api.jar')
-    compileOnly group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.6'
     compileOnly project(':skin-manager-shared')
+    compileOnly files('../libs/lm_api.jar')
+    shadow group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.6'
 }
 
 reobf {
     jar {
-        useNotchSrg()
+        setMappingType(net.minecraftforge.gradle.user.ReobfMappingType.NOTCH)
+    }
+}
+
+artifacts {
+    archives shadowJar
+}
+
+shadowJar.doLast {
+    copy {
+        from './build/libs/HDSkins-1.8.jar'
+        into '../build/libs'
+    }
+
+    delete fileTree('../build/libs') {
+        include 'skin-manager-root-*.jar'
     }
 }

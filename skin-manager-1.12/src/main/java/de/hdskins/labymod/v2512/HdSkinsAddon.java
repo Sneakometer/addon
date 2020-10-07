@@ -1,13 +1,12 @@
-package de.hdskins.labymod.core;
+package de.hdskins.labymod.v2512;
 
-import de.hdskins.labymod.core.config.MainConfig;
 import de.hdskins.labymod.shared.Constants;
+import de.hdskins.labymod.shared.config.LabyModAddonConfig;
 import de.hdskins.labymod.shared.language.LanguageManager;
 import de.hdskins.labymod.shared.mappings.HandledMappings;
 import de.hdskins.labymod.shared.mappings.Mappings;
 import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
 import de.hdskins.labymod.shared.utils.ServerHelper;
-//import de.hdskins.labymod.v18.useraction.UserActionEntryInvoker;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.Source;
 import net.labymod.settings.elements.SettingsElement;
@@ -18,7 +17,7 @@ import java.util.function.Consumer;
 
 public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
 
-    private MainConfig mainConfig;
+    private LabyModAddonConfig labyModAddonConfig;
     private HandledMappings mappings;
     private MinecraftAdapter minecraftAdapter;
 
@@ -66,13 +65,13 @@ public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
         }*/
 
         LanguageManager.setMinecraftAdapter(this.minecraftAdapter);
-        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, ServerHelper.isSlim(this.mainConfig));
+        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.labyModAddonConfig, ServerHelper.isSlim(this.labyModAddonConfig));
         LanguageManager.registerLanguageUpdateListener(this);
     }
 
     @Override
     public void loadConfig() {
-        this.mainConfig = MainConfig.loadConfig(this);
+        this.labyModAddonConfig = LabyModAddonConfig.loadConfig(this);
     }
 
     @Override
@@ -87,7 +86,7 @@ public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
     @Override
     public void accept(String s) {
         if (this.minecraftAdapter != null) {
-            this.minecraftAdapter.fillSettings(this.getSubSettings(), this.mainConfig, false);
+            this.minecraftAdapter.fillSettings(this.getSubSettings(), this.labyModAddonConfig, false);
         }
     }
 }
