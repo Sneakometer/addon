@@ -1,14 +1,23 @@
+/*
+ * The HD-Skins LabyMod addon.
+ * Copyright (C) 2020 HD-Skins <https://github.com/HDSkins>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package de.hdskins.labymod.v1855;
 
-import de.hdskins.labymod.shared.Constants;
-import de.hdskins.labymod.shared.config.LabyModAddonConfig;
-import de.hdskins.labymod.shared.language.LanguageManager;
-import de.hdskins.labymod.shared.mappings.HandledMappings;
-import de.hdskins.labymod.shared.mappings.Mappings;
-import de.hdskins.labymod.shared.minecraft.MinecraftAdapter;
-import de.hdskins.labymod.shared.utils.ServerHelper;
 import net.labymod.api.LabyModAddon;
-import net.labymod.main.Source;
 import net.labymod.settings.elements.SettingsElement;
 
 import java.util.List;
@@ -17,20 +26,8 @@ import java.util.function.Consumer;
 
 public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
 
-    private LabyModAddonConfig labyModAddonConfig;
-    private HandledMappings mappings;
-    private MinecraftAdapter minecraftAdapter;
-
     @Override
     public void onEnable() {
-        Constants.aboutMcVersion = Source.ABOUT_MC_VERSION;
-
-        this.mappings = HandledMappings.getLoadedMappings();
-        if (this.mappings == null) {
-            System.err.println(Constants.LOG_PREFIX + "Unable to load correct mappings for minecraft version " + Source.ABOUT_MC_VERSION);
-            return;
-        }
-
         System.out.println("\n        __  ______  _____ __   _\n" +
                 "       / / / / __ \\/ ___// /__(_)___  _____\n" +
                 "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n" +
@@ -39,39 +36,15 @@ public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
                 "\n" +
                 "          Copyright (c) 2020 HDSkins\n" +
                 "   Support Discord: https://discord.gg/KN8rDZJ");
-
-        Mappings mappings = this.mappings.getMappings();
-        System.out.println(Constants.LOG_PREFIX + "Using mappings for " + mappings.getVersion() + " (Mappings version: " + mappings.getMappingsVersion() + ")");
-    }
-
-    @Override
-    public void init(String addonName, UUID uuid) {
-        if (this.mappings == null) {
-            return;
-        }
-
-        super.init(addonName, uuid);
-        /*switch (this.mappings) {
-            case V1_8:
-                this.minecraftAdapter = new de.hdskins.labymod.v18.V18MinecraftAdapter();
-                de.hdskins.labymod.v18.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
-                UserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
-                break;
-            case V1_12:
-                this.minecraftAdapter = new de.hdskins.labymod.v112.V112MinecraftAdapter();
-                de.hdskins.labymod.v112.manager.SkinManagerInjector.setNewSkinManager(this.mainConfig, this.mappings.getMappings());
-                de.hdskins.labymod.v112.useraction.UserActionEntryInvoker.addUserAction(this.minecraftAdapter, this.mainConfig);
-                break;
-        }*/
-
-        LanguageManager.setMinecraftAdapter(this.minecraftAdapter);
-        this.minecraftAdapter.fillSettings(this.getSubSettings(), this.labyModAddonConfig, ServerHelper.isSlim(this.labyModAddonConfig));
-        LanguageManager.registerLanguageUpdateListener(this);
     }
 
     @Override
     public void loadConfig() {
-        this.labyModAddonConfig = LabyModAddonConfig.loadConfig(this);
+    }
+
+    @Override
+    public void init(String addonName, UUID uuid) {
+        super.init(addonName, uuid);
     }
 
     @Override
@@ -79,14 +52,6 @@ public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
     }
 
     @Override
-    public void onRenderPreview(int mouseX, int mouseY, float partialTicks) {
-        LanguageManager.ensureLanguageSync();
-    }
-
-    @Override
     public void accept(String s) {
-        if (this.minecraftAdapter != null) {
-            this.minecraftAdapter.fillSettings(this.getSubSettings(), this.labyModAddonConfig, false);
-        }
     }
 }
