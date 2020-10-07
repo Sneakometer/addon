@@ -17,7 +17,6 @@
  */
 package de.hdskins.labymod.shared;
 
-import com.sun.istack.internal.NotNull;
 import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
 import de.hdskins.labymod.shared.concurrent.SilentCallable;
 import net.minecraft.client.Minecraft;
@@ -30,7 +29,7 @@ public final class MCUtil {
 
     private static final Minecraft THE_MINECRAFT = Minecraft.getMinecraft();
 
-    public static <T> T call(@NotNull SilentCallable<T> callable) {
+    public static <T> T call(SilentCallable<T> callable) {
         if (THE_MINECRAFT.isCallingFromMinecraftThread()) {
             return callable.call();
         } else {
