@@ -47,6 +47,7 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -78,7 +79,7 @@ public class HDSkinManager extends SkinManager {
         .ticker(Ticker.systemTicker())
         .build(new CacheLoader<MinecraftProfileTexture, HDResourceLocation>() {
             @Override
-            public HDResourceLocation load(MinecraftProfileTexture texture) {
+            public HDResourceLocation load(@Nonnull MinecraftProfileTexture texture) {
                 return HDResourceLocation.forProfileTexture(texture);
             }
         });
@@ -207,7 +208,7 @@ public class HDSkinManager extends SkinManager {
             }
 
             @Override
-            public void nonNullResult(PacketBase packetBase) {
+            public void nonNullResult(@Nonnull PacketBase packetBase) {
                 if (packetBase instanceof PacketServerResponseSkinId) {
                     PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
                     if (response.hasSkin()) {
@@ -234,7 +235,7 @@ public class HDSkinManager extends SkinManager {
             }
 
             @Override
-            public void nonNullResult(PacketBase packetBase) {
+            public void nonNullResult(@Nonnull PacketBase packetBase) {
                 if (packetBase instanceof PacketServerResponseSkin) {
                     PacketServerResponseSkin response = (PacketServerResponseSkin) packetBase;
                     IImageBuffer buffer = new ImageBufferDownload();

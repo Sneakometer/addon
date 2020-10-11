@@ -29,6 +29,6 @@ public class ConfigChangeEvent extends Event {
     }
 
     public AddonConfig getAddonConfig() {
-        return addonConfig;
+        return this.addonConfig;
     }
 }

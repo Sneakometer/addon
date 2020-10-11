@@ -34,14 +34,14 @@ public class AddonContext {
     }
 
     public NetworkClient getNetworkClient() {
-        return networkClient;
+        return this.networkClient;
     }
 
     public LabyModAddon getLabyModAddon() {
-        return labyModAddon;
+        return this.labyModAddon;
     }
 
     public AddonConfig getAddonConfig() {
-        return addonConfig;
+        return this.addonConfig;
     }
 }
