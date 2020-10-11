@@ -21,6 +21,10 @@ repositories {
         name 'jitpack.io'
         url 'https://jitpack.io'
     }
+    maven {
+        name 'HDSkins'
+        url 'https://repo.hdskins.de'
+    }
 }
 
 minecraft {
@@ -32,4 +36,5 @@ minecraft {
 dependencies {
     compileOnly files('../libs/lm_api.jar')
     compileOnly group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.6'
+    compileOnly group: 'de.hdskins.protocol', name: 'client', version: '1.0-SNAPSHOT'
 }

@@ -111,7 +111,7 @@ public class HDSkinTexture extends SimpleTexture {
             // We lazily set this up to spare the resources we don't need for later. We have to
             // ensure that we call this on the main thread because it is the only thread in
             // the client which has a opengl context
-            this.glTextureId = MCUtil.call(() -> GlStateManager.generateTexture());
+            this.glTextureId = MCUtil.call(() -> GL11.glGenTextures());
         }
 
         return this.glTextureId;
