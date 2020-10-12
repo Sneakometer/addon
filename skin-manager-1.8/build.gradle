@@ -94,8 +94,8 @@ repositories {
 dependencies {
     compileOnly project(':skin-manager-shared')
     compileOnly files('../libs/lm_api.jar')
-    shadow group: 'com.github.derklaro', name: 'requestbuilder', version: '1.0.6'
-    shadow group: 'de.hdskins.protocol', name: 'client', version: '1.0-SNAPSHOT'
+    shadow group: 'com.github.derklaro', name: 'requestbuilder', version: dependencyRequestBuilderVersion
+    shadow group: 'de.hdskins.protocol', name: 'client', version: dependencyNetworkClientVersion
 }
 
 reobf {

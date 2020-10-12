@@ -43,6 +43,10 @@ public interface AddonConfig extends Serializable {
 
     void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers);
 
+    boolean isSlim();
+
+    void setSlim(boolean slim);
+
     Collection<UUID> getDisabledSkins();
 
     void removeAllDisabledSkins();

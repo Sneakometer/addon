@@ -15,23 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.listener;
+package de.hdskins.labymod.shared.role;
 
-import de.hdskins.protocol.listener.ChannelInactiveListener;
-import io.netty.channel.Channel;
+import javax.annotation.ParametersAreNonnullByDefault;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+@ParametersAreNonnullByDefault
+public enum UserRole {
 
-public final class NetworkConnectionInactiveListener {
+    ADMIN,
+    STAFF,
+    VIP,
+    USER;
 
-    private final AtomicBoolean connectedStateSubmitter;
+    private static final UserRole[] VALUES = values(); // prevent copy
 
-    public NetworkConnectionInactiveListener(AtomicBoolean connectedStateSubmitter) {
-        this.connectedStateSubmitter = connectedStateSubmitter;
+    public boolean isHigherOrEqualThan(UserRole other) {
+        return super.ordinal() <= other.ordinal();
     }
 
-    @ChannelInactiveListener
-    public void handleChannelInactive(Channel channel) {
-        this.connectedStateSubmitter.set(false);
+    public static UserRole roleFromOrdinalIndex(byte index) {
+        return index >= 0 && index < VALUES.length ? VALUES[index] : USER;
     }
 }

@@ -20,6 +20,8 @@ package de.hdskins.labymod.shared.addon;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.JsonAddonConfig;
+import de.hdskins.labymod.shared.translation.TranslationRegistry;
+import de.hdskins.labymod.shared.translation.TranslationRegistryLoader;
 import net.labymod.api.LabyModAddon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +39,9 @@ public final class AddonContextLoader {
     public static CompletableFuture<AddonContext> initAddon(LabyModAddon addon) {
         AddonConfig addonConfig = JsonAddonConfig.load(addon);
         LOGGER.debug("Loaded addon config: {} with hash: {}", addonConfig.toString(), addonConfig.hashCode());
-        return BackendUtils.connectToServer(addonConfig).thenApply(networkClient -> new AddonContext(networkClient, addon, addonConfig));
+        return BackendUtils.connectToServer(addonConfig).thenApplyAsync(networkClient -> {
+            TranslationRegistry translationRegistry = TranslationRegistryLoader.buildInternalTranslationRegistry();
+            return new AddonContext(addonConfig, addon, networkClient, translationRegistry);
+        });
     }
 }

@@ -59,6 +59,8 @@ public class JsonAddonConfig implements AddonConfig {
     // connection settings
     private long firstReconnectInterval;
     private long reconnectInterval;
+    // client settings
+    private boolean slim;
     // visibility settings
     private boolean showSkinsOfOtherPlayers;
     private Collection<UUID> disabledSkins;
@@ -81,6 +83,7 @@ public class JsonAddonConfig implements AddonConfig {
         this.serverPort = 7007;
         this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
         this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
+        this.slim = false;
         this.showSkinsOfOtherPlayers = true;
         this.disabledSkins = new ArrayList<>();
     }
@@ -146,6 +149,19 @@ public class JsonAddonConfig implements AddonConfig {
     public void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers) {
         if (this.showSkinsOfOtherPlayers != showSkinsOfOtherPlayers) {
             this.showSkinsOfOtherPlayers = showSkinsOfOtherPlayers;
+            this.save();
+        }
+    }
+
+    @Override
+    public boolean isSlim() {
+        return this.slim;
+    }
+
+    @Override
+    public void setSlim(boolean slim) {
+        if (this.slim != slim) {
+            this.slim = slim;
             this.save();
         }
     }
