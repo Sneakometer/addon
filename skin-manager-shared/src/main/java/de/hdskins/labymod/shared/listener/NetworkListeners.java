@@ -50,27 +50,27 @@ public final class NetworkListeners {
         }
     }
 
-    @PacketListener(packetClass = PacketServerLiveUpdateSkin.class)
+    @PacketListener
     public void handleLiveSkinUpdate(PacketServerLiveUpdateSkin packet) {
         this.hdSkinManager.pushSkinUpdate(packet.getUniqueId(), packet.getSkinId());
     }
 
-    @PacketListener(packetClass = PacketServerLiveUpdateSlim.class)
+    @PacketListener
     public void handleLiveSkinSlimUpdate(PacketServerLiveUpdateSlim packet) {
         this.hdSkinManager.pushSkinSlimChange(packet.getUniqueId(), packet.isSlim());
     }
 
-    @PacketListener(packetClass = PacketServerLiveUpdateDeleteSkin.class)
+    @PacketListener
     public void handleLiveDeleteByHash(PacketServerLiveUpdateDeleteSkin packet) {
         this.hdSkinManager.pushSkinDelete(packet.getSkinId());
     }
 
-    @PacketListener(packetClass = PacketServerLiveUpdateDeletePlayer.class)
+    @PacketListener
     public void handleLiveDeleteByPlayer(PacketServerLiveUpdateDeletePlayer packet) {
         this.hdSkinManager.pushSkinDelete(packet.getUniqueId());
     }
 
-    @PacketListener(packetClass = PacketServerDisplayChatMessage.class)
+    @PacketListener
     public void handleDisplayMessage(PacketServerDisplayChatMessage packet) {
         final String message;
         if (packet.isTranslationKey()) {
