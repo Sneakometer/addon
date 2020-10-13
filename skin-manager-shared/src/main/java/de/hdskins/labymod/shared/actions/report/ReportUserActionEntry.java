@@ -15,12 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.actions;
+package de.hdskins.labymod.shared.actions.report;
 
+import de.hdskins.labymod.shared.actions.ActionConstants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.protocol.PacketBase;
-import de.hdskins.protocol.concurrent.FutureListener;
-import de.hdskins.protocol.packets.reading.client.PacketServerReportSkinResponse;
 import net.labymod.main.LabyMod;
 import net.labymod.user.User;
 import net.labymod.user.util.UserActionEntry;
@@ -46,29 +44,13 @@ public class ReportUserActionEntry extends UserActionEntry implements ActionCons
 
     @Override
     public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
-        this.addonContext.reportSkin(entityPlayer.getGameProfile().getId()).getFuture().addListener(new FutureListener<PacketBase>() {
-            @Override
-            public void nullResult() {
-                ReportUserActionEntry.this.showMessage("user-skin-report-failed-unknown");
-            }
-
-            @Override
-            public void nonNullResult(PacketBase packetBase) {
-                if (packetBase instanceof PacketServerReportSkinResponse) {
-                    PacketServerReportSkinResponse result = (PacketServerReportSkinResponse) packetBase;
-                    if (result.isSuccess()) {
-                        ReportUserActionEntry.this.showMessage("user-skin-report-success", entityPlayer.getName());
-                    } else {
-                        ReportUserActionEntry.this.showMessage("user-skin-report-success", entityPlayer.getName());
-                    }
-                }
-            }
-
-            @Override
-            public void cancelled() {
-                ReportUserActionEntry.this.showMessage("user-skin-report-failed-unknown");
-            }
-        });
+        AddonContext.ServerResult serverResult = this.addonContext.reportSkin(entityPlayer.getGameProfile().getId());
+        if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
+            LOGGER.debug("Unable to report hd skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
+            LabyMod.getInstance().displayMessageInChat(this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+        } else {
+            serverResult.getFuture().addListener(new ReportActionFutureListener(this.addonContext, entityPlayer));
+        }
     }
 
     private void showMessage(String key, Object... replacements) {

@@ -17,9 +17,13 @@
  */
 package de.hdskins.labymod.shared.addon;
 
+import de.hdskins.labymod.shared.actions.ActionInvoker;
+import de.hdskins.labymod.shared.actions.delete.DeleteUserActionEntry;
+import de.hdskins.labymod.shared.actions.report.ReportUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.JsonAddonConfig;
+import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
 import de.hdskins.labymod.shared.translation.TranslationRegistryLoader;
 import net.labymod.api.LabyModAddon;
@@ -42,6 +46,12 @@ public final class AddonContextLoader {
         return BackendUtils.connectToServer(addonConfig).thenApplyAsync(networkClient -> {
             TranslationRegistry translationRegistry = TranslationRegistryLoader.buildInternalTranslationRegistry();
             return new AddonContext(addonConfig, addon, networkClient, translationRegistry);
+        }).thenApply(addonContext -> {
+            ActionInvoker.addUserActionEntry(new ReportUserActionEntry(addonContext));
+            if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
+                ActionInvoker.addUserActionEntry(new DeleteUserActionEntry(addonContext));
+            }
+            return addonContext;
         });
     }
 }
