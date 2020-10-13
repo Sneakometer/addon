@@ -15,50 +15,58 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.actions.delete;
+package de.hdskins.labymod.shared.settings.slim;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
-import de.hdskins.protocol.packets.reading.client.PacketServerReportSkinResponse;
-import net.minecraft.entity.player.EntityPlayer;
+import de.hdskins.protocol.packets.reading.client.PacketServerSetSlimResponse;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.concurrent.CompletableFuture;
 
 @ParametersAreNonnullByDefault
-class DeleteActionFutureListener implements FutureListener<PacketBase>, Constants {
+public class SlimFutureListener implements FutureListener<PacketBase>, Constants {
 
+    private final boolean target;
     private final AddonContext addonContext;
-    private final EntityPlayer targetDelete;
+    private final CompletableFuture<Boolean> future;
 
-    protected DeleteActionFutureListener(AddonContext addonContext, EntityPlayer targetDelete) {
+    public SlimFutureListener(boolean target, AddonContext addonContext, CompletableFuture<Boolean> future) {
+        this.target = target;
         this.addonContext = addonContext;
-        this.targetDelete = targetDelete;
+        this.future = future;
     }
 
     @Override
     public void nullResult() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+        this.future.complete(!this.target);
     }
 
     @Override
     public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerReportSkinResponse) {
-            PacketServerReportSkinResponse response = (PacketServerReportSkinResponse) packetBase;
+        if (packetBase instanceof PacketServerSetSlimResponse) {
+            PacketServerSetSlimResponse response = (PacketServerSetSlimResponse) packetBase;
             if (response.isSuccess()) {
-                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-successfully", this.targetDelete.getName()));
+                String targetResult = this.target ? "slim" : "default";
+                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("slim-successfully-toggled", new Object[]{targetResult}));
+                this.future.complete(this.target);
             } else {
                 NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
+                this.future.complete(!this.target);
             }
         } else {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+            this.future.complete(!this.target);
         }
     }
 
     @Override
     public void cancelled() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+        this.future.complete(!this.target);
     }
 }

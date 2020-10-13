@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.actions;
+package de.hdskins.labymod.shared.utils;
 
-import de.hdskins.labymod.shared.utils.Constants;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public interface ActionConstants extends Constants {
-    Logger LOGGER = LogManager.getLogger(ActionConstants.class);
+public interface Constants {
+    ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+    String SUCCESS = "§a§l✔";
+    String FAILURE = "§c§l✖";
 }

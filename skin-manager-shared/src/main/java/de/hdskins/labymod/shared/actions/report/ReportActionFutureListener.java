@@ -18,16 +18,17 @@
 package de.hdskins.labymod.shared.actions.report;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
+import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerReportSkinResponse;
-import net.labymod.main.LabyMod;
 import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-class ReportActionFutureListener implements FutureListener<PacketBase> {
+class ReportActionFutureListener implements FutureListener<PacketBase>, Constants {
 
     private final AddonContext addonContext;
     private final EntityPlayer reported;
@@ -39,7 +40,7 @@ class ReportActionFutureListener implements FutureListener<PacketBase> {
 
     @Override
     public void nullResult() {
-        LabyMod.getInstance().displayMessageInChat(this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
     }
 
     @Override
@@ -47,17 +48,17 @@ class ReportActionFutureListener implements FutureListener<PacketBase> {
         if (packetBase instanceof PacketServerReportSkinResponse) {
             PacketServerReportSkinResponse result = (PacketServerReportSkinResponse) packetBase;
             if (result.isSuccess()) {
-                LabyMod.getInstance().displayMessageInChat(this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-success", this.reported.getName()));
+                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-success", this.reported.getName()));
             } else {
-                LabyMod.getInstance().displayMessageInChat(this.addonContext.getTranslationRegistry().translateMessage(result.getReason(), result.getReason()));
+                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(result.getReason(), result.getReason()));
             }
         } else {
-            LabyMod.getInstance().displayMessageInChat(this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
         }
     }
 
     @Override
     public void cancelled() {
-        LabyMod.getInstance().displayMessageInChat(this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
     }
 }

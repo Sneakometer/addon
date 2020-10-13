@@ -15,12 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.actions;
+package de.hdskins.labymod.shared.event;
 
-import de.hdskins.labymod.shared.utils.Constants;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
-public interface ActionConstants extends Constants {
-    Logger LOGGER = LogManager.getLogger(ActionConstants.class);
+public class TranslationLanguageCodeChangeEvent extends Event {
+    public static final TranslationLanguageCodeChangeEvent EVENT = new TranslationLanguageCodeChangeEvent();
 }

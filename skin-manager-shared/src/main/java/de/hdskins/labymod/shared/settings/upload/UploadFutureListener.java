@@ -15,50 +15,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.actions.delete;
+package de.hdskins.labymod.shared.settings.upload;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
-import de.hdskins.protocol.packets.reading.client.PacketServerReportSkinResponse;
-import net.minecraft.entity.player.EntityPlayer;
+import de.hdskins.protocol.packets.reading.upload.PacketServerUploadSkinResponse;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-class DeleteActionFutureListener implements FutureListener<PacketBase>, Constants {
+public class UploadFutureListener implements FutureListener<PacketBase>, Constants {
 
     private final AddonContext addonContext;
-    private final EntityPlayer targetDelete;
 
-    protected DeleteActionFutureListener(AddonContext addonContext, EntityPlayer targetDelete) {
+    public UploadFutureListener(AddonContext addonContext) {
         this.addonContext = addonContext;
-        this.targetDelete = targetDelete;
     }
 
     @Override
     public void nullResult() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
     }
 
     @Override
     public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerReportSkinResponse) {
-            PacketServerReportSkinResponse response = (PacketServerReportSkinResponse) packetBase;
+        if (packetBase instanceof PacketServerUploadSkinResponse) {
+            PacketServerUploadSkinResponse response = (PacketServerUploadSkinResponse) packetBase;
             if (response.isSuccess()) {
-                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-successfully", this.targetDelete.getName()));
+                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-completed"));
             } else {
                 NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
             }
         } else {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
         }
     }
 
     @Override
     public void cancelled() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
     }
 }

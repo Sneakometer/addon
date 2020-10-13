@@ -20,13 +20,17 @@ package de.hdskins.labymod.shared.addon;
 import de.hdskins.labymod.shared.actions.ActionInvoker;
 import de.hdskins.labymod.shared.actions.delete.DeleteUserActionEntry;
 import de.hdskins.labymod.shared.actions.report.ReportUserActionEntry;
+import de.hdskins.labymod.shared.actions.toggle.ToggleSkinUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.JsonAddonConfig;
 import de.hdskins.labymod.shared.role.UserRole;
+import de.hdskins.labymod.shared.settings.SettingInvoker;
+import de.hdskins.labymod.shared.settings.SettingsFactory;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
 import de.hdskins.labymod.shared.translation.TranslationRegistryLoader;
 import net.labymod.api.LabyModAddon;
+import net.labymod.settings.elements.SettingsElement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,8 +52,14 @@ public final class AddonContextLoader {
             return new AddonContext(addonConfig, addon, networkClient, translationRegistry);
         }).thenApply(addonContext -> {
             ActionInvoker.addUserActionEntry(new ReportUserActionEntry(addonContext));
+            ActionInvoker.addUserActionEntry(new ToggleSkinUserActionEntry(addonContext));
             if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
                 ActionInvoker.addUserActionEntry(new DeleteUserActionEntry(addonContext));
+            }
+            return addonContext;
+        }).thenApply(addonContext -> {
+            for (SettingsElement element : SettingsFactory.bakeSettings(addonContext)) {
+                SettingInvoker.addSettingsElement(element);
             }
             return addonContext;
         });

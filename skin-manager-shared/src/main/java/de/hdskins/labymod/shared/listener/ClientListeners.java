@@ -18,8 +18,12 @@
 package de.hdskins.labymod.shared.listener;
 
 import de.hdskins.labymod.shared.backend.BackendUtils;
+import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
+import de.hdskins.labymod.shared.settings.SettingInvoker;
+import de.hdskins.labymod.shared.settings.SettingsFactory;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
 import net.labymod.main.LabyMod;
+import net.labymod.settings.elements.SettingsElement;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -59,6 +63,14 @@ public final class ClientListeners {
                     this.hdSkinManager.getAddonContext().getReconnecting().set(false);
                 });
             }
+        }
+    }
+
+    @SubscribeEvent
+    public void handle(TranslationLanguageCodeChangeEvent event) {
+        SettingInvoker.unloadSettingElements();
+        for (SettingsElement element : SettingsFactory.bakeSettings(this.hdSkinManager.getAddonContext())) {
+            SettingInvoker.addSettingsElement(element);
         }
     }
 }

@@ -98,7 +98,7 @@ dependencies {
 }
 
 reobf {
-    jar {
+    shadowJar {
         setMappingType(net.minecraftforge.gradle.user.ReobfMappingType.NOTCH)
     }
 }
@@ -107,7 +107,7 @@ artifacts {
     archives shadowJar
 }
 
-shadowJar.doLast {
+reobfShadowJar.doLast {
     copy {
         from './build/libs/HDSkins-1.8.jar'
         into '../build/libs'

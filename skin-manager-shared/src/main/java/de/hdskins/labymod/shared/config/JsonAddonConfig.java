@@ -62,8 +62,8 @@ public class JsonAddonConfig implements AddonConfig {
     // client settings
     private boolean slim;
     // visibility settings
+    private final Collection<UUID> disabledSkins;
     private boolean showSkinsOfOtherPlayers;
-    private Collection<UUID> disabledSkins;
 
     public static AddonConfig load(LabyModAddon labyModAddon) {
         if (configPath == null) {

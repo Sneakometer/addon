@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.actions.report;
+package de.hdskins.labymod.shared.actions.toggle;
 
 import de.hdskins.labymod.shared.actions.ActionConstants;
 import de.hdskins.labymod.shared.addon.AddonContext;
@@ -28,13 +28,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-public class ReportUserActionEntry extends UserActionEntry implements ActionConstants {
+public class ToggleSkinUserActionEntry extends UserActionEntry implements ActionConstants {
 
     private final AddonContext addonContext;
 
-    public ReportUserActionEntry(AddonContext addonContext) {
+    public ToggleSkinUserActionEntry(AddonContext addonContext) {
         super(
-            addonContext.getTranslationRegistry().translateMessage("user-skin-report-choose-display-name"),
+            addonContext.getTranslationRegistry().translateMessage("toggle-skin-button-name"),
             EnumActionType.NONE,
             null,
             null
@@ -44,12 +44,13 @@ public class ReportUserActionEntry extends UserActionEntry implements ActionCons
 
     @Override
     public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
-        AddonContext.ServerResult serverResult = this.addonContext.reportSkin(entityPlayer.getGameProfile().getId());
-        if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
-            LOGGER.debug("Unable to report hd skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+        boolean blacklisted = this.addonContext.getAddonConfig().isSkinDisabled(entityPlayer.getGameProfile().getId());
+        if (blacklisted) {
+            this.addonContext.getAddonConfig().enableSkin(entityPlayer.getGameProfile().getId());
+            NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-shown"));
         } else {
-            serverResult.getFuture().addListener(new ReportActionFutureListener(this.addonContext, entityPlayer));
+            this.addonContext.getAddonConfig().disableSkin(entityPlayer.getGameProfile().getId());
+            NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-hidden"));
         }
     }
 }

@@ -15,30 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.actions;
+package de.hdskins.labymod.shared.settings;
 
-import de.hdskins.labymod.shared.ReflectionUtils;
-import net.labymod.main.LabyMod;
-import net.labymod.user.gui.UserActionGui;
-import net.labymod.user.util.UserActionEntry;
+import net.labymod.settings.elements.SettingsElement;
 
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
-public final class ActionInvoker {
+public final class SettingInvoker {
 
-    private static final List<UserActionEntry> REGISTERED_USER_ACTION_ENTRIES;
+    private static final List<SettingsElement> LOADED_SETTINGS = new ArrayList<>();
 
-    static {
-        REGISTERED_USER_ACTION_ENTRIES = ReflectionUtils.get(List.class, UserActionGui.class, LabyMod.getInstance().getUserManager().getUserActionGui(), "defaultEntries");
-    }
-
-    private ActionInvoker() {
+    private SettingInvoker() {
         throw new UnsupportedOperationException();
     }
 
-    public static void addUserActionEntry(UserActionEntry userActionEntry) {
-        REGISTERED_USER_ACTION_ENTRIES.add(userActionEntry);
+    @Nonnull
+    public static List<SettingsElement> getLoadedSettings() {
+        return LOADED_SETTINGS;
+    }
+
+    public static void addSettingsElement(SettingsElement settingsElement) {
+        LOADED_SETTINGS.add(settingsElement);
+    }
+
+    public static void unloadSettingElements() {
+        LOADED_SETTINGS.clear();
     }
 }

@@ -19,50 +19,21 @@ package de.hdskins.labymod.v2512;
 
 import de.hdskins.labymod.shared.ReflectionUtils;
 import de.hdskins.labymod.shared.addon.AddonContextLoader;
+import de.hdskins.labymod.shared.addon.laby.LabyModAddonBase;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
-import net.labymod.api.LabyModAddon;
-import net.labymod.settings.elements.SettingsElement;
 import net.minecraft.client.Minecraft;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Consumer;
 
-public class HdSkinsAddon extends LabyModAddon implements Consumer<String> {
+public class HdSkinsAddon extends LabyModAddonBase {
 
     @Override
-    public void onEnable() {
-        System.out.println("\n        __  ______  _____ __   _\n" +
-            "       / / / / __ \\/ ___// /__(_)___  _____\n" +
-            "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n" +
-            "     / __  / /_/ /___/ / ,< / / / / (__  )\n" +
-            "    /_/ /_/_____//____/_/|_/_/_/ /_/____/\n" +
-            "\n" +
-            "          Copyright (c) 2020 HDSkins\n" +
-            "   Support Discord: https://discord.gg/KN8rDZJ");
-    }
-
-    @Override
-    public void loadConfig() {
-    }
-
-    @Override
-    public void init(String addonName, UUID uuid) {
-        super.init(addonName, uuid);
+    protected void createAddonContext() {
         AddonContextLoader.initAddon(this).thenAcceptAsync(context -> {
             File skinCacheDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "skinCacheDir", "field_152796_d", "c");
             Objects.requireNonNull(skinCacheDir, "Unable to load skin cache dir correctly!");
             ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(context, skinCacheDir.toPath()), "aP", "skinManager", "field_152350_aA");
         });
-    }
-
-    @Override
-    protected void fillSettings(List<SettingsElement> list) {
-    }
-
-    @Override
-    public void accept(String s) {
     }
 }

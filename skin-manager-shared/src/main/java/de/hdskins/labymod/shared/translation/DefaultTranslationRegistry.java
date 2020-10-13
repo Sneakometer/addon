@@ -17,7 +17,9 @@
  */
 package de.hdskins.labymod.shared.translation;
 
+import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.common.MinecraftForge;
 import org.apache.commons.lang3.LocaleUtils;
 
 import javax.annotation.Nonnull;
@@ -49,6 +51,11 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
     public String translateMessage(String translationKey, String resultIfAbsent, Object... replacements) {
         this.reSyncLanguageCode();
         Properties source = this.loadedLanguageFiles.get(this.currentLocale);
+        if (source == null) {
+            // Try to use english as fallback
+            source = this.loadedLanguageFiles.get("en");
+        }
+
         return source == null ? MessageFormat.format(resultIfAbsent, replacements) : MessageFormat.format(source.getProperty(translationKey, resultIfAbsent), replacements);
     }
 
@@ -84,6 +91,10 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
     }
 
     private void reSyncLanguageCode() {
-        this.currentLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
+        String chosenLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
+        if (!this.currentLocale.equals(chosenLocale)) {
+            this.currentLocale = chosenLocale;
+            MinecraftForge.EVENT_BUS.post(TranslationLanguageCodeChangeEvent.EVENT);
+        }
     }
 }
