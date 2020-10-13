@@ -24,6 +24,5 @@ allprojects {
 
     project.ext {
         dependencyNetworkClientVersion = '1.3-SNAPSHOT'
-        dependencyRequestBuilderVersion = '1.0.6'
     }
 }

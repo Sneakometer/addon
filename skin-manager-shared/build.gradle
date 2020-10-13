@@ -35,6 +35,5 @@ minecraft {
 
 dependencies {
     compileOnly files('../libs/lm_api.jar')
-    compileOnly group: 'com.github.derklaro', name: 'requestbuilder', version: dependencyRequestBuilderVersion
     compileOnly group: 'de.hdskins.protocol', name: 'client', version: dependencyNetworkClientVersion
 }
