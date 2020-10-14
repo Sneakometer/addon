@@ -171,6 +171,10 @@ public class AddonContext {
         }
     }
 
+    public void updateRole(UserRole newRole) {
+        this.userRole = newRole;
+    }
+
     public static final class ServerResult {
         private final ExecutionStage executionStage;
         private final ListeningFuture<PacketBase> future;

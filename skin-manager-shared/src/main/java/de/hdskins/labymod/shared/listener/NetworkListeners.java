@@ -17,11 +17,16 @@
  */
 package de.hdskins.labymod.shared.listener;
 
+import de.hdskins.labymod.shared.actions.ActionFactory;
+import de.hdskins.labymod.shared.actions.ActionInvoker;
+import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
+import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
 import de.hdskins.protocol.packets.reading.live.*;
+import de.hdskins.protocol.packets.reading.role.PacketServerLiveUpdateRole;
 import io.netty.channel.Channel;
 import net.labymod.main.LabyMod;
 
@@ -68,6 +73,21 @@ public final class NetworkListeners {
     @PacketListener
     public void handleLiveDeleteByPlayer(PacketServerLiveUpdateDeletePlayer packet) {
         this.hdSkinManager.pushSkinDelete(packet.getUniqueId());
+    }
+
+    @PacketListener
+    public void handleUserRoleUpdate(PacketServerLiveUpdateRole packet) {
+        final UserRole newRole = UserRole.roleFromOrdinalIndex(packet.getOrdinalIndex());
+        final boolean isTeamCurrently = this.hdSkinManager.getAddonContext().getRole().isHigherOrEqualThan(UserRole.STAFF);
+        final boolean isStaffNow = newRole.isHigherOrEqualThan(UserRole.STAFF);
+
+        this.hdSkinManager.getAddonContext().updateRole(newRole);
+        if (isStaffNow != isTeamCurrently) {
+            ActionInvoker.unregisterMarkedEntries();
+            for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext())) {
+                ActionInvoker.addUserActionEntry(entry);
+            }
+        }
     }
 
     @PacketListener

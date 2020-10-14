@@ -17,6 +17,9 @@
  */
 package de.hdskins.labymod.shared.listener;
 
+import de.hdskins.labymod.shared.actions.ActionFactory;
+import de.hdskins.labymod.shared.actions.ActionInvoker;
+import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
@@ -71,6 +74,11 @@ public final class ClientListeners {
         SettingInvoker.unloadSettingElements();
         for (SettingsElement element : SettingsFactory.bakeSettings(this.hdSkinManager.getAddonContext())) {
             SettingInvoker.addSettingsElement(element);
+        }
+
+        ActionInvoker.unregisterMarkedEntries();
+        for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext())) {
+            ActionInvoker.addUserActionEntry(entry);
         }
     }
 }

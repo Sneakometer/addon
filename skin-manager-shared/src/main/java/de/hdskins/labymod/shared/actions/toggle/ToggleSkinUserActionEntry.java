@@ -18,17 +18,17 @@
 package de.hdskins.labymod.shared.actions.toggle;
 
 import de.hdskins.labymod.shared.actions.ActionConstants;
+import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import net.labymod.user.User;
-import net.labymod.user.util.UserActionEntry;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-public class ToggleSkinUserActionEntry extends UserActionEntry implements ActionConstants {
+public class ToggleSkinUserActionEntry extends MarkedUserActionEntry implements ActionConstants {
 
     private final AddonContext addonContext;
 

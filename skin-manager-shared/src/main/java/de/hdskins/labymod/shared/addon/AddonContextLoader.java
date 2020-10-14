@@ -17,14 +17,12 @@
  */
 package de.hdskins.labymod.shared.addon;
 
+import de.hdskins.labymod.shared.actions.ActionFactory;
 import de.hdskins.labymod.shared.actions.ActionInvoker;
-import de.hdskins.labymod.shared.actions.delete.DeleteUserActionEntry;
-import de.hdskins.labymod.shared.actions.report.ReportUserActionEntry;
-import de.hdskins.labymod.shared.actions.toggle.ToggleSkinUserActionEntry;
+import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.JsonAddonConfig;
-import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.settings.SettingsFactory;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
@@ -51,10 +49,8 @@ public final class AddonContextLoader {
             TranslationRegistry translationRegistry = TranslationRegistryLoader.buildInternalTranslationRegistry();
             return new AddonContext(addonConfig, addon, networkClient, translationRegistry);
         }).thenApply(addonContext -> {
-            ActionInvoker.addUserActionEntry(new ReportUserActionEntry(addonContext));
-            ActionInvoker.addUserActionEntry(new ToggleSkinUserActionEntry(addonContext));
-            if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
-                ActionInvoker.addUserActionEntry(new DeleteUserActionEntry(addonContext));
+            for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(addonContext)) {
+                ActionInvoker.addUserActionEntry(entry);
             }
             return addonContext;
         }).thenApply(addonContext -> {
