@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.ConfigChangeEvent;
 import net.labymod.addon.AddonLoader;
 import net.labymod.api.LabyModAddon;
@@ -29,6 +30,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -41,6 +44,7 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@ParametersAreNonnullByDefault
 public class JsonAddonConfig implements AddonConfig {
     // networking magic
     private static final int FIRST_NON_ROOT_PORT = 1025;
@@ -63,6 +67,7 @@ public class JsonAddonConfig implements AddonConfig {
     private boolean slim;
     // visibility settings
     private final Collection<UUID> disabledSkins;
+    private Resolution maxSkinResolution;
     private boolean showSkinsOfOtherPlayers;
 
     public static AddonConfig load(LabyModAddon labyModAddon) {
@@ -84,13 +89,15 @@ public class JsonAddonConfig implements AddonConfig {
         this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
         this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
         this.slim = false;
-        this.showSkinsOfOtherPlayers = true;
         this.disabledSkins = new ArrayList<>();
+        this.maxSkinResolution = Resolution.RESOLUTION_ALL;
+        this.showSkinsOfOtherPlayers = true;
     }
 
+    @Nonnull
     @Override
     public String getServerHost() {
-        return null;
+        return this.serverHost;
     }
 
     @Override
@@ -153,6 +160,20 @@ public class JsonAddonConfig implements AddonConfig {
         }
     }
 
+    @Nonnull
+    @Override
+    public Resolution getMaxSkinResolution() {
+        return this.maxSkinResolution;
+    }
+
+    @Override
+    public void setMaxSkinResolution(Resolution resolution) {
+        if (this.maxSkinResolution != resolution) {
+            this.maxSkinResolution = resolution;
+            this.save();
+        }
+    }
+
     @Override
     public boolean isSlim() {
         return this.slim;
@@ -166,6 +187,7 @@ public class JsonAddonConfig implements AddonConfig {
         }
     }
 
+    @Nonnull
     @Override
     public Collection<UUID> getDisabledSkins() {
         return this.disabledSkins;

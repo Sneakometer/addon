@@ -17,12 +17,18 @@
  */
 package de.hdskins.labymod.shared.config;
 
+import de.hdskins.labymod.shared.config.resolution.Resolution;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.UUID;
 
+@ParametersAreNonnullByDefault
 public interface AddonConfig extends Serializable {
 
+    @Nonnull
     String getServerHost();
 
     void setServerHost(String serverHost);
@@ -43,10 +49,16 @@ public interface AddonConfig extends Serializable {
 
     void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers);
 
+    @Nonnull
+    Resolution getMaxSkinResolution();
+
+    void setMaxSkinResolution(Resolution resolution);
+
     boolean isSlim();
 
     void setSlim(boolean slim);
 
+    @Nonnull
     Collection<UUID> getDisabledSkins();
 
     void removeAllDisabledSkins();

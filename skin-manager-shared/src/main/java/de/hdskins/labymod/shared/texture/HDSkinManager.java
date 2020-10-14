@@ -338,6 +338,10 @@ public class HDSkinManager extends SkinManager {
         }
     }
 
+    public void pushMaxResolutionUpdate() {
+        this.uniqueIdToSkinHashCache.invalidateAll();
+    }
+
     public void pushSkinUpdate(UUID playerUniqueId, String newSkinHash) {
         SkinHashWrapper wrapper = this.uniqueIdToSkinHashCache.getIfPresent(playerUniqueId);
         if (wrapper != null) {

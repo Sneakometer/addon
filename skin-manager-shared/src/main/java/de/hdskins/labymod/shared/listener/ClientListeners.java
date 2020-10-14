@@ -21,6 +21,7 @@ import de.hdskins.labymod.shared.actions.ActionFactory;
 import de.hdskins.labymod.shared.actions.ActionInvoker;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
+import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.settings.SettingsFactory;
@@ -80,5 +81,10 @@ public final class ClientListeners {
         for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext())) {
             ActionInvoker.addUserActionEntry(entry);
         }
+    }
+
+    @SubscribeEvent
+    public void handle(MaxSkinResolutionChangeEvent event) {
+        this.hdSkinManager.pushMaxResolutionUpdate();
     }
 }

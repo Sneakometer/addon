@@ -19,13 +19,16 @@ package de.hdskins.labymod.shared.settings.element;
 
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
+import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import net.labymod.settings.elements.ControlElement;
+import net.labymod.settings.elements.DropDownElement;
 import net.labymod.settings.elements.StringElement;
 import net.labymod.utils.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -52,6 +55,14 @@ class DefaultElementFactory implements ElementFactory {
         ChangeableBooleanElement element = new ChangeableBooleanElement(displayName, iconData, on, off, currentValue, toggleListener);
         customizer.accept(element);
         return element;
+    }
+
+    @Nonnull
+    @Override
+    public <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, Consumer<T> changeListener, Consumer<DropDownElement<T>> customizer) {
+        DropDownElement<T> dropDownElement = new CustomDropDownElement<>(displayName, iconData, initialValue, values, changeListener);
+        customizer.accept(dropDownElement);
+        return dropDownElement;
     }
 
     @Nonnull

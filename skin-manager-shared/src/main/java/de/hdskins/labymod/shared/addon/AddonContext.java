@@ -18,6 +18,8 @@
 package de.hdskins.labymod.shared.addon;
 
 import de.hdskins.labymod.shared.config.AddonConfig;
+import de.hdskins.labymod.shared.config.resolution.Resolution;
+import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
 import de.hdskins.protocol.PacketBase;
@@ -26,11 +28,13 @@ import de.hdskins.protocol.concurrent.ListeningFuture;
 import de.hdskins.protocol.packets.reading.client.PacketClientDeleteSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientReportSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientSetSlim;
+import de.hdskins.protocol.packets.reading.client.PacketClientSkinSettings;
 import de.hdskins.protocol.packets.reading.role.PacketClientGetRole;
 import de.hdskins.protocol.packets.reading.role.PacketServerGetRoleResponse;
 import de.hdskins.protocol.packets.reading.upload.PacketClientUploadSkin;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.LabyMod;
+import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -173,6 +177,14 @@ public class AddonContext {
 
     public void updateRole(UserRole newRole) {
         this.userRole = newRole;
+    }
+
+    public void setMaxSkinResolution(Resolution resolution) {
+        if (this.addonConfig.getMaxSkinResolution() != resolution) {
+            this.networkClient.sendPacket(new PacketClientSkinSettings(resolution.getWidth(), resolution.getHeight()));
+            this.addonConfig.setMaxSkinResolution(resolution);
+            MinecraftForge.EVENT_BUS.post(MaxSkinResolutionChangeEvent.EVENT);
+        }
     }
 
     public static final class ServerResult {
