@@ -27,7 +27,7 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 public final class SettingInvoker {
 
-    private static final List<SettingsElement> LOADED_SETTINGS = new ArrayList<>();
+    private static List<SettingsElement> loadedSettings = new ArrayList<>();
 
     private SettingInvoker() {
         throw new UnsupportedOperationException();
@@ -35,14 +35,18 @@ public final class SettingInvoker {
 
     @Nonnull
     public static List<SettingsElement> getLoadedSettings() {
-        return LOADED_SETTINGS;
+        return loadedSettings;
+    }
+
+    public static void setLoadedSettings(List<SettingsElement> loadedSettings) {
+        SettingInvoker.loadedSettings = loadedSettings;
     }
 
     public static void addSettingsElement(SettingsElement settingsElement) {
-        LOADED_SETTINGS.add(settingsElement);
+        loadedSettings.add(settingsElement);
     }
 
     public static void unloadSettingElements() {
-        LOADED_SETTINGS.clear();
+        loadedSettings.clear();
     }
 }

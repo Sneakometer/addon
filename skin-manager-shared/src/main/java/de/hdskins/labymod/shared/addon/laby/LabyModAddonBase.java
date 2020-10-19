@@ -55,11 +55,7 @@ public abstract class LabyModAddonBase extends LabyModAddon {
 
     @Override
     protected void fillSettings(List<SettingsElement> list) {
-    }
-
-    @Override
-    public List<SettingsElement> getSubSettings() {
-        return SettingInvoker.getLoadedSettings();
+        SettingInvoker.setLoadedSettings(list);
     }
 
     protected abstract void createAddonContext();

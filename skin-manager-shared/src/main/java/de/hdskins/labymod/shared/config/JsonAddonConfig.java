@@ -20,6 +20,7 @@ package de.hdskins.labymod.shared.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.ConfigChangeEvent;
@@ -32,9 +33,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -52,6 +51,7 @@ public class JsonAddonConfig implements AddonConfig {
     // time magic
     private static final long MIN_RECONNECT_TIME = TimeUnit.SECONDS.toMillis(1);
     // json utils
+    private static final JsonParser PARSER = new JsonParser();
     private static final Gson GSON = new GsonBuilder().serializeNulls().disableHtmlEscaping().setPrettyPrinting().create();
     private static final Type CONFIG_TYPE = new TypeToken<JsonAddonConfig>() {
     }.getType();
@@ -75,12 +75,19 @@ public class JsonAddonConfig implements AddonConfig {
             configPath = AddonLoader.getConfigDirectory().toPath().resolve(labyModAddon.about.name + ".json");
         }
 
-        final JsonObject config = labyModAddon.getConfig();
-        if (!config.has("config") || config.get("config").isJsonNull()) {
-            config.add("config", GSON.toJsonTree(new JsonAddonConfig()));
-        }
+        try (InputStream inputStream = Files.newInputStream(configPath);
+             Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            JsonObject config = PARSER.parse(reader).getAsJsonObject();
 
-        return GSON.fromJson(config.get("config").getAsJsonObject(), CONFIG_TYPE);
+            if (!config.has("config") || config.get("config").isJsonNull()) {
+                config.add("config", GSON.toJsonTree(new JsonAddonConfig()));
+            }
+
+            return GSON.fromJson(config.get("config").getAsJsonObject(), CONFIG_TYPE);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new JsonAddonConfig();
+        }
     }
 
     private JsonAddonConfig() {
