@@ -23,9 +23,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.ConfigChangeEvent;
+import de.hdskins.labymod.shared.utils.Constants;
 import net.labymod.addon.AddonLoader;
 import net.labymod.api.LabyModAddon;
-import net.minecraftforge.common.MinecraftForge;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -57,6 +57,8 @@ public class JsonAddonConfig implements AddonConfig {
     }.getType();
     // lazy initialized by load(LabyModAddon) method
     private static Path configPath;
+    // visibility settings
+    private final Collection<UUID> disabledSkins;
     // server settings
     private String serverHost;
     private int serverPort;
@@ -65,10 +67,19 @@ public class JsonAddonConfig implements AddonConfig {
     private long reconnectInterval;
     // client settings
     private boolean slim;
-    // visibility settings
-    private final Collection<UUID> disabledSkins;
     private Resolution maxSkinResolution;
     private boolean showSkinsOfOtherPlayers;
+
+    private JsonAddonConfig() {
+        this.serverHost = "api.hdskins.de";
+        this.serverPort = 7007;
+        this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
+        this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
+        this.slim = false;
+        this.disabledSkins = new ArrayList<>();
+        this.maxSkinResolution = Resolution.RESOLUTION_ALL;
+        this.showSkinsOfOtherPlayers = true;
+    }
 
     public static AddonConfig load(LabyModAddon labyModAddon) {
         if (configPath == null) {
@@ -81,17 +92,6 @@ public class JsonAddonConfig implements AddonConfig {
         }
 
         return GSON.fromJson(config.get("config").getAsJsonObject(), CONFIG_TYPE);
-    }
-
-    private JsonAddonConfig() {
-        this.serverHost = "api.hdskins.de";
-        this.serverPort = 7007;
-        this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
-        this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
-        this.slim = false;
-        this.disabledSkins = new ArrayList<>();
-        this.maxSkinResolution = Resolution.RESOLUTION_ALL;
-        this.showSkinsOfOtherPlayers = true;
     }
 
     @Nonnull
@@ -246,6 +246,6 @@ public class JsonAddonConfig implements AddonConfig {
             exception.printStackTrace();
         }
 
-        MinecraftForge.EVENT_BUS.post(new ConfigChangeEvent(this));
+        Constants.EVENT_BUS.postReported(new ConfigChangeEvent(this));
     }
 }

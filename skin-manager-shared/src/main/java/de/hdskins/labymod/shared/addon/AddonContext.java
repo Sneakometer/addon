@@ -22,6 +22,7 @@ import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
+import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.client.NetworkClient;
 import de.hdskins.protocol.concurrent.ListeningFuture;
@@ -34,7 +35,6 @@ import de.hdskins.protocol.packets.reading.role.PacketServerGetRoleResponse;
 import de.hdskins.protocol.packets.reading.upload.PacketClientUploadSkin;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.LabyMod;
-import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -183,8 +183,14 @@ public class AddonContext {
         if (this.addonConfig.getMaxSkinResolution() != resolution) {
             this.networkClient.sendPacket(new PacketClientSkinSettings(resolution.getWidth(), resolution.getHeight()));
             this.addonConfig.setMaxSkinResolution(resolution);
-            MinecraftForge.EVENT_BUS.post(MaxSkinResolutionChangeEvent.EVENT);
+            Constants.EVENT_BUS.postReported(MaxSkinResolutionChangeEvent.EVENT);
         }
+    }
+
+    public enum ExecutionStage {
+        EXECUTING,
+        NOT_CONNECTED,
+        ERROR
     }
 
     public static final class ServerResult {
@@ -203,11 +209,5 @@ public class AddonContext {
         public ListeningFuture<PacketBase> getFuture() {
             return this.future;
         }
-    }
-
-    public enum ExecutionStage {
-        EXECUTING,
-        NOT_CONNECTED,
-        ERROR
     }
 }

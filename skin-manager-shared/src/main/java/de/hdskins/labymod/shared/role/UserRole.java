@@ -29,11 +29,11 @@ public enum UserRole {
 
     private static final UserRole[] VALUES = values(); // prevent copy
 
-    public boolean isHigherOrEqualThan(UserRole other) {
-        return super.ordinal() <= other.ordinal();
-    }
-
     public static UserRole roleFromOrdinalIndex(byte index) {
         return index >= 0 && index < VALUES.length ? VALUES[index] : USER;
+    }
+
+    public boolean isHigherOrEqualThan(UserRole other) {
+        return super.ordinal() <= other.ordinal();
     }
 }

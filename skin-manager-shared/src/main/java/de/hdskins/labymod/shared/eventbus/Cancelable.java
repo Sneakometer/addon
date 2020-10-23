@@ -15,17 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.utils;
+package de.hdskins.labymod.shared.eventbus;
 
-import de.hdskins.labymod.shared.eventbus.EventBus;
-import de.hdskins.labymod.shared.eventbus.defaults.DefaultEventBus;
+public interface Cancelable {
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+    boolean isCanceled();
 
-public interface Constants {
-    EventBus EVENT_BUS = new DefaultEventBus();
-    ExecutorService EXECUTOR = Executors.newCachedThreadPool();
-    String SUCCESS = "§a§l✔";
-    String FAILURE = "§c§l✖";
+    void setCanceled(boolean canceled);
 }

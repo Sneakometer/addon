@@ -18,9 +18,8 @@
 package de.hdskins.labymod.shared.event;
 
 import de.hdskins.labymod.shared.config.AddonConfig;
-import net.minecraftforge.fml.common.eventhandler.Event;
 
-public class ConfigChangeEvent extends Event {
+public class ConfigChangeEvent {
 
     private final AddonConfig addonConfig;
 

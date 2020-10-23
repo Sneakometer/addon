@@ -415,12 +415,12 @@ public class HDSkinManager extends SkinManager {
             return this.skinHash;
         }
 
-        public boolean isSlim() {
-            return this.slim;
-        }
-
         public void setSkinHash(@Nullable String skinHash) {
             this.skinHash = skinHash;
+        }
+
+        public boolean isSlim() {
+            return this.slim;
         }
 
         public void setSlim(boolean slim) {

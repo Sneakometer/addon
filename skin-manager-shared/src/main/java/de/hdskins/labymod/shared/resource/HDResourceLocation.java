@@ -22,18 +22,17 @@ import net.minecraft.util.ResourceLocation;
 
 public class HDResourceLocation extends ResourceLocation {
 
+    private static final String[] EMPTY = new String[]{"a", "b"};
+    private static final String DOMAIN = "minecraft";
+    private String resourcePath;
+    public HDResourceLocation(String path) {
+        super(0, EMPTY);
+    }
+
     public static HDResourceLocation forProfileTexture(MinecraftProfileTexture texture) {
         final String hash = texture.getHash();
         final String hashPrefix = hash.length() > 2 ? hash.substring(0, 2) : "xx";
         return new HDResourceLocation("skins/" + hashPrefix + "/" + hash);
-    }
-
-    private static final String[] EMPTY = new String[]{"a", "b"};
-    private static final String DOMAIN = "minecraft";
-    private String resourcePath;
-
-    public HDResourceLocation(String path) {
-        super(0, EMPTY);
     }
 
     @Override

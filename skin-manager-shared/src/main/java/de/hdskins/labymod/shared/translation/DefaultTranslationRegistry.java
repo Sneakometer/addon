@@ -18,8 +18,8 @@
 package de.hdskins.labymod.shared.translation;
 
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
+import de.hdskins.labymod.shared.utils.Constants;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.common.MinecraftForge;
 import org.apache.commons.lang3.LocaleUtils;
 
 import javax.annotation.Nonnull;
@@ -94,7 +94,7 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
         String chosenLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
         if (!this.currentLocale.equals(chosenLocale)) {
             this.currentLocale = chosenLocale;
-            MinecraftForge.EVENT_BUS.post(TranslationLanguageCodeChangeEvent.EVENT);
+            Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
         }
     }
 }

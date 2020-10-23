@@ -17,8 +17,9 @@
  */
 package de.hdskins.labymod.shared.event;
 
-import net.minecraftforge.fml.common.eventhandler.Event;
-
-public class TranslationLanguageCodeChangeEvent extends Event {
+public final class TranslationLanguageCodeChangeEvent {
     public static final TranslationLanguageCodeChangeEvent EVENT = new TranslationLanguageCodeChangeEvent();
+
+    private TranslationLanguageCodeChangeEvent() {
+    }
 }

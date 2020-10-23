@@ -15,14 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.event;
+package de.hdskins.labymod.shared.eventbus;
 
-import net.minecraftforge.fml.common.eventhandler.Event;
+import java.lang.annotation.*;
 
-public class CancelableEvent extends Event {
+@Documented
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EventListener {
 
-    @Override
-    public boolean isCancelable() {
-        return true;
+    byte postOrder() default DefaultPostOrder.BALANCED;
+
+    boolean consumesCanceledEvents() default false;
+
+    interface DefaultPostOrder {
+        byte FIRST = Byte.MIN_VALUE;
+        byte BALANCED = 0;
+        byte LAST = Byte.MAX_VALUE;
     }
 }

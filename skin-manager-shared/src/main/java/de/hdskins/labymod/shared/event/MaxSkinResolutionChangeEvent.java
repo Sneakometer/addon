@@ -17,8 +17,9 @@
  */
 package de.hdskins.labymod.shared.event;
 
-import net.minecraftforge.fml.common.eventhandler.Event;
-
-public class MaxSkinResolutionChangeEvent extends Event {
+public final class MaxSkinResolutionChangeEvent {
     public static final MaxSkinResolutionChangeEvent EVENT = new MaxSkinResolutionChangeEvent();
+
+    private MaxSkinResolutionChangeEvent() {
+    }
 }

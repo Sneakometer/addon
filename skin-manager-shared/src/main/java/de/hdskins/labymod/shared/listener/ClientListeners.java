@@ -23,6 +23,7 @@ import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
+import de.hdskins.labymod.shared.eventbus.EventListener;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.settings.SettingsFactory;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
@@ -70,7 +71,7 @@ public final class ClientListeners {
         }
     }
 
-    @SubscribeEvent
+    @EventListener
     public void handle(TranslationLanguageCodeChangeEvent event) {
         SettingInvoker.unloadSettingElements();
         for (SettingsElement element : SettingsFactory.bakeSettings(this.hdSkinManager.getAddonContext())) {
@@ -83,7 +84,7 @@ public final class ClientListeners {
         }
     }
 
-    @SubscribeEvent
+    @EventListener
     public void handle(MaxSkinResolutionChangeEvent event) {
         this.hdSkinManager.pushMaxResolutionUpdate();
     }
