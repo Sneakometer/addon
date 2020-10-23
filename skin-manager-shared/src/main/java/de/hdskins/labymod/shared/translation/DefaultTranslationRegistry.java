@@ -92,7 +92,7 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
 
     private void reSyncLanguageCode() {
         String chosenLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
-        if (!this.currentLocale.equals(chosenLocale)) {
+        if (this.currentLocale == null || !this.currentLocale.equals(chosenLocale)) {
             this.currentLocale = chosenLocale;
             Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
         }

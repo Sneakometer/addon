@@ -17,24 +17,19 @@
  */
 package de.hdskins.labymod.shared.translation;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.security.CodeSource;
-import java.util.Enumeration;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 @ParametersAreNonnullByDefault
 public final class TranslationRegistryLoader {
@@ -47,34 +42,28 @@ public final class TranslationRegistryLoader {
 
     @Nonnull
     public static TranslationRegistry buildInternalTranslationRegistry() {
-        CodeSource codeSource = TranslationRegistryLoader.class.getProtectionDomain().getCodeSource();
-        if (codeSource == null) {
-            LOGGER.debug("Unable to load language files because code source of class is null");
-            return TranslationRegistry.empty();
-        }
+        try (InputStream inputStream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("langs")) {
+            if (inputStream == null) {
+                return TranslationRegistry.empty();
+            }
 
-        Map<String, Properties> languageFiles = new ConcurrentHashMap<>();
-        try (ZipFile zipFile = new ZipFile(new File(codeSource.getLocation().toURI()))) {
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry zipEntry = entries.nextElement();
-                final String name = zipEntry.getName();
-                if (name.startsWith("lang/") && name.endsWith(".properties")) {
-                    try (InputStream inputStream = zipFile.getInputStream(zipEntry)) {
+            Map<String, Properties> languages = new HashMap<>();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                String lang;
+                while ((lang = reader.readLine()) != null) {
+                    try (InputStream languageStream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("lang/" + lang + ".properties")) {
                         Properties properties = new Properties();
-                        properties.load(inputStream);
-                        languageFiles.put(StringUtils.removeEnd(name, ".properties"), properties);
-                    } catch (IOException exception) {
-                        LOGGER.debug("Unable to load language file {}", name, exception);
+                        properties.load(languageStream);
+                        languages.put(lang, properties);
                     }
                 }
             }
-        } catch (URISyntaxException | IOException exception) {
-            LOGGER.debug("Unable to load language files", exception);
-        }
 
-        String result = languageFiles.entrySet().stream().map(entry -> entry.getKey() + " - " + entry.getValue()).collect(Collectors.joining(", "));
-        LOGGER.debug("Loaded {} language files: {}", languageFiles.size(), result);
-        return languageFiles.isEmpty() ? TranslationRegistry.empty() : TranslationRegistry.fromMap(languageFiles);
+            return TranslationRegistry.fromMap(languages);
+
+        } catch (IOException exception) {
+            LOGGER.debug("Unable to load language files", exception);
+            return TranslationRegistry.empty();
+        }
     }
 }
