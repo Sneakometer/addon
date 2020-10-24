@@ -85,18 +85,19 @@ public final class BackendUtils {
         }
 
         int reconnectAttempts = 0;
-        while (!networkClient.connect()) {
+        do {
             if (reconnectAttempts++ == 0) {
                 sleep(networkClient.getFirstReconnectInterval());
             } else {
                 sleep(networkClient.getReconnectInterval());
-            }
 
-            LOGGER.debug(
-                "Connection attempt to server at {}:{} failed the {} time. (reconnect times: first: {}, always: {}) Retry...",
-                addonConfig.getServerHost(), addonConfig.getServerPort(), reconnectAttempts, networkClient.getFirstReconnectInterval(), networkClient.getReconnectInterval()
-            );
-        }
+                LOGGER.debug(
+                    "Connection attempt to server at {}:{} failed the {} time. (reconnect times: first: {}, always: {}) Retry...",
+                    addonConfig.getServerHost(), addonConfig.getServerPort(), reconnectAttempts,
+                    networkClient.getFirstReconnectInterval(), networkClient.getReconnectInterval()
+                );
+            }
+        } while (!networkClient.connect());
 
         LOGGER.debug("Successfully connected to network server {}:{} after the {} attempt", addonConfig.getServerHost(), addonConfig.getServerPort(), reconnectAttempts);
         return networkClient;
