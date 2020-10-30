@@ -18,7 +18,9 @@
 package de.hdskins.labymod.shared.settings;
 
 import net.labymod.addon.About;
+import net.labymod.addon.AddonLoader;
 import net.labymod.addon.online.AddonInfoManager;
+import net.labymod.addon.online.info.AddonInfo;
 import net.labymod.settings.elements.SettingsElement;
 
 import javax.annotation.Nonnull;
@@ -42,7 +44,17 @@ public final class SettingInvoker {
     @Nonnull
     public static List<SettingsElement> getLoadedSettings() {
         if (loadedSettings == null) {
-            loadedSettings = AddonInfoManager.getInstance().getAddonInfoMap().get(about.uuid).getAddonElement().getSubSettings();
+            // Try to find the addons in the online addons (where it should be normally)
+            AddonInfo addonInfo = AddonInfoManager.getInstance().getAddonInfoMap().get(about.uuid);
+            // The addon info wasn't at the online addons so try to find it in the offline ones
+            if (addonInfo == null) {
+                addonInfo = AddonLoader.getOfflineAddons().stream()
+                    .filter(addon -> addon.getUuid().equals(about.uuid))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Unable to find addon info of HDSkins addon"));
+            }
+
+            loadedSettings = addonInfo.getAddonElement().getSubSettings();
         }
 
         return loadedSettings;
