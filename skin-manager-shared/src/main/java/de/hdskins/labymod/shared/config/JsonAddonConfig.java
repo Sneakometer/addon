@@ -95,11 +95,13 @@ public class JsonAddonConfig implements AddonConfig {
              Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             JsonObject config = PARSER.parse(reader).getAsJsonObject();
 
-            if (!config.has("config") || config.get("config").isJsonNull()) {
-                config.add("config", GSON.toJsonTree(new JsonAddonConfig()));
+            if (!config.has("configuration") || config.get("configuration").isJsonNull()) {
+                JsonAddonConfig addonConfig = new JsonAddonConfig();
+                addonConfig.save();
+                return addonConfig;
             }
 
-            return GSON.fromJson(config.get("config").getAsJsonObject(), CONFIG_TYPE);
+            return GSON.fromJson(config.get("configuration").getAsJsonObject(), CONFIG_TYPE);
         } catch (IOException e) {
             e.printStackTrace();
             return new JsonAddonConfig();
@@ -252,7 +254,7 @@ public class JsonAddonConfig implements AddonConfig {
     private void save() {
         try (Writer out = new OutputStreamWriter(Files.newOutputStream(configPath), StandardCharsets.UTF_8)) {
             JsonObject object = new JsonObject();
-            object.add("config", GSON.toJsonTree(this));
+            object.add("configuration", GSON.toJsonTree(this));
             GSON.toJson(object, out);
         } catch (IOException exception) {
             exception.printStackTrace();
