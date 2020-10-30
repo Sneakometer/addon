@@ -50,12 +50,12 @@ public abstract class LabyModAddonBase extends LabyModAddon {
     @Override
     public void init(String addonName, UUID uuid) {
         super.init(addonName, uuid);
+        SettingInvoker.setAbout(this.about);
         this.createAddonContext();
     }
 
     @Override
     protected void fillSettings(List<SettingsElement> list) {
-        SettingInvoker.setLoadedSettings(list);
     }
 
     protected abstract void createAddonContext();

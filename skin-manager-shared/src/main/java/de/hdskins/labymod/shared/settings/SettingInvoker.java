@@ -17,36 +17,42 @@
  */
 package de.hdskins.labymod.shared.settings;
 
+import net.labymod.addon.About;
+import net.labymod.addon.online.AddonInfoManager;
 import net.labymod.settings.elements.SettingsElement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
 public final class SettingInvoker {
 
-    private static List<SettingsElement> loadedSettings = new ArrayList<>();
+    private static About about;
+    private static List<SettingsElement> loadedSettings;
 
     private SettingInvoker() {
         throw new UnsupportedOperationException();
     }
 
+    public static void setAbout(About about) {
+        SettingInvoker.about = about;
+    }
+
     @Nonnull
     public static List<SettingsElement> getLoadedSettings() {
+        if (loadedSettings == null) {
+            loadedSettings = AddonInfoManager.getInstance().getAddonInfoMap().get(about.uuid).getAddonElement().getSubSettings();
+        }
+
         return loadedSettings;
     }
 
-    public static void setLoadedSettings(List<SettingsElement> loadedSettings) {
-        SettingInvoker.loadedSettings = loadedSettings;
-    }
-
     public static void addSettingsElement(SettingsElement settingsElement) {
-        loadedSettings.add(settingsElement);
+        getLoadedSettings().add(settingsElement);
     }
 
     public static void unloadSettingElements() {
-        loadedSettings.clear();
+        getLoadedSettings().clear();
     }
 }

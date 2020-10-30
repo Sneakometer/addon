@@ -25,6 +25,7 @@ public class HDResourceLocation extends ResourceLocation {
     private static final String[] EMPTY = new String[]{"a", "b"};
     private static final String DOMAIN = "minecraft";
     private String resourcePath;
+
     public HDResourceLocation(String path) {
         super(0, EMPTY);
     }
