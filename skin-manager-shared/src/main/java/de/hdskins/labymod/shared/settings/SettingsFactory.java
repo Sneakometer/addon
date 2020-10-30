@@ -57,6 +57,7 @@ public final class SettingsFactory {
             addonContext.getTranslationRegistry().translateMessage("button-click-here"),
             new UploadButtonClickHandler(addonContext),
             buttonElement -> {
+                buttonElement.setEnabled(true);
                 buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("change-skin-option-description"));
             }
         );
@@ -66,6 +67,7 @@ public final class SettingsFactory {
             addonContext.getTranslationRegistry().translateMessage("button-click-here"),
             new DeleteButtonClickHandler(addonContext),
             buttonElement -> {
+                buttonElement.setEnabled(true);
                 buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("delete-skin-option-description"));
             }
         );
