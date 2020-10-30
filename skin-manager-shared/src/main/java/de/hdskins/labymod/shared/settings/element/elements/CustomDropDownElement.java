@@ -17,12 +17,12 @@
  */
 package de.hdskins.labymod.shared.settings.element.elements;
 
-import de.hdskins.labymod.shared.ReflectionUtils;
 import net.labymod.gui.elements.DropDownMenu;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
 import net.labymod.utils.Consumer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
@@ -30,15 +30,17 @@ import java.util.List;
 public class CustomDropDownElement<T> extends DropDownElement<T> {
 
     public CustomDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, Consumer<T> changeListener) {
-        super(displayName, "", null, iconData, null);
+        super(displayName, "", buildDropDownMenu(initialValue, values), iconData, null);
         super.setChangeListener(changeListener);
-        // Dropdown init
-        DropDownMenu<T> dropDownMenu = new DropDownMenu<>(displayName, 0, 0, 0, 0);
+    }
+
+    @Nonnull
+    private static <T> DropDownMenu<T> buildDropDownMenu(T initialValue, List<T> values) {
+        DropDownMenu<T> dropDownMenu = new DropDownMenu<>("", 0, 0, 0, 0);
         dropDownMenu.setSelected(initialValue);
         for (T value : values) {
             dropDownMenu.addOption(value);
         }
-
-        ReflectionUtils.set(CustomDropDownElement.class, this, dropDownMenu, "dropDownMenu");
+        return dropDownMenu;
     }
 }

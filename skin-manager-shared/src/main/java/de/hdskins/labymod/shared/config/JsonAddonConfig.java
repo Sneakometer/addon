@@ -33,7 +33,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -86,15 +91,23 @@ public class JsonAddonConfig implements AddonConfig {
             configPath = AddonLoader.getConfigDirectory().toPath().resolve(labyModAddon.about.name + ".json");
         }
 
+        if (Files.notExists(configPath)) {
+            JsonAddonConfig addonConfig = new JsonAddonConfig();
+            addonConfig.save();
+            return addonConfig;
+        }
+
         try (InputStream inputStream = Files.newInputStream(configPath);
              Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             JsonObject config = PARSER.parse(reader).getAsJsonObject();
 
-            if (!config.has("config") || config.get("config").isJsonNull()) {
-                config.add("config", GSON.toJsonTree(new JsonAddonConfig()));
+            if (!config.has("configuration") || config.get("configuration").isJsonNull()) {
+                JsonAddonConfig addonConfig = new JsonAddonConfig();
+                addonConfig.save();
+                return addonConfig;
             }
 
-            return GSON.fromJson(config.get("config").getAsJsonObject(), CONFIG_TYPE);
+            return GSON.fromJson(config.get("configuration").getAsJsonObject(), CONFIG_TYPE);
         } catch (IOException e) {
             e.printStackTrace();
             return new JsonAddonConfig();
@@ -245,9 +258,19 @@ public class JsonAddonConfig implements AddonConfig {
     }
 
     private void save() {
+        final Path parent = configPath.getParent();
+        if (parent != null && Files.notExists(parent)) {
+            try {
+                Files.createDirectories(parent);
+            } catch (IOException exception) {
+                exception.printStackTrace();
+                return;
+            }
+        }
+
         try (Writer out = new OutputStreamWriter(Files.newOutputStream(configPath), StandardCharsets.UTF_8)) {
             JsonObject object = new JsonObject();
-            object.add("config", GSON.toJsonTree(this));
+            object.add("configuration", GSON.toJsonTree(this));
             GSON.toJson(object, out);
         } catch (IOException exception) {
             exception.printStackTrace();

@@ -20,19 +20,31 @@ package de.hdskins.labymod.shared.resource;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
+
 public class HDResourceLocation extends ResourceLocation {
 
     private static final String[] EMPTY = new String[]{"a", "b"};
     private static final String DOMAIN = "minecraft";
-    private String resourcePath;
-    public HDResourceLocation(String path) {
+
+    private final String hashPrefix;
+    private final String resourcePath;
+
+    public HDResourceLocation(String hashPrefix, String hash) {
         super(0, EMPTY);
+        this.hashPrefix = hashPrefix;
+        this.resourcePath = "skins/" + hashPrefix + "/" + hash;
     }
 
     public static HDResourceLocation forProfileTexture(MinecraftProfileTexture texture) {
         final String hash = texture.getHash();
         final String hashPrefix = hash.length() > 2 ? hash.substring(0, 2) : "xx";
-        return new HDResourceLocation("skins/" + hashPrefix + "/" + hash);
+        return new HDResourceLocation(hashPrefix, hash);
+    }
+
+    @Nonnull
+    public String getHashPrefix() {
+        return this.hashPrefix;
     }
 
     @Override

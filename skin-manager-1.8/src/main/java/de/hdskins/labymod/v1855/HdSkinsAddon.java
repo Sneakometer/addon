@@ -31,9 +31,9 @@ public class HdSkinsAddon extends LabyModAddonBase {
     @Override
     protected void createAddonContext() {
         AddonContextLoader.initAddon(this).thenAcceptAsync(context -> {
-            File skinCacheDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "c", "skinCacheDir", "field_152796_d");
-            Objects.requireNonNull(skinCacheDir, "Unable to load skin cache dir correctly!");
-            ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(context, skinCacheDir.toPath()), "aL", "skinManager", "field_152350_aA");
+            File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "ak", "fileAssets", "field_110446_Y");
+            Objects.requireNonNull(assetsDir, "Unable to load skin cache dir correctly!");
+            ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(context, assetsDir), "aL", "skinManager", "field_152350_aA");
         });
     }
 }

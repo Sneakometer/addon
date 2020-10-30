@@ -68,7 +68,7 @@ public class AddonContext {
         this.labyModAddon = labyModAddon;
         this.networkClient = networkClient;
         this.translationRegistry = translationRegistry;
-        this.getUserRole();
+        this.loadUserRole();
     }
 
     public NetworkClient getNetworkClient() {
@@ -161,7 +161,7 @@ public class AddonContext {
         return this.userRole;
     }
 
-    private void getUserRole() {
+    private void loadUserRole() {
         final UUID playerUniqueId = LabyMod.getInstance().getPlayerUUID();
         if (playerUniqueId == null || !this.active.get() || this.reconnecting.get()) {
             this.userRole = UserRole.USER;

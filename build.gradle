@@ -16,6 +16,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
         maven {
             name 'jitpack.io'
             url 'https://jitpack.io'
@@ -23,6 +24,6 @@ allprojects {
     }
 
     project.ext {
-        dependencyNetworkClientVersion = '1.5-SNAPSHOT'
+        dependencyNetworkClientVersion = '1.8-SNAPSHOT'
     }
 }

@@ -17,36 +17,54 @@
  */
 package de.hdskins.labymod.shared.settings;
 
+import net.labymod.addon.About;
+import net.labymod.addon.AddonLoader;
+import net.labymod.addon.online.AddonInfoManager;
+import net.labymod.addon.online.info.AddonInfo;
 import net.labymod.settings.elements.SettingsElement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
 public final class SettingInvoker {
 
-    private static List<SettingsElement> loadedSettings = new ArrayList<>();
+    private static About about;
+    private static List<SettingsElement> loadedSettings;
 
     private SettingInvoker() {
         throw new UnsupportedOperationException();
     }
 
+    public static void setAbout(About about) {
+        SettingInvoker.about = about;
+    }
+
     @Nonnull
     public static List<SettingsElement> getLoadedSettings() {
+        if (loadedSettings == null) {
+            // Try to find the addons in the online addons (where it should be normally)
+            AddonInfo addonInfo = AddonInfoManager.getInstance().getAddonInfoMap().get(about.uuid);
+            // The addon info wasn't at the online addons so try to find it in the offline ones
+            if (addonInfo == null) {
+                addonInfo = AddonLoader.getOfflineAddons().stream()
+                    .filter(addon -> addon.getUuid().equals(about.uuid))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Unable to find addon info of HDSkins addon"));
+            }
+
+            loadedSettings = addonInfo.getAddonElement().getSubSettings();
+        }
+
         return loadedSettings;
     }
 
-    public static void setLoadedSettings(List<SettingsElement> loadedSettings) {
-        SettingInvoker.loadedSettings = loadedSettings;
-    }
-
     public static void addSettingsElement(SettingsElement settingsElement) {
-        loadedSettings.add(settingsElement);
+        getLoadedSettings().add(settingsElement);
     }
 
     public static void unloadSettingElements() {
-        loadedSettings.clear();
+        getLoadedSettings().clear();
     }
 }

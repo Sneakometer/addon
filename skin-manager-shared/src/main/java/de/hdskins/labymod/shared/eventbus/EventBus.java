@@ -17,7 +17,6 @@
  */
 package de.hdskins.labymod.shared.eventbus;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -80,9 +79,9 @@ public interface EventBus {
         @Override
         public String toString() {
             if (this.wasSuccessful()) {
-                return Objects.toStringHelper(this).add("type", "success").toString();
+                return "PostResult{type=success}";
             } else {
-                return Objects.toStringHelper(this).add("type", "failure").add("exceptions", this.exceptions.values()).toString();
+                return "PostResult{type=failure, exceptions=" + this.exceptions + '}';
             }
         }
     }

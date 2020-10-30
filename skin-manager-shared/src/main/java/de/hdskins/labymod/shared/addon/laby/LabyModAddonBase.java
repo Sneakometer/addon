@@ -18,6 +18,7 @@
 package de.hdskins.labymod.shared.addon.laby;
 
 import de.hdskins.labymod.shared.settings.SettingInvoker;
+import net.labymod.addon.About;
 import net.labymod.api.LabyModAddon;
 import net.labymod.settings.elements.SettingsElement;
 
@@ -49,13 +50,15 @@ public abstract class LabyModAddonBase extends LabyModAddon {
 
     @Override
     public void init(String addonName, UUID uuid) {
-        super.init(addonName, uuid);
+        this.about = new About(uuid, addonName);
+        this.about.loaded = true;
+
+        SettingInvoker.setAbout(this.about);
         this.createAddonContext();
     }
 
     @Override
     protected void fillSettings(List<SettingsElement> list) {
-        SettingInvoker.setLoadedSettings(list);
     }
 
     protected abstract void createAddonContext();
