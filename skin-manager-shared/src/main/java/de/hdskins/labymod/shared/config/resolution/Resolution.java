@@ -17,6 +17,11 @@
  */
 package de.hdskins.labymod.shared.config.resolution;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Optional;
+
+@ParametersAreNonnullByDefault
 public enum Resolution {
 
     RESOLUTION_128_64(128, 64),
@@ -39,6 +44,17 @@ public enum Resolution {
     Resolution(int width, int height) {
         this.width = width;
         this.height = height;
+    }
+
+    @Nonnull
+    public static Optional<Resolution> byName(String name) {
+        for (Resolution value : VALUES) {
+            if (value.name().equalsIgnoreCase(name)) {
+                return Optional.of(value);
+            }
+        }
+
+        return Optional.empty();
     }
 
     public int getWidth() {
