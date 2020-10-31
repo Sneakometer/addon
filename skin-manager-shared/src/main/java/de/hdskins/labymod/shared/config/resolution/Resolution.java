@@ -24,7 +24,7 @@ import java.util.Optional;
 @ParametersAreNonnullByDefault
 public enum Resolution {
 
-    RESOLUTION_128_64(128, 64),
+    RESOLUTION_128x64(128, 64),
     RESOLUTION_128x128(128, 128),
     RESOLUTION_256x128(256, 128),
     RESOLUTION_256x256(256, 256),
