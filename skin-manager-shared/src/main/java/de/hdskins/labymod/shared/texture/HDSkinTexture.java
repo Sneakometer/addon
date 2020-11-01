@@ -22,20 +22,20 @@ import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.data.TextureMetadataSection;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class HDSkinTexture extends SimpleTexture {
 
     // initialized by class call
-    protected final ResourceLocation resourceLocation;
+    protected final BufferedImage bufferedImage;
     // current values
     protected boolean blur;
     protected boolean mipmap;
@@ -45,9 +45,16 @@ public class HDSkinTexture extends SimpleTexture {
     // lazy initialized
     protected int glTextureId = -1;
 
-    public HDSkinTexture(ResourceLocation resourceLocation) {
+    public HDSkinTexture(Path skinPath) throws IOException {
         super(null); // we override all methods so no need to actually hand it over
-        this.resourceLocation = resourceLocation;
+        try (InputStream inputStream = Files.newInputStream(skinPath)) {
+            this.bufferedImage = ImageIO.read(inputStream);
+        }
+    }
+
+    public HDSkinTexture(BufferedImage bufferedImage) {
+        super(null); // we override all methods so no need to actually hand it over
+        this.bufferedImage = bufferedImage;
     }
 
     @Override
@@ -78,31 +85,7 @@ public class HDSkinTexture extends SimpleTexture {
 
     @Override
     public void loadTexture(IResourceManager resourceManager) {
-        // Ensure that we call this on the main thread because it is the only thread in
-        // the client which has a opengl context
-        MCUtil.call(ConcurrentUtil.fromRunnable(() -> {
-            // Reset the gl texture id as we now set it new
-            this.deleteGlTexture();
-            // Get the resource this texture targets from the resource manager
-            IResource resource = resourceManager.getResource(this.resourceLocation);
-            try (InputStream inputStream = resource.getInputStream()) {
-                // Read the image from the resource stream
-                BufferedImage bufferedImage = ImageIO.read(inputStream);
-                // try to define some extra things using the resource metadata
-                boolean blur = false;
-                boolean clamp = false;
-                if (resource.hasMetadata()) {
-                    TextureMetadataSection textureMetadataSection = resource.getMetadata("texture");
-                    if (textureMetadataSection != null) {
-                        blur = textureMetadataSection.getTextureBlur();
-                        clamp = textureMetadataSection.getTextureClamp();
-                    }
-                }
-                // Now we can actually push the image allocating it (which is not the allocation you may
-                // think about but it's minecraft what did you expect?)
-                TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), bufferedImage, blur, clamp);
-            }
-        }));
+        // there is nothing to load
     }
 
     @Override
@@ -111,7 +94,7 @@ public class HDSkinTexture extends SimpleTexture {
             // We lazily set this up to spare the resources we don't need for later. We have to
             // ensure that we call this on the main thread because it is the only thread in
             // the client which has a opengl context
-            this.glTextureId = MCUtil.call(() -> GL11.glGenTextures());
+            this.glTextureId = MCUtil.call(() -> TextureUtil.uploadTextureImage(GL11.glGenTextures(), this.bufferedImage));
         }
 
         return this.glTextureId;

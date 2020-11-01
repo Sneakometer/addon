@@ -62,6 +62,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -138,13 +139,22 @@ public class HDSkinManager extends SkinManager {
             return location;
         }
         // Check if the file locally already exits
-        Path localSkinPath = this.assetsDirectory.resolve(location.getResourcePath());
-        if (Files.exists(localSkinPath) && this.textureManager.loadTexture(location, new HDSkinTexture(location))) {
-            // If a callback is provided by the method we should post the result to it
-            if (callback != null) {
-                MCUtil.call(ConcurrentUtil.fromRunnable(() -> callback.skinAvailable(type, location, texture)));
+        Path localSkinPath = this.assetsDirectory.resolve(location.getPath());
+        if (Files.exists(localSkinPath)) {
+            try {
+                if (this.textureManager.loadTexture(location, new HDSkinTexture(localSkinPath))) {
+                    // If a callback is provided by the method we should post the result to it
+                    if (callback != null) {
+                        MCUtil.call(ConcurrentUtil.fromRunnable(() -> callback.skinAvailable(type, location, texture)));
+                    }
+                    return location;
+                } else {
+                    // unreachable but well
+                    Files.deleteIfExists(localSkinPath);
+                }
+            } catch (IOException exception) {
+                LOGGER.debug("Tried to load skin {} from local path {} but failed", location, localSkinPath, exception);
             }
-            return location;
         }
         // We were disconnected from the server so we cannot load a skin from there
         if (!this.addonContext.getActive().get()) {
@@ -217,8 +227,9 @@ public class HDSkinManager extends SkinManager {
             }
             return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null));
         }
-        this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profile.getId())).addListener(this.forSkinIdLoad(profile, null, false));
-        //this.loadProfileTextures(profile, null, false);
+        if (this.addonContext.getActive().get()) {
+            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profile.getId())).addListener(this.forSkinIdCacheOnly(profile));
+        }
         return this.mojangProfileCache.getUnchecked(profile);
     }
 
@@ -248,6 +259,32 @@ public class HDSkinManager extends SkinManager {
             public void cancelled() {
                 HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
                 HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
+            }
+        };
+    }
+
+    private FutureListener<PacketBase> forSkinIdCacheOnly(GameProfile profile) {
+        return new FutureListener<PacketBase>() {
+            @Override
+            public void nullResult() {
+                HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+            }
+
+            @Override
+            public void nonNullResult(PacketBase packetBase) {
+                if (packetBase instanceof PacketServerResponseSkinId) {
+                    PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
+                    if (response.hasSkin()) {
+                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), new SkinHashWrapper(response));
+                    } else {
+                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+                    }
+                }
+            }
+
+            @Override
+            public void cancelled() {
+                HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
             }
         };
     }
@@ -284,21 +321,20 @@ public class HDSkinManager extends SkinManager {
                     IImageBuffer buffer = new ImageBufferDownload();
                     try (InputStream stream = new ByteArrayInputStream(response.getSkinData())) {
                         BufferedImage bufferedImage = buffer.parseUserSkin(ImageIO.read(stream));
-                        try (OutputStream outputStream = Files.newOutputStream(targetLocalPath)) {
+                        try (OutputStream outputStream = Files.newOutputStream(targetLocalPath, StandardOpenOption.CREATE)) {
                             ImageIO.write(bufferedImage, "png", outputStream);
                         }
+
+                        MCUtil.call(ConcurrentUtil.fromRunnable(() -> {
+                            HDSkinManager.this.textureManager.loadTexture(location, new HDSkinTexture(bufferedImage));
+                            if (callback != null) {
+                                callback.skinAvailable(type, location, texture);
+                            }
+                        }));
                     } catch (IOException exception) {
                         LOGGER.debug("Unable to load skin of texture: {} type: {} callback: {} path: {}", texture, type, callback, targetLocalPath, exception);
                         MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
-                        return;
                     }
-
-                    MCUtil.call(ConcurrentUtil.fromRunnable(() -> {
-                        HDSkinManager.this.textureManager.loadTexture(location, new HDSkinTexture(location));
-                        if (callback != null) {
-                            callback.skinAvailable(type, location, texture);
-                        }
-                    }));
                 } else {
                     MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
                 }
