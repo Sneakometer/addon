@@ -22,8 +22,11 @@ import de.hdskins.labymod.shared.addon.AddonContextLoader;
 import de.hdskins.labymod.shared.addon.laby.LabyModAddonBase;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.network.NetworkPlayerInfo;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class HdSkinsAddon extends LabyModAddonBase {
@@ -31,9 +34,27 @@ public class HdSkinsAddon extends LabyModAddonBase {
     @Override
     protected void createAddonContext() {
         AddonContextLoader.initAddon(this).thenAcceptAsync(context -> {
-            File skinCacheDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "skinCacheDir", "field_152796_d", "c");
-            Objects.requireNonNull(skinCacheDir, "Unable to load skin cache dir correctly!");
-            //TODO: ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(context, skinCacheDir.toPath()), "aP", "skinManager", "field_152350_aA");
+            // assets directory
+            File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "fileAssets", "field_110446_Y", "am");
+            Objects.requireNonNull(assetsDir, "Unable to load assets dir correctly!");
+            // Network player info bridge
+            Field playerTexturesLoaded = ReflectionUtils.getFieldByNames(NetworkPlayerInfo.class, "playerTexturesLoaded", "field_178864_d", "e");
+            Objects.requireNonNull(playerTexturesLoaded, "Unable to find playerTexturesLoaded boolean");
+
+            ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(
+                context,
+                assetsDir,
+                uniqueId -> {
+                    NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getConnection();
+                    if (netHandler != null) {
+                        NetworkPlayerInfo playerInfo = netHandler.getPlayerInfo(uniqueId);
+                        // it may be null but forge forgot the @Nullable annotation there
+                        if (playerInfo != null) {
+                            ReflectionUtils.set(playerInfo, Boolean.FALSE, playerTexturesLoaded);
+                        }
+                    }
+                }
+            ), "skinManager", "field_152350_aA", "aP");
         });
     }
 }

@@ -22,8 +22,11 @@ import de.hdskins.labymod.shared.addon.AddonContextLoader;
 import de.hdskins.labymod.shared.addon.laby.LabyModAddonBase;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.network.NetworkPlayerInfo;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class HdSkinsAddon extends LabyModAddonBase {
@@ -31,9 +34,26 @@ public class HdSkinsAddon extends LabyModAddonBase {
     @Override
     protected void createAddonContext() {
         AddonContextLoader.initAddon(this).thenAcceptAsync(context -> {
-            File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "ak", "fileAssets", "field_110446_Y");
-            Objects.requireNonNull(assetsDir, "Unable to load skin cache dir correctly!");
-            ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(context, assetsDir), "aL", "skinManager", "field_152350_aA");
+            // assets directory
+            File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "fileAssets", "field_110446_Y", "ak");
+            Objects.requireNonNull(assetsDir, "Unable to assets dir correctly!");
+            // Network player info bridge
+            Field playerTexturesLoaded = ReflectionUtils.getFieldByNames(NetworkPlayerInfo.class, "playerTexturesLoaded", "field_178864_d", "d");
+            Objects.requireNonNull(playerTexturesLoaded, "Unable to find playerTexturesLoaded boolean");
+
+            ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(
+                context,
+                assetsDir,
+                uniqueId -> {
+                    NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getNetHandler();
+                    if (netHandler != null) {
+                        NetworkPlayerInfo playerInfo = netHandler.getPlayerInfo(uniqueId);
+                        if (playerInfo != null) {
+                            ReflectionUtils.set(playerInfo, Boolean.FALSE, playerTexturesLoaded);
+                        }
+                    }
+                }
+            ), "skinManager", "field_152350_aA", "aL");
         });
     }
 }

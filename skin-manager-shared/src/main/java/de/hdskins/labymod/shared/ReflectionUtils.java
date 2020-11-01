@@ -51,7 +51,11 @@ public final class ReflectionUtils {
 
     public static Field getFieldByName(Class<?> clazz, String fieldName) {
         try {
-            return clazz.getDeclaredField(fieldName);
+            Field field = clazz.getDeclaredField(fieldName);
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            return field;
         } catch (NoSuchFieldException exception) {
             return null;
         }
@@ -72,7 +76,10 @@ public final class ReflectionUtils {
                 MODIFIERS_FIELD.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             }
 
-            field.setAccessible(true);
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
+            }
+
             field.set(instance, newValue);
         } catch (IllegalAccessException exception) {
             exception.printStackTrace();
