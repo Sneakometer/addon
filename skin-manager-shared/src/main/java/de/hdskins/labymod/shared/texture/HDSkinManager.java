@@ -82,7 +82,7 @@ public class HDSkinManager extends SkinManager {
     private static final SkinHashWrapper NO_SKIN = new SkinHashWrapper();
     private static final Logger LOGGER = LogManager.getLogger(HDSkinManager.class);
     private static final Map<String, String> SLIM = ImmutableMap.of("model", "slim");
-    private static final Collection<RemovalCause> HANDLED_CAUSES = EnumSet.of(RemovalCause.SIZE, RemovalCause.COLLECTED, RemovalCause.EXPIRED);
+    private static final Collection<RemovalCause> HANDLED_CAUSES = EnumSet.range(RemovalCause.COLLECTED, RemovalCause.SIZE);
 
     private final Path assetsDirectory;
     private final AddonContext addonContext;
