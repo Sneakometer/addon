@@ -60,7 +60,6 @@ public final class TranslationRegistryLoader {
             }
 
             return TranslationRegistry.fromMap(languages);
-
         } catch (IOException exception) {
             LOGGER.debug("Unable to load language files", exception);
             return TranslationRegistry.empty();
