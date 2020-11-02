@@ -261,7 +261,9 @@ public class HDSkinManager extends SkinManager {
         if (!this.nonSentUnloads.isEmpty()) {
             UUID uniqueId;
             while ((uniqueId = this.nonSentUnloads.poll()) != null) {
-                this.addonContext.getNetworkClient().sendPacket(new PacketServerLiveSkinUnload(uniqueId));
+                if (this.uniqueIdToSkinHashCache.getIfPresent(uniqueId) == null) {
+                    this.addonContext.getNetworkClient().sendPacket(new PacketServerLiveSkinUnload(uniqueId));
+                }
             }
         }
     }
