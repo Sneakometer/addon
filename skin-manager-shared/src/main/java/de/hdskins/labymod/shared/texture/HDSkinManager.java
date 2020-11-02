@@ -22,6 +22,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -39,6 +41,7 @@ import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkin;
 import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkinId;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkin;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkinId;
+import de.hdskins.protocol.packets.reading.live.PacketServerLiveSkinUnload;
 import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
@@ -63,8 +66,12 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -75,10 +82,12 @@ public class HDSkinManager extends SkinManager {
     private static final SkinHashWrapper NO_SKIN = new SkinHashWrapper();
     private static final Logger LOGGER = LogManager.getLogger(HDSkinManager.class);
     private static final Map<String, String> SLIM = ImmutableMap.of("model", "slim");
+    private static final Collection<RemovalCause> HANDLED_CAUSES = EnumSet.of(RemovalCause.SIZE, RemovalCause.COLLECTED, RemovalCause.EXPIRED);
 
     private final Path assetsDirectory;
     private final AddonContext addonContext;
     private final Consumer<UUID> skinLoadedRemover;
+    private final Queue<UUID> nonSentUnloads = new ConcurrentLinkedQueue<>();
     private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
     private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = CacheBuilder.newBuilder()
         .expireAfterAccess(30, TimeUnit.SECONDS)
@@ -102,6 +111,7 @@ public class HDSkinManager extends SkinManager {
         });
     private final Cache<UUID, SkinHashWrapper> uniqueIdToSkinHashCache = CacheBuilder.newBuilder()
         .expireAfterAccess(30, TimeUnit.SECONDS)
+        .removalListener(this::handleRemove)
         .concurrencyLevel(4)
         .ticker(Ticker.systemTicker())
         .build();
@@ -234,6 +244,26 @@ public class HDSkinManager extends SkinManager {
             this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profile.getId())).addListener(this.forSkinIdCacheOnly(profile));
         }
         return this.mojangProfileCache.getUnchecked(profile);
+    }
+
+    private void handleRemove(RemovalNotification<Object, ?> notification) {
+        if (notification.getKey() instanceof UUID && HANDLED_CAUSES.contains(notification.getCause())) {
+            if (this.addonContext.getActive().get()) {
+                this.sentAllQueuedUnloads();
+                this.addonContext.getNetworkClient().sendPacket(new PacketServerLiveSkinUnload((UUID) notification.getKey()));
+            } else {
+                this.nonSentUnloads.add((UUID) notification.getKey());
+            }
+        }
+    }
+
+    private void sentAllQueuedUnloads() {
+        if (!this.nonSentUnloads.isEmpty()) {
+            UUID uniqueId;
+            while ((uniqueId = this.nonSentUnloads.poll()) != null) {
+                this.addonContext.getNetworkClient().sendPacket(new PacketServerLiveSkinUnload(uniqueId));
+            }
+        }
     }
 
     private FutureListener<PacketBase> forSkinIdLoad(GameProfile profile, @Nullable SkinAvailableCallback callback, boolean requireSecure) {
