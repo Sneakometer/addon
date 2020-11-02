@@ -87,7 +87,7 @@ tasks.withType<ShadowJar> {
 dependencies {
     "compileOnly"(project(":skin-manager-shared"))
     "compileOnly"(files("../libs/lm_api.jar"))
-    "implementation"("de.hdskins.protocol:client:" + ext.get("dependencyNetworkClientVersion") as String)
+    "implementation"("de.hdskins.protocol:client:" + ext["dependencyNetworkClientVersion"] as String)
 }
 
 afterEvaluate {
@@ -101,7 +101,7 @@ afterEvaluate {
             }
 
             delete {
-                file("./../build/libs/skin-manager-root-*.jar")
+                file("./../build/libs/skin-manager-root-" + project.version + ".jar")
             }
         }
     }

@@ -42,19 +42,26 @@ public final class TranslationRegistryLoader {
 
     @Nonnull
     public static TranslationRegistry buildInternalTranslationRegistry() {
-        try (InputStream inputStream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("langs")) {
+        try (InputStream inputStream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("languages")) {
             if (inputStream == null) {
                 return TranslationRegistry.empty();
             }
 
             Map<String, Properties> languages = new HashMap<>();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                String lang;
-                while ((lang = reader.readLine()) != null) {
-                    try (InputStream languageStream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("lang/" + lang + ".properties")) {
-                        Properties properties = new Properties();
-                        properties.load(languageStream);
-                        languages.put(lang, properties);
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("# ") || line.trim().isEmpty() || !line.contains(":")) {
+                        continue;
+                    }
+
+                    String[] parts = line.split(":");
+                    if (parts.length == 2) {
+                        openStreamOrLog(parts[1], stream -> {
+                            Properties properties = new Properties();
+                            properties.load(stream);
+                            languages.put(parts[0], properties);
+                        });
                     }
                 }
             }
@@ -64,5 +71,20 @@ public final class TranslationRegistryLoader {
             LOGGER.debug("Unable to load language files", exception);
             return TranslationRegistry.empty();
         }
+    }
+
+    private static void openStreamOrLog(String file, IOExceptionConsumer<InputStream> consumer) {
+        try (InputStream stream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("lang/" + file)) {
+            if (stream != null) {
+                consumer.accept(stream);
+            }
+        } catch (IOException exception) {
+            LOGGER.debug("Unable to load language file {}", file, exception);
+        }
+    }
+
+    @FunctionalInterface
+    private interface IOExceptionConsumer<T> {
+        void accept(@Nonnull T t) throws IOException;
     }
 }

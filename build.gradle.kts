@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 
 plugins {
@@ -50,4 +51,14 @@ allprojects {
     }
 
     project.ext.set("dependencyNetworkClientVersion", "1.10-SNAPSHOT")
+    project.ext.set("currentShortGitRevision", getCurrentShortGitRevision())
+}
+
+fun getCurrentShortGitRevision(): String {
+    val stream = ByteArrayOutputStream()
+    exec {
+        commandLine("git", "rev-parse", "HEAD")
+        standardOutput = stream
+    }
+    return stream.toString().trim().substring(0, 8)
 }
