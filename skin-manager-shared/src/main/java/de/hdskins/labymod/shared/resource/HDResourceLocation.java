@@ -22,12 +22,13 @@ import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 
 @ParametersAreNonnullByDefault
 public class HDResourceLocation extends ResourceLocation {
 
-    private static final String[] EMPTY = new String[]{"a", "b"};
-    private static final String DOMAIN = "minecraft";
+    private static final String MINECRAFT_DOMAIN = "minecraft";
+    private static final String[] EMPTY = Collections.nCopies(2, " ").toArray(new String[0]);
 
     private final String path;
     private final String resourcePath;
@@ -57,12 +58,12 @@ public class HDResourceLocation extends ResourceLocation {
 
     @Override
     public String getResourceDomain() {
-        return DOMAIN;
+        return MINECRAFT_DOMAIN;
     }
 
     @Override
     public String toString() {
-        return DOMAIN + ':' + this.resourcePath;
+        return MINECRAFT_DOMAIN + ':' + this.resourcePath;
     }
 
     @Override
