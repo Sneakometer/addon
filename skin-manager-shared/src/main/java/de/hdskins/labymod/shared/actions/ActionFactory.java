@@ -37,12 +37,12 @@ public final class ActionFactory {
 
     @Nonnull
     public static List<MarkedUserActionEntry> bakeUserActionEntries(AddonContext addonContext) {
-        MarkedUserActionEntry reportSkinUserActionEntry = new ReportUserActionEntry(addonContext);
         MarkedUserActionEntry toggleSkinUserActionEntry = new ToggleSkinUserActionEntry(addonContext);
         if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
             MarkedUserActionEntry deleteSkinUserActionEntry = new DeleteUserActionEntry(addonContext);
             return Arrays.asList(toggleSkinUserActionEntry, deleteSkinUserActionEntry);
         } else {
+            MarkedUserActionEntry reportSkinUserActionEntry = new ReportUserActionEntry(addonContext);
             return Arrays.asList(reportSkinUserActionEntry, toggleSkinUserActionEntry);
         }
     }
