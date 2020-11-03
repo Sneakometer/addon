@@ -19,14 +19,15 @@ package de.hdskins.labymod.shared.settings.toggle;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.utils.Constants;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 @ParametersAreNonnullByDefault
-public class SkinToggleButtonClickHandler implements Function<Boolean, CompletableFuture<Boolean>>, Constants {
+public class SkinToggleButtonClickHandler implements BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>>, Constants {
 
     private final AddonContext addonContext;
 
@@ -35,7 +36,7 @@ public class SkinToggleButtonClickHandler implements Function<Boolean, Completab
     }
 
     @Override
-    public CompletableFuture<Boolean> apply(Boolean aBoolean) {
+    public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean aBoolean) {
         if (aBoolean) {
             NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-enabled"));
         } else {

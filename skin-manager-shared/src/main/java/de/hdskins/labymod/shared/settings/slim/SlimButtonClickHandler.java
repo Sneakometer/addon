@@ -19,14 +19,17 @@ package de.hdskins.labymod.shared.settings.slim;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.settings.countdown.DefaultCountdownElementNameChanger;
+import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
+import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.utils.Constants;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 @ParametersAreNonnullByDefault
-public class SlimButtonClickHandler implements Function<Boolean, CompletableFuture<Boolean>>, Constants {
+public class SlimButtonClickHandler implements BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>>, Constants {
 
     private final AddonContext addonContext;
 
@@ -35,11 +38,19 @@ public class SlimButtonClickHandler implements Function<Boolean, CompletableFutu
     }
 
     @Override
-    public CompletableFuture<Boolean> apply(Boolean aBoolean) {
+    public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean aBoolean) {
         AddonContext.ServerResult serverResult = this.addonContext.updateSlim(aBoolean);
         if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
             NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+            this.addonContext.getAddonConfig().setSlim(!aBoolean);
             return CompletableFuture.completedFuture(!aBoolean);
+        }
+
+        if (this.addonContext.getRateLimits().getSetSlimRateLimit() > 0) {
+            SettingsCountdownRegistry.registerTask(
+                new DefaultCountdownElementNameChanger(element),
+                this.addonContext.getRateLimits().getSetSlimRateLimit()
+            );
         }
 
         CompletableFuture<Boolean> future = new CompletableFuture<>();

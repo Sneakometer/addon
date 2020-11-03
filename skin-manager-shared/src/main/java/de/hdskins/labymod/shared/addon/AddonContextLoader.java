@@ -45,15 +45,15 @@ public final class AddonContextLoader {
     public static CompletableFuture<AddonContext> initAddon(LabyModAddon addon) {
         AddonConfig addonConfig = JsonAddonConfig.load(addon);
         LOGGER.debug("Loaded addon config: {} with hash: {}", addonConfig.toString(), addonConfig.hashCode());
-        return BackendUtils.connectToServer(addonConfig).thenApply(networkClient -> {
+        return BackendUtils.connectToServer(addonConfig).thenApplyAsync(networkClient -> {
             TranslationRegistry translationRegistry = TranslationRegistryLoader.buildInternalTranslationRegistry();
             return new AddonContext(addonConfig, addon, networkClient, translationRegistry);
-        }).thenApply(addonContext -> {
+        }).thenApplyAsync(addonContext -> {
             for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(addonContext)) {
                 ActionInvoker.addUserActionEntry(entry);
             }
             return addonContext;
-        }).thenApply(addonContext -> {
+        }).thenApplyAsync(addonContext -> {
             for (SettingsElement element : SettingsFactory.bakeSettings(addonContext)) {
                 SettingInvoker.addSettingsElement(element);
             }

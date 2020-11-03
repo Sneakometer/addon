@@ -74,6 +74,15 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
     }
 
     @Override
+    public void reSyncLanguageCode() {
+        String chosenLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
+        if (this.currentLocale == null || !this.currentLocale.equals(chosenLocale)) {
+            this.currentLocale = chosenLocale;
+            Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
+        }
+    }
+
+    @Override
     public boolean isTranslationPresent(String language, String translationKey) {
         this.reSyncLanguageCode();
         Properties source = this.loadedLanguageFiles.get(language);
@@ -88,13 +97,5 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
 
         this.loadedLanguageFiles.put(languageKey, languageFile);
         return true;
-    }
-
-    private void reSyncLanguageCode() {
-        String chosenLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
-        if (this.currentLocale == null || !this.currentLocale.equals(chosenLocale)) {
-            this.currentLocale = chosenLocale;
-            Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
-        }
     }
 }

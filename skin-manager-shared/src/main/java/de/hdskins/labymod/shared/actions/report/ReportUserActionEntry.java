@@ -21,16 +21,20 @@ import de.hdskins.labymod.shared.actions.ActionConstants;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
+import net.labymod.main.LabyMod;
 import net.labymod.user.User;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @ParametersAreNonnullByDefault
 public class ReportUserActionEntry extends MarkedUserActionEntry implements ActionConstants {
 
     private final AddonContext addonContext;
+    private final AtomicLong nextEnableTime = new AtomicLong();
 
     public ReportUserActionEntry(AddonContext addonContext) {
         super(
@@ -44,6 +48,16 @@ public class ReportUserActionEntry extends MarkedUserActionEntry implements Acti
 
     @Override
     public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
+        if (this.nextEnableTime.get() >= System.currentTimeMillis()) {
+            LabyMod.getInstance().displayMessageInChat(this.addonContext.getTranslationRegistry().translateMessage(
+                "user-skin-report-rate-limited",
+                TimeUnit.MILLISECONDS.toSeconds(this.nextEnableTime.get() - System.currentTimeMillis())
+            ));
+            return;
+        } else if (this.addonContext.getRateLimits().getReportRateLimit() > 0) {
+            this.nextEnableTime.set(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.addonContext.getRateLimits().getReportRateLimit()));
+        }
+
         AddonContext.ServerResult serverResult = this.addonContext.reportSkin(entityPlayer.getGameProfile().getId());
         if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
             LOGGER.debug("Unable to report hd skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());

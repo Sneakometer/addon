@@ -60,7 +60,6 @@ public final class SettingsFactory {
             addonContext.getTranslationRegistry().translateMessage("button-click-here"),
             new UploadButtonClickHandler(addonContext),
             buttonElement -> {
-                buttonElement.setEnabled(true);
                 buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("change-skin-option-description"));
             }
         );
@@ -70,7 +69,6 @@ public final class SettingsFactory {
             addonContext.getTranslationRegistry().translateMessage("button-click-here"),
             new DeleteButtonClickHandler(addonContext),
             buttonElement -> {
-                buttonElement.setEnabled(true);
                 buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("delete-skin-option-description"));
             }
         );
@@ -90,7 +88,7 @@ public final class SettingsFactory {
             new ControlElement.IconData(Material.RECORD_9),
             addonContext.getAddonConfig().getMaxSkinResolution().name().replaceFirst(RESOLUTION_NAME_PREFIX, ""),
             Arrays.stream(Resolution.VALUES).map(Enum::name).map(value -> value.replaceFirst(RESOLUTION_NAME_PREFIX, "")).collect(Collectors.toList()),
-            newValue -> Resolution.byName(RESOLUTION_NAME_PREFIX + newValue).ifPresent(addonContext::setMaxSkinResolution),
+            (ignored, newValue) -> Resolution.byName(RESOLUTION_NAME_PREFIX + newValue).ifPresent(addonContext::setMaxSkinResolution),
             dropDownElement -> {
                 dropDownElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("set-max-resolution-option-description"));
             }

@@ -24,8 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public interface Constants {
-    EventBus EVENT_BUS = new DefaultEventBus();
-    ExecutorService EXECUTOR = Executors.newCachedThreadPool();
     String SUCCESS = "§a§l✔";
     String FAILURE = "§c§l✖";
+    EventBus EVENT_BUS = new DefaultEventBus();
+    ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 }

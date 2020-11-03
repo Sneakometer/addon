@@ -26,20 +26,22 @@ import net.minecraft.client.gui.GuiButton;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class ChangeableBooleanElement extends BooleanElement {
 
-    private final Function<Boolean, CompletableFuture<Boolean>> toggleListener;
+    private final BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener;
     private final AtomicBoolean currentValue;
 
     private String stringEnabled;
     private String stringDisabled;
     private GuiButton buttonToggle;
 
+    private boolean enabled = true;
     private boolean pressable = true;
 
-    public ChangeableBooleanElement(String displayName, IconData iconData, String on, String off, boolean currentValue, Function<Boolean, CompletableFuture<Boolean>> toggleListener) {
+    public ChangeableBooleanElement(String displayName, IconData iconData, String on, String off,
+                                    boolean currentValue, BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener) {
         super(displayName, iconData, null, currentValue);
         this.toggleListener = toggleListener;
         this.currentValue = new AtomicBoolean(currentValue);
@@ -84,7 +86,7 @@ public class ChangeableBooleanElement extends BooleanElement {
 
     @Override
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-        if (!this.pressable) {
+        if (!this.enabled || !this.pressable) {
             return;
         }
 
@@ -92,7 +94,7 @@ public class ChangeableBooleanElement extends BooleanElement {
             boolean playSound = true;
 
             if (this.toggleListener != null) {
-                CompletableFuture<Boolean> future = this.toggleListener.apply(!this.currentValue.get());
+                CompletableFuture<Boolean> future = this.toggleListener.apply(this, !this.currentValue.get());
                 if (future != null) {
                     this.pressable = false;
                     future.thenAccept(value -> {
@@ -119,6 +121,11 @@ public class ChangeableBooleanElement extends BooleanElement {
 
     public void setCurrentValue(boolean currentValue) {
         this.currentValue.set(currentValue);
+    }
+
+    @Override
+    public void setSettingEnabled(boolean settingEnabled) {
+        this.enabled = settingEnabled;
     }
 
     @Override

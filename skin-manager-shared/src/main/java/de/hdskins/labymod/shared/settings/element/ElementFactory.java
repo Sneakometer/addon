@@ -22,14 +22,14 @@ import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElem
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
-import net.labymod.settings.elements.StringElement;
 import net.labymod.utils.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 @ParametersAreNonnullByDefault
 public interface ElementFactory {
@@ -39,18 +39,19 @@ public interface ElementFactory {
     }
 
     @Nonnull
-    StringElement brewStringElement(String displayName, ControlElement.IconData iconData, String currentValue, Consumer<String> changeListener, Consumer<StringElement> customizer);
-
-    @Nonnull
     ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
-                                                Function<Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer);
+                                                BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer);
 
     @Nonnull <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values,
-                                                        Consumer<T> changeListener, Consumer<DropDownElement<T>> customizer);
+                                                        BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer);
 
     @Nonnull
-    ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Runnable clickListener, Consumer<ButtonElement> customizer);
+    ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer);
 
     @Nonnull
     PlayerSkinRenderElement brewRenderElement(Consumer<PlayerSkinRenderElement> customizer);
+
+    boolean areSettingsEnabledByDefault();
+
+    void setSettingsEnabledByDefault(boolean settingsEnabledByDefault);
 }

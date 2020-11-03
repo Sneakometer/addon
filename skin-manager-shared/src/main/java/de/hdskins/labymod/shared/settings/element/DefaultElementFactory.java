@@ -23,52 +23,48 @@ import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
-import net.labymod.settings.elements.StringElement;
 import net.labymod.utils.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 @ParametersAreNonnullByDefault
 class DefaultElementFactory implements ElementFactory {
 
     protected static final ElementFactory DEFAULT = new DefaultElementFactory();
+    private boolean settingsEnabledByDefault = true;
 
     private DefaultElementFactory() {
     }
 
     @Nonnull
     @Override
-    public StringElement brewStringElement(String displayName, ControlElement.IconData iconData, String currentValue, Consumer<String> changeListener, Consumer<StringElement> customizer) {
-        StringElement stringElement = new StringElement(displayName, iconData, currentValue, changeListener);
-        customizer.accept(stringElement);
-        return stringElement;
-    }
-
-    @Nonnull
-    @Override
     public ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
-                                                       Function<Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer) {
+                                                       BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer) {
         ChangeableBooleanElement element = new ChangeableBooleanElement(displayName, iconData, on, off, currentValue, toggleListener);
+        element.setSettingEnabled(this.settingsEnabledByDefault);
         customizer.accept(element);
         return element;
     }
 
     @Nonnull
     @Override
-    public <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, Consumer<T> changeListener, Consumer<DropDownElement<T>> customizer) {
-        DropDownElement<T> dropDownElement = new CustomDropDownElement<>(displayName, iconData, initialValue, values, changeListener);
+    public <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer) {
+        DropDownElement<T> dropDownElement = CustomDropDownElement.of(displayName, iconData, initialValue, values, changeListener);
+        dropDownElement.setSettingEnabled(this.settingsEnabledByDefault);
         customizer.accept(dropDownElement);
         return dropDownElement;
     }
 
     @Nonnull
     @Override
-    public ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Runnable clickListener, Consumer<ButtonElement> customizer) {
+    public ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer) {
         ButtonElement element = new ButtonElement(displayName, iconData, inButtonName, clickListener);
+        element.setSettingEnabled(this.settingsEnabledByDefault);
         customizer.accept(element);
         return element;
     }
@@ -79,5 +75,15 @@ class DefaultElementFactory implements ElementFactory {
         PlayerSkinRenderElement element = new PlayerSkinRenderElement();
         customizer.accept(element);
         return element;
+    }
+
+    @Override
+    public boolean areSettingsEnabledByDefault() {
+        return this.settingsEnabledByDefault;
+    }
+
+    @Override
+    public void setSettingsEnabledByDefault(boolean settingsEnabledByDefault) {
+        this.settingsEnabledByDefault = settingsEnabledByDefault;
     }
 }

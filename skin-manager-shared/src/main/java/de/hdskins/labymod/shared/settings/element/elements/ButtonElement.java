@@ -20,6 +20,7 @@ package de.hdskins.labymod.shared.settings.element.elements;
 import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.ControlElement;
+import net.labymod.utils.Consumer;
 import net.minecraft.client.gui.GuiButton;
 
 import java.awt.Color;
@@ -27,10 +28,11 @@ import java.awt.Color;
 public class ButtonElement extends ControlElement {
 
     private final GuiButton button = new GuiButton(-2, 0, 0, 0, 20, "");
-    private final Runnable clickListener;
+    private final Consumer<ButtonElement> clickListener;
     private boolean enabled;
+    private int overriddenStringWidth = -1;
 
-    public ButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Runnable clickListener) {
+    public ButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener) {
         super(displayName, iconData);
         this.button.displayString = inButtonName;
         this.clickListener = clickListener;
@@ -42,6 +44,12 @@ public class ButtonElement extends ControlElement {
 
     public void setText(String text) {
         this.button.displayString = text;
+        this.overriddenStringWidth = -1;
+    }
+
+    public void setText(String text, int overriddenStringWidth) {
+        this.button.displayString = text;
+        this.overriddenStringWidth = overriddenStringWidth;
     }
 
     @Override
@@ -49,7 +57,7 @@ public class ButtonElement extends ControlElement {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         if (this.button.mousePressed(this.mc, mouseX, mouseY)) {
             this.button.playPressSound(super.mc.getSoundHandler());
-            this.clickListener.run();
+            this.clickListener.accept(this);
         }
     }
 
@@ -61,7 +69,12 @@ public class ButtonElement extends ControlElement {
             LabyMod.getInstance().getDrawUtils().drawRectangle(x - 1, y, x, maxY, Color.GRAY.getRGB());
         }
 
-        int buttonWidth = super.displayName == null ? maxX - x : LabyModCore.getMinecraft().getFontRenderer().getStringWidth(this.button.displayString) + 20;
+        int stringWidth = this.overriddenStringWidth;
+        if (stringWidth == -1) {
+            stringWidth = LabyModCore.getMinecraft().getFontRenderer().getStringWidth(this.button.displayString);
+        }
+
+        int buttonWidth = super.displayName == null ? maxX - x : stringWidth + 20;
 
         this.button.setWidth(buttonWidth);
         this.button.enabled = this.enabled;
@@ -72,8 +85,13 @@ public class ButtonElement extends ControlElement {
         LabyModCore.getMinecraft().drawButton(this.button, mouseX, mouseY);
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        this.button.enabled = enabled;
+    @Override
+    public void setSettingEnabled(boolean settingEnabled) {
+        this.enabled = settingEnabled;
+        this.button.enabled = settingEnabled;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
     }
 }

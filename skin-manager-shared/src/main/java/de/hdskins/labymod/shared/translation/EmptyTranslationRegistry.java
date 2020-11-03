@@ -58,6 +58,10 @@ public class EmptyTranslationRegistry implements TranslationRegistry {
     }
 
     @Override
+    public void reSyncLanguageCode() {
+    }
+
+    @Override
     public boolean isTranslationPresent(String language, String translationKey) {
         return false;
     }

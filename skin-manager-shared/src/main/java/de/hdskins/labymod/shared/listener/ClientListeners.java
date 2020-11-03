@@ -34,11 +34,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @ParametersAreNonnullByDefault
 public final class ClientListeners {
 
     private final HDSkinManager hdSkinManager;
+    private final AtomicInteger currentTick = new AtomicInteger();
     private UUID currentUniqueId;
 
     public ClientListeners(HDSkinManager hdSkinManager) {
@@ -51,7 +53,17 @@ public final class ClientListeners {
         if (event.phase != TickEvent.Phase.END) {
             return;
         }
-
+        // Evaluate if we did a full tick (every second)
+        final boolean fullTick = this.currentTick.incrementAndGet() >= 20;
+        if (fullTick) {
+            this.currentTick.set(0);
+        }
+        // Sync client language with internal translation registry language code
+        // every second is enough for the language
+        if (fullTick) {
+            this.hdSkinManager.getAddonContext().getTranslationRegistry().reSyncLanguageCode();
+        }
+        // Check if the player changed his
         UUID currentlyUsedUniqueId = LabyMod.getInstance().getPlayerUUID();
         if (currentlyUsedUniqueId != null && (this.currentUniqueId == null || !this.currentUniqueId.equals(currentlyUsedUniqueId))) {
             this.currentUniqueId = currentlyUsedUniqueId;

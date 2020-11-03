@@ -43,6 +43,7 @@ public class SlimFutureListener implements FutureListener<PacketBase>, Constants
     @Override
     public void nullResult() {
         NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+        this.addonContext.getAddonConfig().setSlim(!this.target);
         this.future.complete(!this.target);
     }
 
@@ -56,10 +57,12 @@ public class SlimFutureListener implements FutureListener<PacketBase>, Constants
                 this.future.complete(this.target);
             } else {
                 NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
+                this.addonContext.getAddonConfig().setSlim(!this.target);
                 this.future.complete(!this.target);
             }
         } else {
             NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+            this.addonContext.getAddonConfig().setSlim(!this.target);
             this.future.complete(!this.target);
         }
     }
@@ -67,6 +70,7 @@ public class SlimFutureListener implements FutureListener<PacketBase>, Constants
     @Override
     public void cancelled() {
         NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+        this.addonContext.getAddonConfig().setSlim(!this.target);
         this.future.complete(!this.target);
     }
 }

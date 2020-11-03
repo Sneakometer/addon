@@ -21,13 +21,18 @@ import de.hdskins.labymod.shared.actions.ActionFactory;
 import de.hdskins.labymod.shared.actions.ActionInvoker;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
+import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.role.UserRole;
+import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
+import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
 import de.hdskins.protocol.packets.reading.live.PacketServerDisplayChatMessage;
+import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeletePlayer;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeleteSkin;
+import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateRateLimits;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateSkin;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateSlim;
 import de.hdskins.protocol.packets.reading.role.PacketServerLiveUpdateRole;
@@ -104,5 +109,29 @@ public final class NetworkListeners {
         }
 
         LabyMod.getInstance().displayMessageInChat(message);
+    }
+
+    @PacketListener
+    public void handleBanUpdate(PacketServerLiveUpdateBan packet) {
+        SettingInvoker.pushSettingStateUpdate(!packet.isBanned());
+        if (packet.isBanned()) {
+            ActionInvoker.unregisterMarkedEntries();
+        } else {
+            ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext());
+        }
+
+        if (packet.getReason().trim().isEmpty()) {
+            String message = packet.getReason();
+            if (packet.isTranslate()) {
+                message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getReason(), EMPTY_OBJECT_ARRAY);
+            }
+
+            NotificationUtil.notify((packet.isBanned() ? Constants.FAILURE : Constants.SUCCESS) + "BAN UPDATE", message);
+        }
+    }
+
+    @PacketListener
+    public void handleRateLimitUpdate(PacketServerLiveUpdateRateLimits packet) {
+        this.hdSkinManager.getAddonContext().setRateLimits(packet.getRateLimits());
     }
 }

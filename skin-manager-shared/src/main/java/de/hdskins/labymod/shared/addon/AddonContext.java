@@ -30,6 +30,7 @@ import de.hdskins.protocol.packets.reading.client.PacketClientDeleteSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientReportSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientSetSlim;
 import de.hdskins.protocol.packets.reading.client.PacketClientSkinSettings;
+import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateRateLimits;
 import de.hdskins.protocol.packets.reading.role.PacketClientGetRole;
 import de.hdskins.protocol.packets.reading.role.PacketServerGetRoleResponse;
 import de.hdskins.protocol.packets.reading.upload.PacketClientUploadSkin;
@@ -53,6 +54,7 @@ public class AddonContext {
     private static final Logger LOGGER = LogManager.getLogger(AddonContext.class);
     private static final ServerResult ERROR = new ServerResult(ExecutionStage.ERROR, null);
     private static final ServerResult NOT_CONNECTED = new ServerResult(ExecutionStage.NOT_CONNECTED, null);
+    private static final PacketServerLiveUpdateRateLimits.RateLimits EMPTY = PacketServerLiveUpdateRateLimits.RateLimits.limits(-1, -1, -1, -1);
 
     private final AddonConfig addonConfig;
     private final LabyModAddon labyModAddon;
@@ -62,6 +64,7 @@ public class AddonContext {
     private final AtomicBoolean reconnecting = new AtomicBoolean(false);
     // changeable
     private UserRole userRole;
+    private PacketServerLiveUpdateRateLimits.RateLimits rateLimits = EMPTY;
 
     public AddonContext(AddonConfig addonConfig, LabyModAddon labyModAddon, NetworkClient networkClient, TranslationRegistry translationRegistry) {
         this.addonConfig = addonConfig;
@@ -185,6 +188,14 @@ public class AddonContext {
             this.addonConfig.setMaxSkinResolution(resolution);
             Constants.EVENT_BUS.postReported(MaxSkinResolutionChangeEvent.EVENT);
         }
+    }
+
+    public PacketServerLiveUpdateRateLimits.RateLimits getRateLimits() {
+        return this.rateLimits;
+    }
+
+    public void setRateLimits(PacketServerLiveUpdateRateLimits.RateLimits rateLimits) {
+        this.rateLimits = rateLimits;
     }
 
     public enum ExecutionStage {

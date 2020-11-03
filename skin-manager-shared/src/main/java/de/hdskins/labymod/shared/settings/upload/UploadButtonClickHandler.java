@@ -19,7 +19,11 @@ package de.hdskins.labymod.shared.settings.upload;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
+import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
+import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.utils.Constants;
+import net.labymod.utils.Consumer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.imageio.ImageIO;
@@ -34,7 +38,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 
 @ParametersAreNonnullByDefault
-public class UploadButtonClickHandler implements Runnable, Constants {
+public class UploadButtonClickHandler implements Consumer<ButtonElement>, Constants {
 
     private static final int MAX_FILE_SIZE = 4 * 1024 * 1024;
 
@@ -49,7 +53,7 @@ public class UploadButtonClickHandler implements Runnable, Constants {
     }
 
     @Override
-    public void run() {
+    public void accept(ButtonElement buttonElement) {
         if (this.jFileChooser != null) {
             this.jFileChooser.requestFocus();
         } else {
@@ -62,6 +66,12 @@ public class UploadButtonClickHandler implements Runnable, Constants {
                 this.lastUsedDirectory = this.jFileChooser.getCurrentDirectory();
                 this.jFileChooser = null;
             });
+            if (this.addonContext.getRateLimits().getUploadSkinRateLimit() > 0) {
+                SettingsCountdownRegistry.registerTask(
+                    new ButtonCountdownElementNameChanger(buttonElement),
+                    this.addonContext.getRateLimits().getUploadSkinRateLimit()
+                );
+            }
         }
     }
 

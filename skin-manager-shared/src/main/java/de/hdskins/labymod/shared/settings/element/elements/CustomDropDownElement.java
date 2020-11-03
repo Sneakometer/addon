@@ -20,18 +20,29 @@ package de.hdskins.labymod.shared.settings.element.elements;
 import net.labymod.gui.elements.DropDownMenu;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
-import net.labymod.utils.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 @ParametersAreNonnullByDefault
-public class CustomDropDownElement<T> extends DropDownElement<T> {
+public final class CustomDropDownElement<T> extends DropDownElement<T> {
 
-    public CustomDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, Consumer<T> changeListener) {
-        super(displayName, "", buildDropDownMenu(initialValue, values), iconData, null);
-        super.setChangeListener(changeListener);
+    private final DropDownMenu<T> dropDownMenu;
+    private final BiConsumer<DropDownElement<T>, T> changeListener;
+    private boolean enabled = false;
+
+    private CustomDropDownElement(String displayName, ControlElement.IconData iconData, DropDownMenu<T> dropDownMenu, BiConsumer<DropDownElement<T>, T> changeListener) {
+        super(displayName, "", dropDownMenu, iconData, null);
+        this.changeListener = changeListener;
+        this.dropDownMenu = dropDownMenu;
+    }
+
+    @Nonnull
+    public static <T> DropDownElement<T> of(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener) {
+        DropDownMenu<T> dropDownMenu = buildDropDownMenu(initialValue, values);
+        return new CustomDropDownElement<>(displayName, iconData, dropDownMenu, changeListener);
     }
 
     @Nonnull
@@ -42,5 +53,19 @@ public class CustomDropDownElement<T> extends DropDownElement<T> {
             dropDownMenu.addOption(value);
         }
         return dropDownMenu;
+    }
+
+    @Override
+    public boolean onClickDropDown(int mouseX, int mouseY, int mouseButton) {
+        if (this.enabled && this.dropDownMenu.onClick(mouseX, mouseY, mouseButton)) {
+            this.changeListener.accept(this, this.dropDownMenu.getSelected());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void setSettingEnabled(boolean settingEnabled) {
+        this.enabled = settingEnabled;
     }
 }

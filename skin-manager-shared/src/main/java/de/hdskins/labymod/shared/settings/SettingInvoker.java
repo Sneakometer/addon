@@ -17,10 +17,12 @@
  */
 package de.hdskins.labymod.shared.settings;
 
+import de.hdskins.labymod.shared.settings.element.ElementFactory;
 import net.labymod.addon.About;
 import net.labymod.addon.AddonLoader;
 import net.labymod.addon.online.AddonInfoManager;
 import net.labymod.addon.online.info.AddonInfo;
+import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.SettingsElement;
 
 import javax.annotation.Nonnull;
@@ -62,6 +64,15 @@ public final class SettingInvoker {
 
     public static void addSettingsElement(SettingsElement settingsElement) {
         getLoadedSettings().add(settingsElement);
+    }
+
+    public static void pushSettingStateUpdate(boolean settingsEnabled) {
+        ElementFactory.defaultFactory().setSettingsEnabledByDefault(settingsEnabled);
+        for (SettingsElement loadedSetting : loadedSettings) {
+            if (loadedSetting instanceof ControlElement) {
+                ((ControlElement) loadedSetting).setSettingEnabled(settingsEnabled);
+            }
+        }
     }
 
     public static void unloadSettingElements() {
