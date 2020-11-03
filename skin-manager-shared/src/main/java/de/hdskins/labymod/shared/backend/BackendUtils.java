@@ -29,23 +29,25 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class BackendUtils {
 
     private static final Logger LOGGER = LogManager.getLogger(BackendUtils.class);
     private static final Supplier<String> NAME_SUPPLIER = LabyMod.getInstance()::getPlayerName;
-    private static final Consumer<String> SERVER_JOINER = serverId -> {
-        Session session = Minecraft.getMinecraft().getSession();
-        if (session == null) {
-            return;
-        }
-
-        try {
-            Minecraft.getMinecraft().getSessionService().joinServer(session.getProfile(), session.getToken(), serverId);
-        } catch (AuthenticationException exception) {
-            exception.printStackTrace();
+    private static final Function<String, Boolean> SERVER_JOINER = serverId -> {
+        final Session session = Minecraft.getMinecraft().getSession();
+        if (session != null) {
+            try {
+                Minecraft.getMinecraft().getSessionService().joinServer(session.getProfile(), session.getToken(), serverId);
+                return true;
+            } catch (AuthenticationException exception) {
+                exception.printStackTrace();
+                return false;
+            }
+        } else {
+            return false;
         }
     };
 
