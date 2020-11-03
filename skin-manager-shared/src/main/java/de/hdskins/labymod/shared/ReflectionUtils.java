@@ -63,11 +63,9 @@ public final class ReflectionUtils {
 
     public static void set(Class<?> source, Object instance, Object newValue, String... fieldNames) {
         Field field = getFieldByNames(source, fieldNames);
-        if (field == null) {
-            return;
+        if (field != null) {
+            set(instance, newValue, field);
         }
-
-        set(instance, newValue, field);
     }
 
     public static void set(Object instance, Object newValue, Field field) {
@@ -97,14 +95,12 @@ public final class ReflectionUtils {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused"})
     public static <T> T get(Class<T> unused, Field field, Object instance) {
         try {
-            if (field.isAccessible()) {
-                return (T) field.get(instance);
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
             }
-
-            field.setAccessible(true);
             return (T) field.get(instance);
         } catch (IllegalAccessException exception) {
             return null;
