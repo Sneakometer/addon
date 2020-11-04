@@ -27,7 +27,7 @@ buildscript {
 
         maven {
             name = "forge"
-            url = uri("http://files.minecraftforge.net/maven")
+            url = uri("https://files.minecraftforge.net/maven")
         }
     }
 
