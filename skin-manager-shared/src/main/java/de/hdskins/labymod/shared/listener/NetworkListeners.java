@@ -28,6 +28,7 @@ import de.hdskins.labymod.shared.texture.HDSkinManager;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
+import de.hdskins.protocol.packets.general.PacketDisconnect;
 import de.hdskins.protocol.packets.reading.live.PacketServerDisplayChatMessage;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeletePlayer;
@@ -109,6 +110,11 @@ public final class NetworkListeners {
         }
 
         LabyMod.getInstance().displayMessageInChat(message);
+    }
+
+    @PacketListener
+    public void handleDisconnect(PacketDisconnect packet) {
+        this.handleDisplayMessage(packet);
     }
 
     @PacketListener
