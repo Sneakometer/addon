@@ -47,7 +47,10 @@ public final class SettingInvoker {
     public static List<SettingsElement> getLoadedSettings() {
         if (loadedSettings == null) {
             // Try to find the addons in the online addons (where it should be normally)
-            AddonInfo addonInfo = AddonInfoManager.getInstance().getAddonInfoMap().get(about.uuid);
+            final AddonInfoManager addonInfoManager = AddonInfoManager.getInstance();
+            // By default the manager isn't initialized right now so hack us in
+            addonInfoManager.init();
+            AddonInfo addonInfo = addonInfoManager.getAddonInfoMap().get(about.uuid);
             // The addon info wasn't at the online addons so try to find it in the offline ones
             if (addonInfo == null) {
                 addonInfo = AddonLoader.getOfflineAddons().stream()
