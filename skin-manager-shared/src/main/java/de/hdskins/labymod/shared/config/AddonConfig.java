@@ -22,6 +22,7 @@ import de.hdskins.labymod.shared.config.resolution.Resolution;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -36,6 +37,9 @@ public interface AddonConfig extends Serializable {
     int getServerPort();
 
     void setServerPort(int serverPort);
+
+    @Nonnull
+    InetAddress getServerAddress();
 
     long getFirstReconnectInterval();
 

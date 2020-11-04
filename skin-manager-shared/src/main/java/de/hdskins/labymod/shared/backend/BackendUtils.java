@@ -57,7 +57,7 @@ public final class BackendUtils {
 
     public static CompletableFuture<NetworkClient> connectToServer(AddonConfig addonConfig) {
         return CompletableFuture.supplyAsync(() -> {
-            NetworkClient networkClient = NetworkClient.create(addonConfig.getServerHost(), addonConfig.getServerPort(), NAME_SUPPLIER, SERVER_JOINER);
+            NetworkClient networkClient = NetworkClient.create(addonConfig.getServerAddress().getHostAddress(), addonConfig.getServerPort(), NAME_SUPPLIER, SERVER_JOINER);
             networkClient.setFirstReconnectInterval(addonConfig.getFirstReconnectInterval());
             networkClient.setReconnectInterval(addonConfig.getReconnectInterval());
             return connect0(networkClient, addonConfig);

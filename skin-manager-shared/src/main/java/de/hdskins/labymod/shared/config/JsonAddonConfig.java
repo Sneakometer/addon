@@ -22,6 +22,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import de.hdskins.labymod.shared.config.gson.ServerConfigSerializer;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.ConfigChangeEvent;
 import de.hdskins.labymod.shared.utils.Constants;
@@ -40,6 +41,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,6 +54,13 @@ import java.util.concurrent.TimeUnit;
 
 @ParametersAreNonnullByDefault
 public class JsonAddonConfig implements AddonConfig {
+    // server default network stuff
+    // these values aren't in the config as they may change between releases and
+    // are only useful for development reasons (normally)
+    private static final int DEFAULT_PORT = 2007;
+    private static final String DEFAULT_HOST = "api.hdskins.de";
+    private static final ServerConfig DEFAULT_SERVER_CONFIG = new ServerConfig(DEFAULT_HOST, DEFAULT_PORT);
+    private static final InetAddress DEFAULT_SERVER_ADDRESS = new InetSocketAddress(DEFAULT_HOST, DEFAULT_PORT).getAddress();
     // networking magic
     private static final int FIRST_NON_ROOT_PORT = 1025;
     private static final int MAX_POSSIBLE_PORT_NUMBER = 65535;
@@ -57,16 +68,22 @@ public class JsonAddonConfig implements AddonConfig {
     private static final long MIN_RECONNECT_TIME = TimeUnit.SECONDS.toMillis(1);
     // json utils
     private static final JsonParser PARSER = new JsonParser();
-    private static final Gson GSON = new GsonBuilder().serializeNulls().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder()
+        .serializeNulls()
+        .setPrettyPrinting()
+        .disableHtmlEscaping()
+        .registerTypeAdapter(ServerConfig.class, new ServerConfigSerializer(DEFAULT_SERVER_CONFIG))
+        .create();
     private static final Type CONFIG_TYPE = new TypeToken<JsonAddonConfig>() {
     }.getType();
-    // lazy initialized by load(LabyModAddon) method
+    // lazy initialized by load (LabyModAddon) method
     private static Path configPath;
+    // lazy initialized by getServerAddress() call
+    private transient InetAddress serverAddress;
     // visibility settings
     private final Collection<UUID> disabledSkins;
     // server settings
-    private String serverHost;
-    private int serverPort;
+    private final ServerConfig serverConfig;
     // connection settings
     private long firstReconnectInterval;
     private long reconnectInterval;
@@ -76,8 +93,7 @@ public class JsonAddonConfig implements AddonConfig {
     private boolean showSkinsOfOtherPlayers;
 
     private JsonAddonConfig() {
-        this.serverHost = "api.hdskins.de";
-        this.serverPort = 7007;
+        this.serverConfig = DEFAULT_SERVER_CONFIG;
         this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
         this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
         this.slim = false;
@@ -108,8 +124,8 @@ public class JsonAddonConfig implements AddonConfig {
             }
 
             return GSON.fromJson(config.get("configuration").getAsJsonObject(), CONFIG_TYPE);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            exception.printStackTrace();
             return new JsonAddonConfig();
         }
     }
@@ -117,27 +133,40 @@ public class JsonAddonConfig implements AddonConfig {
     @Nonnull
     @Override
     public String getServerHost() {
-        return this.serverHost;
+        return this.serverConfig.host == null ? DEFAULT_HOST : this.serverConfig.host;
     }
 
     @Override
     public void setServerHost(String serverHost) {
-        if (!this.serverHost.equals(serverHost)) {
-            this.serverHost = serverHost;
+        if (this.serverConfig.host == null || !this.serverConfig.host.equals(serverHost)) {
+            this.serverConfig.host = serverHost;
+            this.serverAddress = null;
             this.save();
         }
     }
 
     @Override
     public int getServerPort() {
-        return Math.min(Math.max(this.serverPort, FIRST_NON_ROOT_PORT), MAX_POSSIBLE_PORT_NUMBER);
+        return Math.min(Math.max(this.serverConfig.port == null ? DEFAULT_PORT : this.serverConfig.port, FIRST_NON_ROOT_PORT), MAX_POSSIBLE_PORT_NUMBER);
     }
 
     @Override
     public void setServerPort(int serverPort) {
-        if (this.serverPort != serverPort && serverPort >= FIRST_NON_ROOT_PORT && serverPort <= MAX_POSSIBLE_PORT_NUMBER) {
-            this.serverPort = serverPort;
+        if (this.serverConfig.port == null || this.serverConfig.port != serverPort && serverPort >= FIRST_NON_ROOT_PORT && serverPort <= MAX_POSSIBLE_PORT_NUMBER) {
+            this.serverConfig.port = serverPort;
             this.save();
+        }
+    }
+
+    @Nonnull
+    @Override
+    public InetAddress getServerAddress() {
+        try {
+            return this.serverAddress == null
+                ? this.serverAddress = InetAddress.getByName(this.getServerHost())
+                : this.serverAddress;
+        } catch (UnknownHostException exception) {
+            return DEFAULT_SERVER_ADDRESS;
         }
     }
 
@@ -277,5 +306,23 @@ public class JsonAddonConfig implements AddonConfig {
         }
 
         Constants.EVENT_BUS.postReported(new ConfigChangeEvent(this));
+    }
+
+    public static class ServerConfig {
+        private String host;
+        private Integer port;
+
+        public ServerConfig(String host, Integer port) {
+            this.host = host;
+            this.port = port;
+        }
+
+        public String getHost() {
+            return this.host;
+        }
+
+        public Integer getPort() {
+            return this.port;
+        }
     }
 }
