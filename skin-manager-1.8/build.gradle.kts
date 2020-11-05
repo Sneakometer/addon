@@ -71,6 +71,11 @@ compileJava.doFirst {
         from("./src/main/resources")
         into("./build/resources/main")
     }
+    // Copy the license into the resources folder
+    copy {
+        from("./../LICENSE")
+        into("./build/resources/main/LICENSE")
+    }
 }
 
 configure<UserBaseExtension> {
