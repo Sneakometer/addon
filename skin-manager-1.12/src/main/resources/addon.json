@@ -2,6 +2,7 @@
   "uuid": "%uuid%",
   "name": "HDSkins",
   "mainClass": "de.hdskins.labymod.v2512.HdSkinsAddon",
+  "transformerClass": "de.hdskins.labymod.shared.asm.MainTransformer",
   "author": "HDSkins",
   "description": "Upload your own HD Skin for your player! Everyone with this addon can see it. Support: www.HDSkins.de/Discord | Privacy Policies: https://hdskins.de/privacy.html",
   "icon": "http://icon.hdskins.de/favicon.png",

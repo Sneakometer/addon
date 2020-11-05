@@ -231,19 +231,31 @@ public class HDSkinManager extends SkinManager {
     public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> loadSkinFromCache(GameProfile profile) {
         if (profile.getId() == null) {
             LOGGER.debug("Unable to load skin {} from cache because skin unique id is null", profile);
-            return this.mojangProfileCache.getUnchecked(profile);
+            if (profile.getProperties().containsKey("textures")) {
+                return this.mojangProfileCache.getUnchecked(profile);
+            } else {
+                return ImmutableMap.of();
+            }
         }
         SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profile.getId());
         if (response != null) {
             if (!response.hasSkin()) {
-                return this.mojangProfileCache.getUnchecked(profile);
+                if (profile.getProperties().containsKey("textures")) {
+                    return this.mojangProfileCache.getUnchecked(profile);
+                } else {
+                    return ImmutableMap.of();
+                }
             }
             return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null));
         }
         if (this.addonContext.getActive().get()) {
             this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profile.getId())).addListener(this.forSkinIdCacheOnly(profile));
         }
-        return this.mojangProfileCache.getUnchecked(profile);
+        if (profile.getProperties().containsKey("textures")) {
+            return this.mojangProfileCache.getUnchecked(profile);
+        } else {
+            return ImmutableMap.of();
+        }
     }
 
     private void handleRemove(RemovalNotification<Object, ?> notification) {
