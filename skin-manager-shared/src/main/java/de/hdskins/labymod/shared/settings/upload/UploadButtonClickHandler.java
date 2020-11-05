@@ -60,24 +60,25 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
             EXECUTOR.execute(() -> {
                 this.jFileChooser = new JFileChooser(this.lastUsedDirectory);
                 if (this.jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    UploadButtonClickHandler.this.handleApprove(this.jFileChooser);
+                    UploadButtonClickHandler.this.handleApprove(buttonElement, this.jFileChooser);
                 }
 
                 this.lastUsedDirectory = this.jFileChooser.getCurrentDirectory();
                 this.jFileChooser = null;
             });
+        }
+    }
+
+    private void handleApprove(ButtonElement buttonElement, JFileChooser chooser) {
+        ImageCheckResult result = this.processImage(chooser.getSelectedFile());
+        if (result == ImageCheckResult.OK) {
             if (this.addonContext.getRateLimits().getUploadSkinRateLimit() > 0) {
                 SettingsCountdownRegistry.registerTask(
                     new ButtonCountdownElementNameChanger(buttonElement),
                     this.addonContext.getRateLimits().getUploadSkinRateLimit()
                 );
             }
-        }
-    }
 
-    private void handleApprove(JFileChooser chooser) {
-        ImageCheckResult result = this.processImage(chooser.getSelectedFile());
-        if (result == ImageCheckResult.OK) {
             AddonContext.ServerResult serverResult = this.addonContext.uploadSkin(chooser.getSelectedFile());
             if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
                 NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
