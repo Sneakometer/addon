@@ -18,12 +18,7 @@
 package de.hdskins.labymod.shared.texture;
 
 import com.google.common.base.Ticker;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalCause;
-import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.*;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -41,7 +36,7 @@ import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkin;
 import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkinId;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkin;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkinId;
-import de.hdskins.protocol.packets.reading.live.PacketServerLiveSkinUnload;
+import de.hdskins.protocol.packets.reading.live.PacketClientLiveSkinUnload;
 import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
@@ -58,19 +53,11 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -262,7 +249,7 @@ public class HDSkinManager extends SkinManager {
         if (notification.getKey() instanceof UUID && HANDLED_CAUSES.contains(notification.getCause())) {
             if (this.addonContext.getActive().get()) {
                 this.sentAllQueuedUnloads();
-                this.addonContext.getNetworkClient().sendPacket(new PacketServerLiveSkinUnload((UUID) notification.getKey()));
+                this.addonContext.getNetworkClient().sendPacket(new PacketClientLiveSkinUnload((UUID) notification.getKey()));
             } else {
                 this.nonSentUnloads.add((UUID) notification.getKey());
             }
@@ -274,7 +261,7 @@ public class HDSkinManager extends SkinManager {
             UUID uniqueId;
             while ((uniqueId = this.nonSentUnloads.poll()) != null) {
                 if (this.uniqueIdToSkinHashCache.getIfPresent(uniqueId) == null) {
-                    this.addonContext.getNetworkClient().sendPacket(new PacketServerLiveSkinUnload(uniqueId));
+                    this.addonContext.getNetworkClient().sendPacket(new PacketClientLiveSkinUnload(uniqueId));
                 }
             }
         }
