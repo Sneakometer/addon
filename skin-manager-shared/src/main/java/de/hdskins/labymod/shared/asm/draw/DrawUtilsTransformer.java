@@ -35,37 +35,6 @@ public class DrawUtilsTransformer implements IClassTransformer {
 
     private static final String SKULL_RENDERER = SkullRenderer.class.getName().replace(".", "/");
 
-    @Override
-    public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        ClassNode classNode = new ClassNode();
-        ClassReader classReader = new ClassReader(basicClass);
-        classReader.accept(classNode, 0);
-
-        for (MethodNode method : classNode.methods) {
-            if (method.name.equals("renderSkull")) {
-                transformRenderSkull(method);
-            } else if (method.name.equals("drawPlayerHead")) {
-                switch (method.desc) {
-                    case "(Lcom/mojang/authlib/GameProfile;III)V":
-                        transformDrawPlayerHeadByGameProfile(method, transformDrawPlayerHeadBasic());
-                        break;
-                    case "(Ljava/util/UUID;III)V":
-                        transformDrawPlayerHeadByUniqueId(method, transformDrawPlayerHeadBasic());
-                        break;
-                    case "(Ljava/lang/String;III)V":
-                        transformDrawPlayerHeadByUserName(method, transformDrawPlayerHeadBasic());
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        classNode.accept(classWriter);
-        return classWriter.toByteArray();
-    }
-
     private static void transformRenderSkull(MethodNode methodNode) {
         InsnList insnList = new InsnList();
         insnList.add(new VarInsnNode(Opcodes.ALOAD, 1));
@@ -129,5 +98,36 @@ public class DrawUtilsTransformer implements IClassTransformer {
         // override the full method
         methodNode.instructions.clear();
         methodNode.instructions.add(insnList);
+    }
+
+    @Override
+    public byte[] transform(String name, String transformedName, byte[] basicClass) {
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(basicClass);
+        classReader.accept(classNode, 0);
+
+        for (MethodNode method : classNode.methods) {
+            if (method.name.equals("renderSkull")) {
+                transformRenderSkull(method);
+            } else if (method.name.equals("drawPlayerHead")) {
+                switch (method.desc) {
+                    case "(Lcom/mojang/authlib/GameProfile;III)V":
+                        transformDrawPlayerHeadByGameProfile(method, transformDrawPlayerHeadBasic());
+                        break;
+                    case "(Ljava/util/UUID;III)V":
+                        transformDrawPlayerHeadByUniqueId(method, transformDrawPlayerHeadBasic());
+                        break;
+                    case "(Ljava/lang/String;III)V":
+                        transformDrawPlayerHeadByUserName(method, transformDrawPlayerHeadBasic());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        classNode.accept(classWriter);
+        return classWriter.toByteArray();
     }
 }

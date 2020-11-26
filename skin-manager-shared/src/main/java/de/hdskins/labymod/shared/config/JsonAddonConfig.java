@@ -78,12 +78,12 @@ public class JsonAddonConfig implements AddonConfig {
     }.getType();
     // lazy initialized by load (LabyModAddon) method
     private static Path configPath;
-    // lazy initialized by getServerAddress() call
-    private transient InetAddress serverAddress;
     // visibility settings
     private final Collection<UUID> disabledSkins;
     // server settings
     private final ServerConfig serverConfig;
+    // lazy initialized by getServerAddress() call
+    private transient InetAddress serverAddress;
     // connection settings
     private long firstReconnectInterval;
     private long reconnectInterval;
