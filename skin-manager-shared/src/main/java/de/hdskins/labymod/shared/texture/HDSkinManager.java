@@ -18,7 +18,12 @@
 package de.hdskins.labymod.shared.texture;
 
 import com.google.common.base.Ticker;
-import com.google.common.cache.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -53,11 +58,19 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -73,7 +86,7 @@ public class HDSkinManager extends SkinManager {
 
     private final Path assetsDirectory;
     private final AddonContext addonContext;
-    private final Consumer<UUID> skinLoadedRemover;
+    private final Consumer<UUID> skinInvalidator;
     private final Queue<UUID> nonSentUnloads = new ConcurrentLinkedQueue<>();
     private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
     private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = CacheBuilder.newBuilder()
@@ -103,17 +116,35 @@ public class HDSkinManager extends SkinManager {
         .ticker(Ticker.systemTicker())
         .build();
 
-    public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Consumer<UUID> skinLoadedRemover) {
+    public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Consumer<UUID> skinInvalidator) {
         super(Minecraft.getMinecraft().getTextureManager(), new File(mcAssetsDir, "skins"), Minecraft.getMinecraft().getSessionService());
         this.assetsDirectory = mcAssetsDir.toPath();
         this.addonContext = addonContext;
-        this.skinLoadedRemover = skinLoadedRemover;
+        this.skinInvalidator = skinInvalidator;
         // Register listeners to this skin manager
         addonContext.getNetworkClient().getPacketListenerRegistry().registerListeners(new NetworkListeners(this));
         // Register client listeners to forge & internal event bus
         final ClientListeners clientListeners = new ClientListeners(this);
         LabyMod.getInstance().getLabyModAPI().registerForgeListener(clientListeners);
         Constants.EVENT_BUS.registerListener(clientListeners);
+    }
+
+    private void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {
+        if (wrapper != null && wrapper != NO_SKIN) {
+            for (Map.Entry<MinecraftProfileTexture, HDResourceLocation> entry : this.textureToLocationCache.asMap().entrySet()) {
+                if (entry.getKey().getHash().equals(wrapper.getSkinHash())) {
+                    this.textureToLocationCache.invalidate(entry.getKey());
+                    break;
+                }
+            }
+        }
+
+        if (wrapper != null) {
+            this.uniqueIdToSkinHashCache.put(uniqueId, wrapper);
+        } else {
+            this.uniqueIdToSkinHashCache.invalidate(uniqueId);
+        }
+        this.skinInvalidator.accept(uniqueId);
     }
 
     @Override
@@ -395,24 +426,18 @@ public class HDSkinManager extends SkinManager {
 
         for (Map.Entry<UUID, SkinHashWrapper> entry : this.uniqueIdToSkinHashCache.asMap().entrySet()) {
             if (entry.getValue().hasSkin() && entry.getValue().getSkinHash().equals(skinHash)) {
-                this.uniqueIdToSkinHashCache.put(entry.getKey(), NO_SKIN);
-                this.skinLoadedRemover.accept(entry.getKey());
+                this.updateSkin(entry.getKey(), NO_SKIN);
             }
         }
     }
 
     public void pushSkinDelete(UUID playerUniqueId) {
-        if (this.uniqueIdToSkinHashCache.getIfPresent(playerUniqueId) != null) {
-            this.uniqueIdToSkinHashCache.put(playerUniqueId, NO_SKIN);
-        }
-
-        this.skinLoadedRemover.accept(playerUniqueId);
+        this.updateSkin(playerUniqueId, NO_SKIN);
     }
 
     public void pushMaxResolutionUpdate() {
         for (UUID uuid : this.uniqueIdToSkinHashCache.asMap().keySet()) {
-            this.uniqueIdToSkinHashCache.invalidate(uuid);
-            this.skinLoadedRemover.accept(uuid);
+            this.updateSkin(uuid, null);
         }
     }
 
@@ -420,13 +445,13 @@ public class HDSkinManager extends SkinManager {
         SkinHashWrapper wrapper = this.uniqueIdToSkinHashCache.getIfPresent(playerUniqueId);
         if (wrapper != null) {
             if (wrapper == NO_SKIN) {
-                this.uniqueIdToSkinHashCache.put(playerUniqueId, new SkinHashWrapper(newSkinHash));
+                wrapper = new SkinHashWrapper(newSkinHash);
             } else {
                 wrapper.setSkinHash(newSkinHash);
             }
         }
 
-        this.skinLoadedRemover.accept(playerUniqueId);
+        this.updateSkin(playerUniqueId, wrapper);
     }
 
     public void pushSkinSlimChange(UUID playerUniqueId, boolean newSlimState) {
@@ -435,7 +460,7 @@ public class HDSkinManager extends SkinManager {
             wrapper.setSlim(newSlimState);
         }
 
-        this.skinLoadedRemover.accept(playerUniqueId);
+        this.updateSkin(playerUniqueId, wrapper);
     }
 
     private static final class HDMinecraftProfileTexture extends MinecraftProfileTexture {
