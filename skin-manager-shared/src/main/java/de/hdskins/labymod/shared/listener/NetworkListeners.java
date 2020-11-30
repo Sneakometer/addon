@@ -88,11 +88,11 @@ public final class NetworkListeners {
     @PacketListener
     public void handleUserRoleUpdate(PacketServerLiveUpdateRole packet) {
         final UserRole newRole = UserRole.roleFromOrdinalIndex(packet.getOrdinalIndex());
-        final boolean isTeamCurrently = this.hdSkinManager.getAddonContext().getRole().isHigherOrEqualThan(UserRole.STAFF);
-        final boolean isStaffNow = newRole.isHigherOrEqualThan(UserRole.STAFF);
+        final boolean staffBefore = this.hdSkinManager.getAddonContext().getRole().isHigherOrEqualThan(UserRole.STAFF);
+        final boolean staffNow = newRole.isHigherOrEqualThan(UserRole.STAFF);
 
         this.hdSkinManager.getAddonContext().updateRole(newRole);
-        if (isStaffNow != isTeamCurrently) {
+        if (staffNow != staffBefore) {
             ActionInvoker.unregisterMarkedEntries();
             for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext())) {
                 ActionInvoker.addUserActionEntry(entry);

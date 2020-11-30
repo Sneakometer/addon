@@ -54,7 +54,7 @@ public class AddonContext {
     private static final Logger LOGGER = LogManager.getLogger(AddonContext.class);
     private static final ServerResult ERROR = new ServerResult(ExecutionStage.ERROR, null);
     private static final ServerResult NOT_CONNECTED = new ServerResult(ExecutionStage.NOT_CONNECTED, null);
-    private static final PacketServerUpdateRateLimits.RateLimits EMPTY = PacketServerUpdateRateLimits.RateLimits.limits(-1, -1, -1, -1);
+    private static final PacketServerUpdateRateLimits.RateLimits EMPTY = PacketServerUpdateRateLimits.RateLimits.limits((short) -1, (short) -1, (short) -1, (short) -1);
 
     private final AddonConfig addonConfig;
     private final LabyModAddon labyModAddon;
