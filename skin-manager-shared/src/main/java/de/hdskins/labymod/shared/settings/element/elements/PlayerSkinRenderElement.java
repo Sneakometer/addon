@@ -21,6 +21,7 @@ import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
 import net.labymod.utils.DrawUtils;
+import net.minecraft.client.renderer.GlStateManager;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -36,6 +37,8 @@ public class PlayerSkinRenderElement extends SettingsElement {
         super.draw(x, y, maxX, maxY, mouseX, mouseY);
 
         if (LabyModCore.getMinecraft().getPlayer() != null) {
+            GlStateManager.color(1, 1, 1, 1);
+
             double currentRotation = (System.currentTimeMillis() / 25D) % 360;
             int locationX = maxX + maxX / 5;
             int locationY = ((LabyMod.getInstance().getDrawUtils().getHeight() / 4) * 3) + 40;
