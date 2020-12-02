@@ -28,4 +28,6 @@ jobs:
       - uses: actions/upload-artifact@master
         with:
           name: HDSkins
-          path: build/libs/HDSkins.jar
+          path: |
+            build/libs/HDSkins-1.8.jar
+            build/libs/HDSkins-1.12.jar
