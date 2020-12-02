@@ -56,6 +56,7 @@ public final class SettingsCountdownRegistry {
         public Task(Consumer<Long> consumer, long executions) {
             this.consumer = consumer;
             this.executions.set(executions);
+            this.consumer.accept(executions);
         }
     }
 }
