@@ -36,12 +36,12 @@ public class EmptyTranslationRegistry implements TranslationRegistry {
     @Nonnull
     @Override
     public String translateMessage(String translationKey, Object... replacements) {
-        return this.translateMessage(translationKey, "translation <" + translationKey + "> is missing", replacements);
+        return this.translateMessageOrDefault(translationKey, "translation <" + translationKey + "> is missing", replacements);
     }
 
     @Nonnull
     @Override
-    public String translateMessage(String translationKey, String resultIfAbsent, Object... replacements) {
+    public String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements) {
         return resultIfAbsent;
     }
 

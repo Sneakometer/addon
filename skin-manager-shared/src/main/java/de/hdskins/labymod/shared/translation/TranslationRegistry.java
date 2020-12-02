@@ -38,7 +38,7 @@ public interface TranslationRegistry {
     String translateMessage(String translationKey, Object... replacements);
 
     @Nonnull
-    String translateMessage(String translationKey, String resultIfAbsent, Object... replacements);
+    String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements);
 
     @Nonnull
     Locale getCurrentLocale();
