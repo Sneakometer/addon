@@ -37,6 +37,7 @@ import de.hdskins.labymod.shared.resource.HDResourceLocation;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
+import de.hdskins.protocol.packets.reading.client.PacketClientReady;
 import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkin;
 import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkinId;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkin;
@@ -123,6 +124,8 @@ public class HDSkinManager extends SkinManager {
         this.skinInvalidator = skinInvalidator;
         // Register listeners to this skin manager
         addonContext.getNetworkClient().getPacketListenerRegistry().registerListeners(new NetworkListeners(this));
+        // We are ready
+        addonContext.getNetworkClient().sendPacket(new PacketClientReady());
         // Register client listeners to forge & internal event bus
         final ClientListeners clientListeners = new ClientListeners(this);
         LabyMod.getInstance().getLabyModAPI().registerForgeListener(clientListeners);

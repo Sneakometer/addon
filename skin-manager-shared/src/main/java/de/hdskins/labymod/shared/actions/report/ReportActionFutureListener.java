@@ -22,7 +22,7 @@ import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
-import de.hdskins.protocol.packets.reading.client.PacketServerReportSkinResponse;
+import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
 import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -45,8 +45,8 @@ class ReportActionFutureListener implements FutureListener<PacketBase>, Constant
 
     @Override
     public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerReportSkinResponse) {
-            PacketServerReportSkinResponse result = (PacketServerReportSkinResponse) packetBase;
+        if (packetBase instanceof PacketServerQueryResponse) {
+            PacketServerQueryResponse result = (PacketServerQueryResponse) packetBase;
             if (result.isSuccess()) {
                 NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-success", this.reported.getName()));
             } else {

@@ -33,15 +33,16 @@ import de.hdskins.protocol.packets.reading.live.PacketServerDisplayChatMessage;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeletePlayer;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeleteSkin;
+import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateRole;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateSkin;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateSlim;
 import de.hdskins.protocol.packets.reading.ratelimit.PacketServerUpdateRateLimits;
-import de.hdskins.protocol.packets.reading.role.PacketServerLiveUpdateRole;
 import io.netty.channel.Channel;
 import net.labymod.main.LabyMod;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+@SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
 public final class NetworkListeners {
 

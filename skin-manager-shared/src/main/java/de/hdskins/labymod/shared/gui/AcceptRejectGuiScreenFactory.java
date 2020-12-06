@@ -15,18 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.utils;
+package de.hdskins.labymod.shared.gui;
 
-import de.hdskins.labymod.shared.eventbus.EventBus;
-import de.hdskins.labymod.shared.eventbus.defaults.DefaultEventBus;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collection;
+import java.util.function.BiConsumer;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+@FunctionalInterface
+@ParametersAreNonnullByDefault
+public interface AcceptRejectGuiScreenFactory {
 
-public interface Constants {
-    String SUCCESS = "§a§l✔";
-    String FAILURE = "§c§l✖";
-    String SPACE = " ";
-    EventBus EVENT_BUS = new DefaultEventBus();
-    ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+    @Nonnull
+    AcceptRejectGuiScreen newScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback);
 }

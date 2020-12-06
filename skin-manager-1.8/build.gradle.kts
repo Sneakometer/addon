@@ -102,12 +102,12 @@ afterEvaluate {
         task.doLast {
             copy {
                 from("./build/libs/HDSkins-1.8.jar")
-                into("../build/libs")
+                into("./../build/libs")
             }
 
-            delete {
-                file("./../build/libs/skin-manager-root-" + project.version + ".jar")
-            }
+            delete(fileTree("./../build/libs").matching {
+                include("**/skin-manager-root-" + project.version + ".jar")
+            })
         }
     }
 }

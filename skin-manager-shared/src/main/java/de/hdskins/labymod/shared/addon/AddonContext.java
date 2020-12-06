@@ -25,15 +25,14 @@ import de.hdskins.labymod.shared.translation.TranslationRegistry;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.client.NetworkClient;
+import de.hdskins.protocol.component.ClientSettings;
 import de.hdskins.protocol.concurrent.ListeningFuture;
 import de.hdskins.protocol.packets.reading.client.PacketClientDeleteSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientReportSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientSetSlim;
 import de.hdskins.protocol.packets.reading.client.PacketClientSkinSettings;
+import de.hdskins.protocol.packets.reading.client.PacketClientUploadSkin;
 import de.hdskins.protocol.packets.reading.ratelimit.PacketServerUpdateRateLimits;
-import de.hdskins.protocol.packets.reading.role.PacketClientGetRole;
-import de.hdskins.protocol.packets.reading.role.PacketServerGetRoleResponse;
-import de.hdskins.protocol.packets.reading.upload.PacketClientUploadSkin;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.LabyMod;
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +62,8 @@ public class AddonContext {
     private final AtomicBoolean active = new AtomicBoolean(true);
     private final AtomicBoolean reconnecting = new AtomicBoolean(false);
     // changeable
-    private UserRole userRole;
+    private ClientSettings clientSettings;
+    private UserRole userRole = UserRole.USER;
     private PacketServerUpdateRateLimits.RateLimits rateLimits = EMPTY;
 
     public AddonContext(AddonConfig addonConfig, LabyModAddon labyModAddon, NetworkClient networkClient, TranslationRegistry translationRegistry) {
@@ -71,7 +71,7 @@ public class AddonContext {
         this.labyModAddon = labyModAddon;
         this.networkClient = networkClient;
         this.translationRegistry = translationRegistry;
-        this.loadUserRole();
+        this.clientSettings = new ClientSettings(addonConfig.getMaxSkinResolution().getWidth(), addonConfig.getMaxSkinResolution().getHeight());
     }
 
     public NetworkClient getNetworkClient() {
@@ -164,28 +164,15 @@ public class AddonContext {
         return this.userRole;
     }
 
-    private void loadUserRole() {
-        final UUID playerUniqueId = LabyMod.getInstance().getPlayerUUID();
-        if (playerUniqueId == null || !this.active.get() || this.reconnecting.get()) {
-            this.userRole = UserRole.USER;
-        } else {
-            PacketBase result = this.networkClient.sendQuery(new PacketClientGetRole(playerUniqueId)).getUninterruptedly();
-            if (result instanceof PacketServerGetRoleResponse) {
-                this.userRole = UserRole.roleFromOrdinalIndex(((PacketServerGetRoleResponse) result).getOrdinalIndex());
-            } else {
-                this.userRole = UserRole.USER;
-            }
-        }
-    }
-
     public void updateRole(UserRole newRole) {
         this.userRole = newRole;
     }
 
     public void setMaxSkinResolution(Resolution resolution) {
         if (this.addonConfig.getMaxSkinResolution() != resolution) {
-            this.networkClient.sendPacket(new PacketClientSkinSettings(resolution.getWidth(), resolution.getHeight()));
             this.addonConfig.setMaxSkinResolution(resolution);
+            this.clientSettings = new ClientSettings(resolution.getWidth(), resolution.getHeight());
+            this.networkClient.sendPacket(new PacketClientSkinSettings(this.clientSettings));
             Constants.EVENT_BUS.postReported(MaxSkinResolutionChangeEvent.EVENT);
         }
     }

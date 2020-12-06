@@ -20,6 +20,7 @@ package de.hdskins.labymod.shared.concurrent;
 @FunctionalInterface
 public interface ExceptionRunnable extends Runnable {
 
+    @Override
     default void run() {
         try {
             this.call();

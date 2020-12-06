@@ -22,7 +22,7 @@ import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
-import de.hdskins.protocol.packets.reading.client.PacketServerReportSkinResponse;
+import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
 import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -45,8 +45,8 @@ class DeleteActionFutureListener implements FutureListener<PacketBase>, Constant
 
     @Override
     public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerReportSkinResponse) {
-            PacketServerReportSkinResponse response = (PacketServerReportSkinResponse) packetBase;
+        if (packetBase instanceof PacketServerQueryResponse) {
+            PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
             if (response.isSuccess()) {
                 NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-successfully", this.targetDelete.getName()));
             } else {

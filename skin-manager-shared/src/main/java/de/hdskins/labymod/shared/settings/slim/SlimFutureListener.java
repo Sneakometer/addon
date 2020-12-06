@@ -22,7 +22,7 @@ import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
-import de.hdskins.protocol.packets.reading.client.PacketServerSetSlimResponse;
+import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
@@ -49,8 +49,8 @@ public class SlimFutureListener implements FutureListener<PacketBase>, Constants
 
     @Override
     public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerSetSlimResponse) {
-            PacketServerSetSlimResponse response = (PacketServerSetSlimResponse) packetBase;
+        if (packetBase instanceof PacketServerQueryResponse) {
+            PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
             if (response.isSuccess()) {
                 String targetResult = this.target ? "slim" : "default";
                 NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("slim-successfully-toggled", new Object[]{targetResult}));

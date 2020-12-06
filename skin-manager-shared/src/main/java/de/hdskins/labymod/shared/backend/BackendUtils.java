@@ -21,6 +21,7 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.protocol.client.NetworkClient;
+import de.hdskins.protocol.component.ClientSettings;
 import de.hdskins.protocol.packets.reading.client.PacketClientSkinSettings;
 import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
@@ -62,20 +63,20 @@ public final class BackendUtils {
             networkClient.setReconnectInterval(addonConfig.getReconnectInterval());
             return connect0(networkClient, addonConfig);
         }).thenApply(networkClient -> {
-            networkClient.sendPacket(new PacketClientSkinSettings(
+            networkClient.sendPacket(new PacketClientSkinSettings(new ClientSettings(
                 addonConfig.getMaxSkinResolution().getWidth(),
                 addonConfig.getMaxSkinResolution().getHeight()
-            ));
+            )));
             return networkClient;
         });
     }
 
     public static CompletableFuture<Void> reconnect(AddonContext addonContext) {
         return CompletableFuture.supplyAsync(() -> {
-            connect0(addonContext.getNetworkClient(), addonContext.getAddonConfig()).sendPacket(new PacketClientSkinSettings(
+            connect0(addonContext.getNetworkClient(), addonContext.getAddonConfig()).sendPacket(new PacketClientSkinSettings(new ClientSettings(
                 addonContext.getAddonConfig().getMaxSkinResolution().getWidth(),
                 addonContext.getAddonConfig().getMaxSkinResolution().getHeight()
-            ));
+            )));
             return null;
         });
     }

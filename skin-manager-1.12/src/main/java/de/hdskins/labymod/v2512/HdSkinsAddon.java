@@ -34,6 +34,8 @@ public class HdSkinsAddon extends LabyModAddonBase {
     @Override
     protected void createAddonContext() {
         AddonContextLoader.initAddon(this).thenAcceptAsync(context -> {
+            // Initialize screen factory
+            AcceptRejectGuiScreenImpl.init();
             // assets directory
             File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "fileAssets", "field_110446_Y", "am");
             Objects.requireNonNull(assetsDir, "Unable to load assets dir correctly!");

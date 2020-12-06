@@ -22,7 +22,7 @@ import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
-import de.hdskins.protocol.packets.reading.upload.PacketServerUploadSkinResponse;
+import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -42,8 +42,8 @@ public class UploadFutureListener implements FutureListener<PacketBase>, Constan
 
     @Override
     public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerUploadSkinResponse) {
-            PacketServerUploadSkinResponse response = (PacketServerUploadSkinResponse) packetBase;
+        if (packetBase instanceof PacketServerQueryResponse) {
+            PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
             if (response.isSuccess()) {
                 NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-completed"));
             } else {
