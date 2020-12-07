@@ -161,9 +161,9 @@ public class HDSkinManager extends SkinManager {
             return super.loadSkin(texture, type, callback);
         }
         // Build a resource location for the profile texture
-        HDResourceLocation location = this.textureToLocationCache.getUnchecked(texture);
+        final HDResourceLocation location = this.textureToLocationCache.getUnchecked(texture);
         // Test if the texture is already loaded and cached
-        ITextureObject textureObject = this.textureManager.getTexture(location);
+        final ITextureObject textureObject = this.textureManager.getTexture(location);
         // If the texture object is non-null we can break now
         if (textureObject != null) {
             // If a callback is provided by the method we should post the result to it
@@ -173,7 +173,7 @@ public class HDSkinManager extends SkinManager {
             return location;
         }
         // Check if the file locally already exits
-        Path localSkinPath = this.assetsDirectory.resolve(location.getPath());
+        final Path localSkinPath = this.assetsDirectory.resolve(location.getPath());
         if (Files.exists(localSkinPath)) {
             try {
                 if (this.textureManager.loadTexture(location, new HDSkinTexture(localSkinPath))) {
@@ -222,7 +222,7 @@ public class HDSkinManager extends SkinManager {
             return;
         }
 
-        SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profile.getId());
+        final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profile.getId());
         if (response == null) {
             // We were disconnected from the server so we cannot load a skin from there
             if (!this.addonContext.getActive().get()) {
@@ -258,7 +258,7 @@ public class HDSkinManager extends SkinManager {
                 return ImmutableMap.of();
             }
         }
-        SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profile.getId());
+        final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profile.getId());
         if (response != null) {
             if (!response.hasSkin()) {
                 if (profile.getProperties().containsKey("textures")) {
