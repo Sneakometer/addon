@@ -43,6 +43,6 @@ public final class ActionInvoker {
     }
 
     public static void unregisterMarkedEntries() {
-        REGISTERED_USER_ACTION_ENTRIES.stream().filter(entry -> entry instanceof MarkedUserActionEntry).forEach(REGISTERED_USER_ACTION_ENTRIES::remove);
+        REGISTERED_USER_ACTION_ENTRIES.removeIf(entry -> entry instanceof MarkedUserActionEntry);
     }
 }
