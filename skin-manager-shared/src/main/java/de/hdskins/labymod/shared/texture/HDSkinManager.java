@@ -25,8 +25,14 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalCause;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.properties.Property;
+import com.mojang.util.UUIDTypeAdapter;
 import de.hdskins.labymod.shared.MCUtil;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.backend.BackendUtils;
@@ -67,6 +73,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
@@ -80,6 +87,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("UnstableApiUsage")
 public class HDSkinManager extends SkinManager {
 
+    private static final JsonParser PARSER = new JsonParser();
     private static final SkinHashWrapper NO_SKIN = new SkinHashWrapper();
     private static final Logger LOGGER = LogManager.getLogger(HDSkinManager.class);
     private static final Map<String, String> SLIM = ImmutableMap.of("model", "slim");
@@ -155,6 +163,33 @@ public class HDSkinManager extends SkinManager {
         return this.loadSkin(texture, type, null);
     }
 
+    private UUID getUniqueId(GameProfile profile) {
+        if (profile.getProperties().isEmpty()) {
+            return profile.getId();
+        }
+
+        Collection<Property> properties = profile.getProperties().get("textures");
+        if (properties == null || properties.isEmpty()) {
+            return profile.getId();
+        }
+        for (Property property : properties) {
+            byte[] decoded = Base64.getDecoder().decode(property.getValue());
+            try {
+                JsonElement element = PARSER.parse(new String(decoded));
+                if (element.isJsonObject()) {
+                    JsonObject object = element.getAsJsonObject();
+                    if (object.has("profileId") && object.get("profileId").isJsonPrimitive()) {
+                        String rawId = object.get("profileId").getAsString();
+                        return UUIDTypeAdapter.fromString(rawId);
+                    }
+                }
+            } catch (JsonSyntaxException ignored) {
+            }
+        }
+
+        return profile.getId();
+    }
+
     @Override
     public ResourceLocation loadSkin(MinecraftProfileTexture texture, MinecraftProfileTexture.Type type, @Nullable SkinAvailableCallback callback) {
         if (!(texture instanceof HDMinecraftProfileTexture)) {
@@ -216,13 +251,15 @@ public class HDSkinManager extends SkinManager {
         }
 
         final UUID self = LabyMod.getInstance().getPlayerUUID();
-        if ((!profile.getId().equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profile.getId())) {
+        final UUID profileId = this.getUniqueId(profile);
+
+        if ((!profileId.equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profileId)) {
             LOGGER.debug("Not loading skin for profile: {} callback: {} secure: {} because the unique id is blocked locally.", profile, callback, requireSecure);
             super.loadProfileTextures(profile, callback, requireSecure);
             return;
         }
 
-        final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profile.getId());
+        final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profileId);
         if (response == null) {
             // We were disconnected from the server so we cannot load a skin from there
             if (!this.addonContext.getActive().get()) {
@@ -238,7 +275,7 @@ public class HDSkinManager extends SkinManager {
                 return;
             }
             // We send a query to the server to get the skin hash from the uuid given
-            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profile.getId())).addListener(this.forSkinIdLoad(profile, callback, requireSecure));
+            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdLoad(profile, callback, requireSecure));
         } else if (response.hasSkin()) {
             // We already sent a request to the server so we can now simply load the texture by the hash we already got from the server
             this.loadSkin(new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null), MinecraftProfileTexture.Type.SKIN, callback);
@@ -258,7 +295,10 @@ public class HDSkinManager extends SkinManager {
                 return ImmutableMap.of();
             }
         }
-        final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profile.getId());
+
+        final UUID profileId = this.getUniqueId(profile);
+
+        final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profileId);
         if (response != null) {
             if (!response.hasSkin()) {
                 if (profile.getProperties().containsKey("textures")) {
@@ -270,7 +310,7 @@ public class HDSkinManager extends SkinManager {
             return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null));
         }
         if (this.addonContext.getActive().get()) {
-            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profile.getId())).addListener(this.forSkinIdCacheOnly(profile));
+            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdCacheOnly(profile));
         }
         if (profile.getProperties().containsKey("textures")) {
             return this.mojangProfileCache.getUnchecked(profile);
