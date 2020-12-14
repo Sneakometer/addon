@@ -123,7 +123,7 @@ public class HDSkinManager extends SkinManager {
         this.addonContext = addonContext;
         this.skinInvalidator = skinInvalidator;
         // Register listeners to this skin manager
-        addonContext.getNetworkClient().getPacketListenerRegistry().registerListeners(new NetworkListeners(this));
+        addonContext.getNetworkClient().getPacketListenerRegistry().registerListeners(new NetworkListeners(this, addonContext.getTranslationRegistry()));
         // We are ready
         addonContext.getNetworkClient().sendPacket(new PacketClientReady());
         // Register client listeners to forge & internal event bus

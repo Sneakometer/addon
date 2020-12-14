@@ -34,6 +34,8 @@ public interface TranslationRegistry {
         return new DefaultTranslationRegistry(loadedLanguages);
     }
 
+    void updateTranslation(String language, String translationKey, String message);
+
     @Nonnull
     String translateMessage(String translationKey, Object... replacements);
 

@@ -40,6 +40,16 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
         this.reSyncLanguageCode();
     }
 
+    @Override
+    public void updateTranslation(String language, String translationKey, String message) {
+        Properties properties = this.loadedLanguageFiles.get(language);
+        if (properties == null) {
+            return;
+        }
+
+        properties.setProperty(translationKey, message);
+    }
+
     @Nonnull
     @Override
     public String translateMessage(String translationKey, Object... replacements) {
