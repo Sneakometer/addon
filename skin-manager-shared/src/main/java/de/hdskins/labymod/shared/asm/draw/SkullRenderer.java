@@ -24,7 +24,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.properties.Property;
 import de.hdskins.labymod.shared.utils.MCUtil;
-import de.hdskins.labymod.shared.texture.HDSkinManager;
+import de.hdskins.labymod.shared.manager.HDSkinManager;
 import net.labymod.main.LabyMod;
 import net.labymod.utils.UUIDFetcher;
 import net.minecraft.client.Minecraft;

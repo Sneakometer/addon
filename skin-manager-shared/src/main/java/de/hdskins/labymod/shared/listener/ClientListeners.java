@@ -26,7 +26,7 @@ import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import de.hdskins.labymod.shared.eventbus.EventListener;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.settings.SettingsFactory;
-import de.hdskins.labymod.shared.texture.HDSkinManager;
+import de.hdskins.labymod.shared.manager.HDSkinManager;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
