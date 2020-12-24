@@ -275,7 +275,7 @@ public class HDSkinManager extends SkinManager {
                 return;
             }
             // We send a query to the server to get the skin hash from the uuid given
-            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdLoad(profile, callback, requireSecure));
+            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdLoad(profileId, profile, callback, requireSecure));
         } else if (response.hasSkin()) {
             // We already sent a request to the server so we can now simply load the texture by the hash we already got from the server
             this.loadSkin(new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null), MinecraftProfileTexture.Type.SKIN, callback);
@@ -310,7 +310,7 @@ public class HDSkinManager extends SkinManager {
             return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null));
         }
         if (this.addonContext.getActive().get()) {
-            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdCacheOnly(profile));
+            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdCacheOnly(profileId));
         }
         if (profile.getProperties().containsKey("textures")) {
             return this.mojangProfileCache.getUnchecked(profile);
@@ -341,11 +341,11 @@ public class HDSkinManager extends SkinManager {
         }
     }
 
-    private FutureListener<PacketBase> forSkinIdLoad(GameProfile profile, @Nullable SkinAvailableCallback callback, boolean requireSecure) {
+    private FutureListener<PacketBase> forSkinIdLoad(UUID profileId, GameProfile profile, @Nullable SkinAvailableCallback callback, boolean requireSecure) {
         return new FutureListener<PacketBase>() {
             @Override
             public void nullResult() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
                 HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
             }
 
@@ -354,10 +354,10 @@ public class HDSkinManager extends SkinManager {
                 if (packetBase instanceof PacketServerResponseSkinId) {
                     PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
                     if (response.hasSkin()) {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), new SkinHashWrapper(response));
+                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, new SkinHashWrapper(response));
                         HDSkinManager.this.loadSkin(new HDMinecraftProfileTexture(response.getSkinId(), response.isSlim() ? SLIM : null), MinecraftProfileTexture.Type.SKIN, callback);
                     } else {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
                         HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
                     }
                 }
@@ -365,17 +365,17 @@ public class HDSkinManager extends SkinManager {
 
             @Override
             public void cancelled() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
                 HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
             }
         };
     }
 
-    private FutureListener<PacketBase> forSkinIdCacheOnly(GameProfile profile) {
+    private FutureListener<PacketBase> forSkinIdCacheOnly(UUID profileId) {
         return new FutureListener<PacketBase>() {
             @Override
             public void nullResult() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
             }
 
             @Override
@@ -383,16 +383,16 @@ public class HDSkinManager extends SkinManager {
                 if (packetBase instanceof PacketServerResponseSkinId) {
                     PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
                     if (response.hasSkin()) {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), new SkinHashWrapper(response));
+                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, new SkinHashWrapper(response));
                     } else {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
                     }
                 }
             }
 
             @Override
             public void cancelled() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profile.getId(), NO_SKIN);
+                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
             }
         };
     }

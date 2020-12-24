@@ -42,14 +42,15 @@ public class ServerConfigSerializer implements JsonSerializer<JsonAddonConfig.Se
             JsonObject object = json.getAsJsonObject();
             JsonElement host = object.get("host");
             JsonElement port = object.get("port");
+            JsonElement guidelines = object.get("guidelines");
 
-            if ((host == null || host.isJsonNull()) && (port == null || port.isJsonNull())) {
+            if ((host == null || host.isJsonNull()) && (port == null || port.isJsonNull()) && (guidelines == null || guidelines.isJsonNull())) {
                 return this.defaultServerConfig;
             } else {
                 return new JsonAddonConfig.ServerConfig(
                     host == null || host.isJsonNull() ? this.defaultServerConfig.getHost() : host.getAsString(),
-                    port == null || port.isJsonNull() ? this.defaultServerConfig.getPort() : port.getAsInt()
-                );
+                    port == null || port.isJsonNull() ? this.defaultServerConfig.getPort() : port.getAsInt(),
+                    guidelines == null || guidelines.isJsonNull() ? this.defaultServerConfig.getGuidelinesUrl() : guidelines.getAsString());
             }
         } else {
             throw new JsonParseException("JsonElement " + json + " is not a json object");
@@ -59,12 +60,14 @@ public class ServerConfigSerializer implements JsonSerializer<JsonAddonConfig.Se
     @Override
     public JsonElement serialize(JsonAddonConfig.ServerConfig src, Type typeOfSrc, JsonSerializationContext context) {
         if (src.getHost() != null && src.getHost().equals(this.defaultServerConfig.getHost())
-            && src.getPort() != null && src.getPort().equals(this.defaultServerConfig.getPort())) {
+            && src.getPort() != null && src.getPort().equals(this.defaultServerConfig.getPort())
+            && src.getGuidelinesUrl() != null && src.getGuidelinesUrl().equals(this.defaultServerConfig.getGuidelinesUrl())) {
             return new JsonObject();
         } else {
             JsonObject object = new JsonObject();
             object.addProperty("host", src.getHost());
             object.addProperty("port", src.getPort());
+            object.addProperty("guidelines", src.getGuidelinesUrl());
             return object;
         }
     }

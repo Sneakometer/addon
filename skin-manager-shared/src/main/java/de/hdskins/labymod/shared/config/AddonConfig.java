@@ -38,6 +38,8 @@ public interface AddonConfig extends Serializable {
 
     void setServerPort(int serverPort);
 
+    String getGuidelinesUrl();
+
     @Nonnull
     InetAddress getServerAddress();
 
@@ -72,4 +74,9 @@ public interface AddonConfig extends Serializable {
     void enableSkin(UUID playerUniqueId);
 
     boolean isSkinDisabled(UUID playerUniqueId);
+
+    boolean hasAcceptedGuidelines();
+
+    void setGuidelinesAccepted(boolean accepted);
+
 }
