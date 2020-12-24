@@ -108,7 +108,7 @@ public class HDSkinManager extends SkinManager {
     });
   private final Cache<UUID, SkinHashWrapper> uniqueIdToSkinHashCache = CacheBuilder.newBuilder()
     .expireAfterAccess(30, TimeUnit.SECONDS)
-    .removalListener(this::handleRemove)
+    .removalListener(this::handleUniqueIdRemove)
     .concurrencyLevel(4)
     .ticker(Ticker.systemTicker())
     .build();
@@ -163,7 +163,7 @@ public class HDSkinManager extends SkinManager {
         if (maxResolution != Resolution.RESOLUTION_ALL
           && skinTexture.getBufferedImage().getHeight() > maxResolution.getHeight() && skinTexture.getBufferedImage().getWidth() > maxResolution.getWidth()) {
           LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", localSkinPath, maxResolution);
-          return super.loadSkin(texture, type, callback);
+          return MCUtil.call(() -> super.loadSkin(texture, type, callback));
         }
         // Now we can load the texture
         if (this.textureManager.loadTexture(location, skinTexture)) {
@@ -275,7 +275,7 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
-  private void handleRemove(RemovalNotification<Object, ?> notification) {
+  private void handleUniqueIdRemove(RemovalNotification<Object, ?> notification) {
     if (notification.getKey() instanceof UUID && HANDLED_CAUSES.contains(notification.getCause())) {
       if (this.addonContext.getActive().get()) {
         this.sentAllQueuedUnloads();
@@ -365,6 +365,7 @@ public class HDSkinManager extends SkinManager {
   }
 
   public void pushMaxResolutionUpdate() {
+    this.textureToLocationCache.invalidateAll();
     for (UUID uuid : this.uniqueIdToSkinHashCache.asMap().keySet()) {
       this.updateSkin(uuid, null);
     }
