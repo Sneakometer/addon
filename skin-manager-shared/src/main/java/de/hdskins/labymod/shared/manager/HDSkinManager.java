@@ -325,6 +325,7 @@ public class HDSkinManager extends SkinManager {
       targetLocalPath,
       location,
       this.textureManager,
+      this.addonContext,
       () -> HDSkinManager.super.loadSkin(texture, type, callback),
       texture,
       type,
@@ -377,6 +378,14 @@ public class HDSkinManager extends SkinManager {
     }
 
     this.updateSkin(playerUniqueId, wrapper);
+  }
+
+  public void invalidateAll() {
+    for (UUID uuid : this.uniqueIdToSkinHashCache.asMap().keySet()) {
+      this.skinInvalidator.accept(uuid);
+    }
+    this.textureToLocationCache.invalidateAll();
+    this.uniqueIdToSkinHashCache.invalidateAll();
   }
 
   public void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {

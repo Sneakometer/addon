@@ -18,7 +18,10 @@
 package de.hdskins.labymod.shared.manager;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
+import de.hdskins.labymod.shared.config.AddonConfig;
+import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.resource.HDResourceLocation;
 import de.hdskins.labymod.shared.texture.HDSkinTexture;
 import de.hdskins.labymod.shared.utils.MCUtil;
@@ -48,6 +51,7 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
   private static final IImageBuffer IMAGE_BUFFER = new ImageBufferDownload();
 
   private final Path targetLocalPath;
+  private final AddonContext addonContext;
   private final HDResourceLocation location;
   private final TextureManager textureManager;
   private final Runnable backingLoaderExecutor;
@@ -55,10 +59,11 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
   private final MinecraftProfileTexture.Type type;
   private final SkinManager.SkinAvailableCallback callback;
 
-  protected SkinLoadPacketHandler(Path targetLocalPath, HDResourceLocation location, TextureManager textureManager,
+  protected SkinLoadPacketHandler(Path targetLocalPath, HDResourceLocation location, TextureManager textureManager, AddonContext context,
                                   Runnable backingLoaderExecutor, MinecraftProfileTexture texture, MinecraftProfileTexture.Type type,
                                   SkinManager.SkinAvailableCallback callback) {
     this.targetLocalPath = targetLocalPath;
+    this.addonContext = context;
     this.location = location;
     this.textureManager = textureManager;
     this.backingLoaderExecutor = backingLoaderExecutor;
@@ -89,7 +94,16 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
       }
 
       try (InputStream stream = new ByteArrayInputStream(response.getSkinData())) {
-        BufferedImage bufferedImage = IMAGE_BUFFER.parseUserSkin(ImageIO.read(stream));
+        final BufferedImage image = ImageIO.read(stream);
+        final AddonConfig config = this.addonContext.getAddonConfig();
+        if (config.getMaxSkinResolution() != Resolution.RESOLUTION_ALL
+          && image.getHeight() > config.getMaxSkinResolution().getHeight() && image.getWidth() > config.getMaxSkinResolution().getWidth()) {
+          LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", this.texture.getHash(), config.getMaxSkinResolution());
+          MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+          return;
+        }
+
+        BufferedImage bufferedImage = IMAGE_BUFFER.parseUserSkin(image);
         try (OutputStream outputStream = Files.newOutputStream(this.targetLocalPath, StandardOpenOption.CREATE)) {
           ImageIO.write(bufferedImage, "png", outputStream);
         }
@@ -113,7 +127,6 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
       }
     } else {
       MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
-      //MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
     }
   }
 }
