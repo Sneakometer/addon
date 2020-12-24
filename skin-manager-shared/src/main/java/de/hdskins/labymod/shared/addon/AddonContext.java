@@ -22,7 +22,7 @@ import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.client.NetworkClient;
 import de.hdskins.protocol.component.ClientSettings;

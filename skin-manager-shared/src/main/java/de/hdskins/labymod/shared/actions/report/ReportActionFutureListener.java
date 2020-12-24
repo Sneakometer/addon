@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.actions.report;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;

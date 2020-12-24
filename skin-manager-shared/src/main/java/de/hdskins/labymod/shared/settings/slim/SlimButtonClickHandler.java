@@ -22,7 +22,7 @@ import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.settings.countdown.DefaultCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;

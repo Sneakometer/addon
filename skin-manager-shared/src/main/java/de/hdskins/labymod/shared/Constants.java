@@ -17,23 +17,16 @@
  */
 package de.hdskins.labymod.shared;
 
-import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
-import de.hdskins.labymod.shared.concurrent.SilentCallable;
-import net.minecraft.client.Minecraft;
+import de.hdskins.labymod.shared.eventbus.EventBus;
+import de.hdskins.labymod.shared.eventbus.defaults.DefaultEventBus;
 
-public final class MCUtil {
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-    private static final Minecraft THE_MINECRAFT = Minecraft.getMinecraft();
-
-    private MCUtil() {
-        throw new UnsupportedOperationException();
-    }
-
-    public static <T> T call(SilentCallable<T> callable) {
-        if (THE_MINECRAFT.isCallingFromMinecraftThread()) {
-            return callable.call();
-        } else {
-            return ConcurrentUtil.waitedGet(THE_MINECRAFT.addScheduledTask(() -> callable.call()));
-        }
-    }
+public interface Constants {
+    String SUCCESS = "§a§l✔";
+    String FAILURE = "§c§l✖";
+    String SPACE = " ";
+    EventBus EVENT_BUS = new DefaultEventBus();
+    ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 }

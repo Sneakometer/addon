@@ -17,7 +17,7 @@
  */
 package de.hdskins.labymod.shared.actions;
 
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

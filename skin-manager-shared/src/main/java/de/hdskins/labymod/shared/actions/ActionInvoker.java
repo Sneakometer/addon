@@ -17,7 +17,7 @@
  */
 package de.hdskins.labymod.shared.actions;
 
-import de.hdskins.labymod.shared.ReflectionUtils;
+import de.hdskins.labymod.shared.utils.ReflectionUtils;
 import net.labymod.main.LabyMod;
 import net.labymod.user.gui.UserActionGui;
 import net.labymod.user.util.UserActionEntry;

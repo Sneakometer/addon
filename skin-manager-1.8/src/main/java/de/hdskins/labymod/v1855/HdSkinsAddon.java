@@ -17,10 +17,10 @@
  */
 package de.hdskins.labymod.v1855;
 
-import de.hdskins.labymod.shared.ReflectionUtils;
+import de.hdskins.labymod.shared.utils.ReflectionUtils;
 import de.hdskins.labymod.shared.addon.AddonContextLoader;
 import de.hdskins.labymod.shared.addon.laby.LabyModAddonBase;
-import de.hdskins.labymod.shared.texture.HDSkinManager;
+import de.hdskins.labymod.shared.manager.HDSkinManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;

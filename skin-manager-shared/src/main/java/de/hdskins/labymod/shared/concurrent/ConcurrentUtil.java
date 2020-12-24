@@ -33,7 +33,7 @@ public final class ConcurrentUtil {
         }
     }
 
-    public static SilentCallable<Void> fromRunnable(ExceptionRunnable runnable) {
+    public static SilentCallable<Void> fromRunnable(Runnable runnable) {
         return () -> {
             runnable.run();
             return null;

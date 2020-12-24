@@ -17,7 +17,7 @@
  */
 package de.hdskins.labymod.shared.texture;
 
-import de.hdskins.labymod.shared.MCUtil;
+import de.hdskins.labymod.shared.utils.MCUtil;
 import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.SimpleTexture;

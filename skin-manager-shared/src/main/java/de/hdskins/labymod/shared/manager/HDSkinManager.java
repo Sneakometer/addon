@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.texture;
+package de.hdskins.labymod.shared.manager;
 
 import com.google.common.base.Ticker;
 import com.google.common.cache.Cache;
@@ -25,34 +25,29 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalCause;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.authlib.properties.Property;
-import com.mojang.util.UUIDTypeAdapter;
-import de.hdskins.labymod.shared.MCUtil;
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
+import de.hdskins.labymod.shared.concurrent.FunctionalFutureListener;
 import de.hdskins.labymod.shared.listener.ClientListeners;
 import de.hdskins.labymod.shared.listener.NetworkListeners;
 import de.hdskins.labymod.shared.resource.HDResourceLocation;
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.texture.HDMinecraftProfileTexture;
+import de.hdskins.labymod.shared.texture.HDSkinTexture;
+import de.hdskins.labymod.shared.utils.GameProfileUtils;
+import de.hdskins.labymod.shared.utils.MCUtil;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketClientReady;
 import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkin;
 import de.hdskins.protocol.packets.reading.download.PacketClientRequestSkinId;
-import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkin;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkinId;
 import de.hdskins.protocol.packets.reading.live.PacketClientLiveSkinUnload;
 import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IImageBuffer;
-import net.minecraft.client.renderer.ImageBufferDownload;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.SkinManager;
@@ -63,17 +58,10 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
@@ -87,10 +75,8 @@ import java.util.function.Consumer;
 @SuppressWarnings("UnstableApiUsage")
 public class HDSkinManager extends SkinManager {
 
-    private static final JsonParser PARSER = new JsonParser();
-    private static final SkinHashWrapper NO_SKIN = new SkinHashWrapper();
+    private static final SkinHashWrapper NO_SKIN = SkinHashWrapper.newEmpty();
     private static final Logger LOGGER = LogManager.getLogger(HDSkinManager.class);
-    private static final Map<String, String> SLIM = ImmutableMap.of("model", "slim");
     private static final Collection<RemovalCause> HANDLED_CAUSES = EnumSet.range(RemovalCause.COLLECTED, RemovalCause.SIZE);
 
     private final Path assetsDirectory;
@@ -163,33 +149,6 @@ public class HDSkinManager extends SkinManager {
         return this.loadSkin(texture, type, null);
     }
 
-    private UUID getUniqueId(GameProfile profile) {
-        if (profile.getProperties().isEmpty()) {
-            return profile.getId();
-        }
-
-        Collection<Property> properties = profile.getProperties().get("textures");
-        if (properties == null || properties.isEmpty()) {
-            return profile.getId();
-        }
-        for (Property property : properties) {
-            byte[] decoded = Base64.getDecoder().decode(property.getValue());
-            try {
-                JsonElement element = PARSER.parse(new String(decoded));
-                if (element.isJsonObject()) {
-                    JsonObject object = element.getAsJsonObject();
-                    if (object.has("profileId") && object.get("profileId").isJsonPrimitive()) {
-                        String rawId = object.get("profileId").getAsString();
-                        return UUIDTypeAdapter.fromString(rawId);
-                    }
-                }
-            } catch (JsonSyntaxException ignored) {
-            }
-        }
-
-        return profile.getId();
-    }
-
     @Override
     public ResourceLocation loadSkin(MinecraftProfileTexture texture, MinecraftProfileTexture.Type type, @Nullable SkinAvailableCallback callback) {
         if (!(texture instanceof HDMinecraftProfileTexture)) {
@@ -251,9 +210,9 @@ public class HDSkinManager extends SkinManager {
         }
 
         final UUID self = LabyMod.getInstance().getPlayerUUID();
-        final UUID profileId = this.getUniqueId(profile);
+        final UUID profileId = GameProfileUtils.getUniqueId(profile);
 
-        if ((!profileId.equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profileId)) {
+        if (profileId == null || (!profileId.equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profileId)) {
             LOGGER.debug("Not loading skin for profile: {} callback: {} secure: {} because the unique id is blocked locally.", profile, callback, requireSecure);
             super.loadProfileTextures(profile, callback, requireSecure);
             return;
@@ -275,10 +234,12 @@ public class HDSkinManager extends SkinManager {
                 return;
             }
             // We send a query to the server to get the skin hash from the uuid given
-            this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdLoad(profileId, profile, callback, requireSecure));
+            this.addonContext.getNetworkClient()
+                .sendQuery(new PacketClientRequestSkinId(profileId))
+                .addListener(this.newListenerForSkinIdLoad(profileId, profile, callback, requireSecure));
         } else if (response.hasSkin()) {
             // We already sent a request to the server so we can now simply load the texture by the hash we already got from the server
-            this.loadSkin(new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null), MinecraftProfileTexture.Type.SKIN, callback);
+            this.loadSkin(response.toProfileTexture(), MinecraftProfileTexture.Type.SKIN, callback);
         } else {
             // The player has no hd skin so we do a legacy load
             super.loadProfileTextures(profile, callback, requireSecure);
@@ -287,7 +248,8 @@ public class HDSkinManager extends SkinManager {
 
     @Override
     public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> loadSkinFromCache(GameProfile profile) {
-        if (profile.getId() == null) {
+        final UUID profileId = GameProfileUtils.getUniqueId(profile);
+        if (profileId == null) {
             LOGGER.debug("Unable to load skin {} from cache because skin unique id is null", profile);
             if (profile.getProperties().containsKey("textures")) {
                 return this.mojangProfileCache.getUnchecked(profile);
@@ -295,8 +257,6 @@ public class HDSkinManager extends SkinManager {
                 return ImmutableMap.of();
             }
         }
-
-        final UUID profileId = this.getUniqueId(profile);
 
         final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profileId);
         if (response != null) {
@@ -307,7 +267,7 @@ public class HDSkinManager extends SkinManager {
                     return ImmutableMap.of();
                 }
             }
-            return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, new HDMinecraftProfileTexture(response.getSkinHash(), response.isSlim() ? SLIM : null));
+            return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, response.toProfileTexture());
         }
         if (this.addonContext.getActive().get()) {
             this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdCacheOnly(profileId));
@@ -341,122 +301,51 @@ public class HDSkinManager extends SkinManager {
         }
     }
 
-    private FutureListener<PacketBase> forSkinIdLoad(UUID profileId, GameProfile profile, @Nullable SkinAvailableCallback callback, boolean requireSecure) {
-        return new FutureListener<PacketBase>() {
-            @Override
-            public void nullResult() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
-                HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
-            }
-
-            @Override
-            public void nonNullResult(@Nonnull PacketBase packetBase) {
-                if (packetBase instanceof PacketServerResponseSkinId) {
-                    PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
-                    if (response.hasSkin()) {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, new SkinHashWrapper(response));
-                        HDSkinManager.this.loadSkin(new HDMinecraftProfileTexture(response.getSkinId(), response.isSlim() ? SLIM : null), MinecraftProfileTexture.Type.SKIN, callback);
-                    } else {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
-                        HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
-                    }
+    @Nonnull
+    private FutureListener<PacketBase> newListenerForSkinIdLoad(UUID uniqueId, GameProfile profile, @Nullable SkinAvailableCallback callback, boolean requireSecure) {
+        return FunctionalFutureListener.listener(packetBase -> {
+            if (packetBase instanceof PacketServerResponseSkinId) {
+                PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
+                if (response.hasSkin()) {
+                    HDSkinManager.this.uniqueIdToSkinHashCache.put(uniqueId, SkinHashWrapper.wrap(response));
+                    HDSkinManager.this.loadSkin(HDMinecraftProfileTexture.texture(response), MinecraftProfileTexture.Type.SKIN, callback);
+                } else {
+                    HDSkinManager.this.uniqueIdToSkinHashCache.put(uniqueId, NO_SKIN);
+                    HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
                 }
             }
-
-            @Override
-            public void cancelled() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
-                HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
-            }
-        };
+        }, () -> {
+            HDSkinManager.this.uniqueIdToSkinHashCache.put(uniqueId, NO_SKIN);
+            HDSkinManager.super.loadProfileTextures(profile, callback, requireSecure);
+        });
     }
 
+    @Nonnull
     private FutureListener<PacketBase> forSkinIdCacheOnly(UUID profileId) {
-        return new FutureListener<PacketBase>() {
-            @Override
-            public void nullResult() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
-            }
-
-            @Override
-            public void nonNullResult(PacketBase packetBase) {
-                if (packetBase instanceof PacketServerResponseSkinId) {
-                    PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
-                    if (response.hasSkin()) {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, new SkinHashWrapper(response));
-                    } else {
-                        HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
-                    }
+        return FunctionalFutureListener.listener(packetBase -> {
+            if (packetBase instanceof PacketServerResponseSkinId) {
+                PacketServerResponseSkinId response = (PacketServerResponseSkinId) packetBase;
+                if (response.hasSkin()) {
+                    HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, SkinHashWrapper.wrap(response));
+                } else {
+                    HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
                 }
             }
-
-            @Override
-            public void cancelled() {
-                HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN);
-            }
-        };
+        }, () -> HDSkinManager.this.uniqueIdToSkinHashCache.put(profileId, NO_SKIN));
     }
 
+    @Nonnull
     private FutureListener<PacketBase> forSkinLoad(MinecraftProfileTexture texture, MinecraftProfileTexture.Type type,
                                                    @Nullable SkinAvailableCallback callback, HDResourceLocation location, Path targetLocalPath) {
-        return new FutureListener<PacketBase>() {
-            @Override
-            public void nullResult() {
-                MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
-            }
-
-            @Override
-            public void nonNullResult(@Nonnull PacketBase packetBase) {
-                if (packetBase instanceof PacketServerResponseSkin) {
-                    PacketServerResponseSkin response = (PacketServerResponseSkin) packetBase;
-                    if (response.getSkinData().length == 0) {
-                        LOGGER.debug("Unable to load skin with hash {} because server sent an empty result", texture.getHash());
-                        MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
-                        return;
-                    }
-
-                    final Path parent = targetLocalPath.getParent();
-                    if (parent != null && Files.notExists(parent)) {
-                        try {
-                            Files.createDirectories(parent);
-                        } catch (IOException exception) {
-                            LOGGER.debug("Unable to create directory {} for skin download to {}", parent, targetLocalPath, exception);
-                            MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
-                            return;
-                        }
-                    }
-
-                    IImageBuffer buffer = new ImageBufferDownload();
-                    try (InputStream stream = new ByteArrayInputStream(response.getSkinData())) {
-                        BufferedImage bufferedImage = buffer.parseUserSkin(ImageIO.read(stream));
-                        try (OutputStream outputStream = Files.newOutputStream(targetLocalPath, StandardOpenOption.CREATE)) {
-                            ImageIO.write(bufferedImage, "png", outputStream);
-                        }
-
-                        MCUtil.call(ConcurrentUtil.fromRunnable(() -> {
-                            HDSkinManager.this.textureManager.loadTexture(location, new HDSkinTexture(bufferedImage));
-                            if (callback != null) {
-                                callback.skinAvailable(type, location, texture);
-                            }
-                        }));
-                    } catch (IOException exception) {
-                        LOGGER.debug("Unable to load skin of texture: {} type: {} callback: {} path: {}", texture, type, callback, targetLocalPath, exception);
-                        MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
-                    }
-                } else {
-                    MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
-                }
-            }
-
-            @Override
-            public void cancelled() {
-                MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
-            }
-        };
-    }
-
-    public AddonContext getAddonContext() {
-        return this.addonContext;
+        return FunctionalFutureListener.listener(new SkinLoadPacketHandler(
+            targetLocalPath,
+            location,
+            this.textureManager,
+            () -> HDSkinManager.super.loadSkin(texture, type, callback),
+            texture,
+            type,
+            callback
+        ), () -> MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback))));
     }
 
     public void pushSkinDelete(String skinHash) {
@@ -488,7 +377,7 @@ public class HDSkinManager extends SkinManager {
         SkinHashWrapper wrapper = this.uniqueIdToSkinHashCache.getIfPresent(playerUniqueId);
         if (wrapper != null) {
             if (wrapper == NO_SKIN) {
-                wrapper = new SkinHashWrapper(newSkinHash);
+                wrapper = SkinHashWrapper.wrap(newSkinHash);
             } else {
                 wrapper.setSkinHash(newSkinHash);
             }
@@ -506,71 +395,7 @@ public class HDSkinManager extends SkinManager {
         this.updateSkin(playerUniqueId, wrapper);
     }
 
-    private static final class HDMinecraftProfileTexture extends MinecraftProfileTexture {
-
-        public HDMinecraftProfileTexture(String hash, @Nullable Map<String, String> metadata) {
-            super(hash, metadata);
-        }
-
-        @Override
-        public String getHash() {
-            return super.getUrl(); // Easy workaround :)
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-
-            if (!(obj instanceof HDMinecraftProfileTexture)) {
-                return false;
-            }
-
-            return ((HDMinecraftProfileTexture) obj).getHash().equals(this.getHash());
-        }
-
-        @Override
-        public int hashCode() {
-            return this.getHash().hashCode();
-        }
-    }
-
-    private static final class SkinHashWrapper {
-
-        private String skinHash;
-        private boolean slim;
-
-        public SkinHashWrapper() {
-        }
-
-        public SkinHashWrapper(String skinHash) {
-            this.skinHash = skinHash;
-        }
-
-        public SkinHashWrapper(PacketServerResponseSkinId responseSkinId) {
-            this.skinHash = responseSkinId.getSkinId();
-            this.slim = responseSkinId.isSlim();
-        }
-
-        public boolean hasSkin() {
-            return this.skinHash != null;
-        }
-
-        public String getSkinHash() {
-            return this.skinHash;
-        }
-
-        public void setSkinHash(@Nullable String skinHash) {
-            this.skinHash = skinHash;
-        }
-
-        public boolean isSlim() {
-            return this.slim;
-        }
-
-        public void setSlim(boolean slim) {
-            this.slim = slim;
-        }
+    public AddonContext getAddonContext() {
+        return this.addonContext;
     }
 }
