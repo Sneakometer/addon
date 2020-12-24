@@ -126,24 +126,6 @@ public class HDSkinManager extends SkinManager {
     Constants.EVENT_BUS.registerListener(clientListeners);
   }
 
-  private void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {
-    if (wrapper != null && wrapper != NO_SKIN) {
-      for (Map.Entry<MinecraftProfileTexture, HDResourceLocation> entry : this.textureToLocationCache.asMap().entrySet()) {
-        if (entry.getKey().getHash().equals(wrapper.getSkinHash())) {
-          this.textureToLocationCache.invalidate(entry.getKey());
-          break;
-        }
-      }
-    }
-
-    if (wrapper != null) {
-      this.uniqueIdToSkinHashCache.put(uniqueId, wrapper);
-    } else {
-      this.uniqueIdToSkinHashCache.invalidate(uniqueId);
-    }
-    this.skinInvalidator.accept(uniqueId);
-  }
-
   @Override
   public ResourceLocation loadSkin(MinecraftProfileTexture texture, MinecraftProfileTexture.Type type) {
     return this.loadSkin(texture, type, null);
@@ -393,6 +375,24 @@ public class HDSkinManager extends SkinManager {
     }
 
     this.updateSkin(playerUniqueId, wrapper);
+  }
+
+  private void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {
+    if (wrapper != null && wrapper != NO_SKIN) {
+      for (Map.Entry<MinecraftProfileTexture, HDResourceLocation> entry : this.textureToLocationCache.asMap().entrySet()) {
+        if (entry.getKey().getHash().equals(wrapper.getSkinHash())) {
+          this.textureToLocationCache.invalidate(entry.getKey());
+          break;
+        }
+      }
+    }
+
+    if (wrapper != null) {
+      this.uniqueIdToSkinHashCache.put(uniqueId, wrapper);
+    } else {
+      this.uniqueIdToSkinHashCache.invalidate(uniqueId);
+    }
+    this.skinInvalidator.accept(uniqueId);
   }
 
   public AddonContext getAddonContext() {

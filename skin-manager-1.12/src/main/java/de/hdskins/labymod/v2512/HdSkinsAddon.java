@@ -20,6 +20,7 @@ package de.hdskins.labymod.v2512;
 import de.hdskins.labymod.shared.addon.AddonContextLoader;
 import de.hdskins.labymod.shared.addon.laby.LabyModAddonBase;
 import de.hdskins.labymod.shared.manager.HDSkinManager;
+import de.hdskins.labymod.shared.utils.GameProfileUtils;
 import de.hdskins.labymod.shared.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -28,6 +29,7 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.UUID;
 
 public class HdSkinsAddon extends LabyModAddonBase {
 
@@ -49,10 +51,12 @@ public class HdSkinsAddon extends LabyModAddonBase {
         uniqueId -> {
           NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getConnection();
           if (netHandler != null) {
-            NetworkPlayerInfo playerInfo = netHandler.getPlayerInfo(uniqueId);
-            // it may be null but forge forgot the @Nullable annotation there
-            if (playerInfo != null) {
-              ReflectionUtils.set(playerInfo, Boolean.FALSE, playerTexturesLoaded);
+            UUID playerId;
+            for (NetworkPlayerInfo info : netHandler.getPlayerInfoMap()) {
+              playerId = GameProfileUtils.getUniqueId(info.getGameProfile());
+              if (playerId != null && playerId.equals(uniqueId)) {
+                ReflectionUtils.set(info, Boolean.FALSE, playerTexturesLoaded);
+              }
             }
           }
         }
