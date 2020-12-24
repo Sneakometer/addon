@@ -33,6 +33,10 @@ public class EmptyTranslationRegistry implements TranslationRegistry {
     private EmptyTranslationRegistry() {
     }
 
+    @Override
+    public void updateTranslation(String language, String translationKey, String message) {
+    }
+
     @Nonnull
     @Override
     public String translateMessage(String translationKey, Object... replacements) {

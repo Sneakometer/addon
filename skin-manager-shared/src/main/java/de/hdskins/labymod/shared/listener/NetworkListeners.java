@@ -21,10 +21,12 @@ import de.hdskins.labymod.shared.actions.ActionFactory;
 import de.hdskins.labymod.shared.actions.ActionInvoker;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
+import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
+import de.hdskins.labymod.shared.translation.TranslationRegistry;
 import de.hdskins.labymod.shared.utils.Constants;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
@@ -36,6 +38,7 @@ import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeleteSkin
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateRole;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateSkin;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateSlim;
+import de.hdskins.protocol.packets.reading.other.PacketServerOverrideMessage;
 import de.hdskins.protocol.packets.reading.ratelimit.PacketServerUpdateRateLimits;
 import io.netty.channel.Channel;
 import net.labymod.main.LabyMod;
@@ -48,9 +51,11 @@ public final class NetworkListeners {
 
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
     private final HDSkinManager hdSkinManager;
+    private final TranslationRegistry translationRegistry;
 
-    public NetworkListeners(HDSkinManager hdSkinManager) {
+    public NetworkListeners(HDSkinManager hdSkinManager, TranslationRegistry translationRegistry) {
         this.hdSkinManager = hdSkinManager;
+        this.translationRegistry = translationRegistry;
     }
 
     @ChannelInactiveListener
@@ -64,6 +69,15 @@ public final class NetworkListeners {
                 this.hdSkinManager.getAddonContext().getReconnecting().set(false);
             });
         }
+    }
+
+    @PacketListener
+    public void handleLanguageOverride(PacketServerOverrideMessage packet) {
+        packet.getMessages().forEach((key, message) ->
+            this.translationRegistry.updateTranslation(packet.getLanguage(), key, message));
+
+        // update the elements
+        Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
     }
 
     @PacketListener
