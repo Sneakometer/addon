@@ -22,5 +22,5 @@ import java.util.concurrent.Callable;
 @FunctionalInterface
 public interface SilentCallable<T> extends Callable<T> {
 
-    T call();
+  T call();
 }

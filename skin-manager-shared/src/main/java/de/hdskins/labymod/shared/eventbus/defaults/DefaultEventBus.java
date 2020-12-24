@@ -37,106 +37,106 @@ import java.util.stream.Collectors;
 @ParametersAreNonnullByDefault
 public class DefaultEventBus implements EventBus {
 
-    private static final Logger LOGGER = LogManager.getLogger(DefaultEventBus.class);
-    private static final Comparator<EventBusEntry> ENTRY_COMPARATOR = Comparator.comparingInt(e -> e.eventListener.postOrder());
+  private static final Logger LOGGER = LogManager.getLogger(DefaultEventBus.class);
+  private static final Comparator<EventBusEntry> ENTRY_COMPARATOR = Comparator.comparingInt(e -> e.eventListener.postOrder());
 
-    // technically MultiMap<Event, Listener>
-    private final Multimap<Class<?>, EventBusEntry> entries = HashMultimap.create();
-    private final Object lock = new Object();
+  // technically MultiMap<Event, Listener>
+  private final Multimap<Class<?>, EventBusEntry> entries = HashMultimap.create();
+  private final Object lock = new Object();
 
-    @Override
-    public void registerListener(Object listenerClass) {
-        synchronized (this.lock) {
-            for (Method method : listenerClass.getClass().getMethods()) {
-                EventListener eventListener = method.getAnnotation(EventListener.class);
-                if (eventListener == null || method.getParameterCount() != 1) {
-                    continue;
-                }
-
-                this.entries.put(method.getParameterTypes()[0], new EventBusEntry(eventListener, listenerClass, method));
-            }
+  @Override
+  public void registerListener(Object listenerClass) {
+    synchronized (this.lock) {
+      for (Method method : listenerClass.getClass().getMethods()) {
+        EventListener eventListener = method.getAnnotation(EventListener.class);
+        if (eventListener == null || method.getParameterCount() != 1) {
+          continue;
         }
+
+        this.entries.put(method.getParameterTypes()[0], new EventBusEntry(eventListener, listenerClass, method));
+      }
     }
+  }
 
-    @Override
-    public void unregister(Object listenerClass) {
-        synchronized (this.lock) {
-            this.entries.values().removeIf(entry -> entry.listenerClass.equals(listenerClass));
-        }
+  @Override
+  public void unregister(Object listenerClass) {
+    synchronized (this.lock) {
+      this.entries.values().removeIf(entry -> entry.listenerClass.equals(listenerClass));
     }
+  }
 
-    @Override
-    public void unregisterAll() {
-        synchronized (this.lock) {
-            this.entries.clear();
-        }
+  @Override
+  public void unregisterAll() {
+    synchronized (this.lock) {
+      this.entries.clear();
     }
+  }
 
-    @Override
-    public @Nonnull PostResult post(Object event) {
-        synchronized (this.lock) {
-            // get the listener subscribed to the event
-            Collection<EventBusEntry> eventBusEntries = this.entries.get(event.getClass());
-            if (eventBusEntries == null) {
-                // no listener are subscribed, abort
-                return PostResult.success();
-            }
+  @Override
+  public @Nonnull PostResult post(Object event) {
+    synchronized (this.lock) {
+      // get the listener subscribed to the event
+      Collection<EventBusEntry> eventBusEntries = this.entries.get(event.getClass());
+      if (eventBusEntries == null) {
+        // no listener are subscribed, abort
+        return PostResult.success();
+      }
 
-            // collect the listeners sorted by the priority to a new list
-            List<EventBusEntry> targetListener = eventBusEntries.stream().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
-            // Create a new lazily initialized map of the failed posts
-            Multimap<Object, Throwable> exceptions = null;
-            // post the event to the listeners
-            for (EventBusEntry eventBusEntry : targetListener) {
-                if (this.shouldPost(event, eventBusEntry)) {
-                    try {
-                        eventBusEntry.method.invoke(eventBusEntry.listenerClass, event);
-                    } catch (Throwable throwable) {
-                        if (exceptions == null) {
-                            // we cached the first exception - initialize the result map
-                            exceptions = HashMultimap.create();
-                        }
-
-                        exceptions.put(eventBusEntry.eventListener, throwable);
-                    }
-                }
+      // collect the listeners sorted by the priority to a new list
+      List<EventBusEntry> targetListener = eventBusEntries.stream().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
+      // Create a new lazily initialized map of the failed posts
+      Multimap<Object, Throwable> exceptions = null;
+      // post the event to the listeners
+      for (EventBusEntry eventBusEntry : targetListener) {
+        if (this.shouldPost(event, eventBusEntry)) {
+          try {
+            eventBusEntry.method.invoke(eventBusEntry.listenerClass, event);
+          } catch (Throwable throwable) {
+            if (exceptions == null) {
+              // we cached the first exception - initialize the result map
+              exceptions = HashMultimap.create();
             }
 
-            return exceptions == null ? PostResult.success() : PostResult.failure(exceptions);
+            exceptions.put(eventBusEntry.eventListener, throwable);
+          }
         }
+      }
+
+      return exceptions == null ? PostResult.success() : PostResult.failure(exceptions);
+    }
+  }
+
+  @Override
+  public void postReported(Object event) {
+    PostResult postResult = this.post(event);
+    if (postResult.wasSuccessful()) {
+      return;
     }
 
-    @Override
-    public void postReported(Object event) {
-        PostResult postResult = this.post(event);
-        if (postResult.wasSuccessful()) {
-            return;
-        }
+    for (Map.Entry<Object, Throwable> entry : postResult.getExceptions().entries()) {
+      LOGGER.error("Exception posting event {} to {}", event.getClass().getName(), entry.getKey(), entry.getValue());
+    }
+  }
 
-        for (Map.Entry<Object, Throwable> entry : postResult.getExceptions().entries()) {
-            LOGGER.error("Exception posting event {} to {}", event.getClass().getName(), entry.getKey(), entry.getValue());
-        }
+  private boolean shouldPost(Object event, EventBusEntry eventBusEntry) {
+    if (!(event instanceof Cancelable)) {
+      return true;
     }
 
-    private boolean shouldPost(Object event, EventBusEntry eventBusEntry) {
-        if (!(event instanceof Cancelable)) {
-            return true;
-        }
+    return !((Cancelable) event).isCanceled() || eventBusEntry.eventListener.consumesCanceledEvents();
+  }
 
-        return !((Cancelable) event).isCanceled() || eventBusEntry.eventListener.consumesCanceledEvents();
+  private static final class EventBusEntry {
+
+    private final EventListener eventListener;
+    private final Object listenerClass;
+    private final Method method;
+
+    public EventBusEntry(EventListener eventListener, Object listenerClass, Method method) {
+      this.eventListener = eventListener;
+      this.listenerClass = listenerClass;
+      this.method = method;
+      this.method.setAccessible(true);
     }
-
-    private static final class EventBusEntry {
-
-        private final EventListener eventListener;
-        private final Object listenerClass;
-        private final Method method;
-
-        public EventBusEntry(EventListener eventListener, Object listenerClass, Method method) {
-            this.eventListener = eventListener;
-            this.listenerClass = listenerClass;
-            this.method = method;
-            this.method.setAccessible(true);
-        }
-    }
+  }
 }

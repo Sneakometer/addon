@@ -35,55 +35,55 @@ import java.util.function.BiFunction;
 @ParametersAreNonnullByDefault
 class DefaultElementFactory implements ElementFactory {
 
-    protected static final ElementFactory DEFAULT = new DefaultElementFactory();
-    private boolean settingsEnabledByDefault = true;
+  protected static final ElementFactory DEFAULT = new DefaultElementFactory();
+  private boolean settingsEnabledByDefault = true;
 
-    private DefaultElementFactory() {
-    }
+  private DefaultElementFactory() {
+  }
 
-    @Nonnull
-    @Override
-    public ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
-                                                       BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer) {
-        ChangeableBooleanElement element = new ChangeableBooleanElement(displayName, iconData, on, off, currentValue, toggleListener);
-        element.setSettingEnabled(this.settingsEnabledByDefault);
-        customizer.accept(element);
-        return element;
-    }
+  @Nonnull
+  @Override
+  public ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
+                                                     BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer) {
+    ChangeableBooleanElement element = new ChangeableBooleanElement(displayName, iconData, on, off, currentValue, toggleListener);
+    element.setSettingEnabled(this.settingsEnabledByDefault);
+    customizer.accept(element);
+    return element;
+  }
 
-    @Nonnull
-    @Override
-    public <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer) {
-        DropDownElement<T> dropDownElement = CustomDropDownElement.of(displayName, iconData, initialValue, values, changeListener);
-        dropDownElement.setSettingEnabled(this.settingsEnabledByDefault);
-        customizer.accept(dropDownElement);
-        return dropDownElement;
-    }
+  @Nonnull
+  @Override
+  public <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer) {
+    DropDownElement<T> dropDownElement = CustomDropDownElement.of(displayName, iconData, initialValue, values, changeListener);
+    dropDownElement.setSettingEnabled(this.settingsEnabledByDefault);
+    customizer.accept(dropDownElement);
+    return dropDownElement;
+  }
 
-    @Nonnull
-    @Override
-    public ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer) {
-        ButtonElement element = new ButtonElement(displayName, iconData, inButtonName, clickListener);
-        element.setSettingEnabled(this.settingsEnabledByDefault);
-        customizer.accept(element);
-        return element;
-    }
+  @Nonnull
+  @Override
+  public ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer) {
+    ButtonElement element = new ButtonElement(displayName, iconData, inButtonName, clickListener);
+    element.setSettingEnabled(this.settingsEnabledByDefault);
+    customizer.accept(element);
+    return element;
+  }
 
-    @Nonnull
-    @Override
-    public PlayerSkinRenderElement brewRenderElement(Consumer<PlayerSkinRenderElement> customizer) {
-        PlayerSkinRenderElement element = new PlayerSkinRenderElement();
-        customizer.accept(element);
-        return element;
-    }
+  @Nonnull
+  @Override
+  public PlayerSkinRenderElement brewRenderElement(Consumer<PlayerSkinRenderElement> customizer) {
+    PlayerSkinRenderElement element = new PlayerSkinRenderElement();
+    customizer.accept(element);
+    return element;
+  }
 
-    @Override
-    public boolean areSettingsEnabledByDefault() {
-        return this.settingsEnabledByDefault;
-    }
+  @Override
+  public boolean areSettingsEnabledByDefault() {
+    return this.settingsEnabledByDefault;
+  }
 
-    @Override
-    public void setSettingsEnabledByDefault(boolean settingsEnabledByDefault) {
-        this.settingsEnabledByDefault = settingsEnabledByDefault;
-    }
+  @Override
+  public void setSettingsEnabledByDefault(boolean settingsEnabledByDefault) {
+    this.settingsEnabledByDefault = settingsEnabledByDefault;
+  }
 }

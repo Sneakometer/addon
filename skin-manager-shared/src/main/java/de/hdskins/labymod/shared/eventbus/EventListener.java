@@ -28,13 +28,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EventListener {
 
-    byte postOrder() default DefaultPostOrder.BALANCED;
+  byte postOrder() default DefaultPostOrder.BALANCED;
 
-    boolean consumesCanceledEvents() default false;
+  boolean consumesCanceledEvents() default false;
 
-    interface DefaultPostOrder {
-        byte FIRST = Byte.MIN_VALUE;
-        byte BALANCED = 0;
-        byte LAST = Byte.MAX_VALUE;
-    }
+  interface DefaultPostOrder {
+    byte FIRST = Byte.MIN_VALUE;
+    byte BALANCED = 0;
+    byte LAST = Byte.MAX_VALUE;
+  }
 }

@@ -34,24 +34,24 @@ import java.util.function.BiFunction;
 @ParametersAreNonnullByDefault
 public interface ElementFactory {
 
-    static ElementFactory defaultFactory() {
-        return DefaultElementFactory.DEFAULT;
-    }
+  static ElementFactory defaultFactory() {
+    return DefaultElementFactory.DEFAULT;
+  }
 
-    @Nonnull
-    ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
-                                                BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer);
+  @Nonnull
+  ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
+                                              BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer);
 
-    @Nonnull <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values,
-                                                        BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer);
+  @Nonnull <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values,
+                                                      BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer);
 
-    @Nonnull
-    ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer);
+  @Nonnull
+  ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer);
 
-    @Nonnull
-    PlayerSkinRenderElement brewRenderElement(Consumer<PlayerSkinRenderElement> customizer);
+  @Nonnull
+  PlayerSkinRenderElement brewRenderElement(Consumer<PlayerSkinRenderElement> customizer);
 
-    boolean areSettingsEnabledByDefault();
+  boolean areSettingsEnabledByDefault();
 
-    void setSettingsEnabledByDefault(boolean settingsEnabledByDefault);
+  void setSettingsEnabledByDefault(boolean settingsEnabledByDefault);
 }

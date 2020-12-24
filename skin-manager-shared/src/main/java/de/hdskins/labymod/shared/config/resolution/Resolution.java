@@ -24,44 +24,44 @@ import java.util.Optional;
 @ParametersAreNonnullByDefault
 public enum Resolution {
 
-    RESOLUTION_128x64(128, 64),
-    RESOLUTION_128x128(128, 128),
-    RESOLUTION_256x128(256, 128),
-    RESOLUTION_256x256(256, 256),
-    RESOLUTION_512x256(512, 256),
-    RESOLUTION_512x512(512, 512),
-    RESOLUTION_1024x512(1024, 512),
-    RESOLUTION_1024x1024(1024, 1024),
-    RESOLUTION_2048x1024(2048, 1024),
-    RESOLUTION_2048x2048(2048, 2048),
-    RESOLUTION_ALL(0, 0);
+  RESOLUTION_128x64(128, 64),
+  RESOLUTION_128x128(128, 128),
+  RESOLUTION_256x128(256, 128),
+  RESOLUTION_256x256(256, 256),
+  RESOLUTION_512x256(512, 256),
+  RESOLUTION_512x512(512, 512),
+  RESOLUTION_1024x512(1024, 512),
+  RESOLUTION_1024x1024(1024, 1024),
+  RESOLUTION_2048x1024(2048, 1024),
+  RESOLUTION_2048x2048(2048, 2048),
+  RESOLUTION_ALL(0, 0);
 
-    public static final Resolution[] VALUES = values(); // prevent copy
+  public static final Resolution[] VALUES = values(); // prevent copy
 
-    private final int width;
-    private final int height;
+  private final int width;
+  private final int height;
 
-    Resolution(int width, int height) {
-        this.width = width;
-        this.height = height;
+  Resolution(int width, int height) {
+    this.width = width;
+    this.height = height;
+  }
+
+  @Nonnull
+  public static Optional<Resolution> byName(String name) {
+    for (Resolution value : VALUES) {
+      if (value.name().equalsIgnoreCase(name)) {
+        return Optional.of(value);
+      }
     }
 
-    @Nonnull
-    public static Optional<Resolution> byName(String name) {
-        for (Resolution value : VALUES) {
-            if (value.name().equalsIgnoreCase(name)) {
-                return Optional.of(value);
-            }
-        }
+    return Optional.empty();
+  }
 
-        return Optional.empty();
-    }
+  public int getWidth() {
+    return this.width;
+  }
 
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
+  public int getHeight() {
+    return this.height;
+  }
 }

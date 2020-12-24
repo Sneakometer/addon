@@ -23,17 +23,17 @@ import net.minecraft.client.Minecraft;
 
 public final class MCUtil {
 
-    private static final Minecraft THE_MINECRAFT = Minecraft.getMinecraft();
+  private static final Minecraft THE_MINECRAFT = Minecraft.getMinecraft();
 
-    private MCUtil() {
-        throw new UnsupportedOperationException();
-    }
+  private MCUtil() {
+    throw new UnsupportedOperationException();
+  }
 
-    public static <T> T call(SilentCallable<T> callable) {
-        if (THE_MINECRAFT.isCallingFromMinecraftThread()) {
-            return callable.call();
-        } else {
-            return ConcurrentUtil.waitedGet(THE_MINECRAFT.addScheduledTask(() -> callable.call()));
-        }
+  public static <T> T call(SilentCallable<T> callable) {
+    if (THE_MINECRAFT.isCallingFromMinecraftThread()) {
+      return callable.call();
+    } else {
+      return ConcurrentUtil.waitedGet(THE_MINECRAFT.addScheduledTask(() -> callable.call()));
     }
+  }
 }

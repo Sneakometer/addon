@@ -25,24 +25,24 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public final class NotificationUtil {
 
-    private NotificationUtil() {
-        throw new UnsupportedOperationException();
-    }
+  private NotificationUtil() {
+    throw new UnsupportedOperationException();
+  }
 
-    public static void notify(String title, String description) {
+  public static void notify(String title, String description) {
+    LabyMod.getInstance().getGuiCustomAchievement().displayAchievement(title, description);
+  }
+
+  public static void notifyUsingLabyConnectSetting(String title, String description) {
+    switch (LabyMod.getInstance().getLabyConnect().getAlertDisplayType()) {
+      case CHAT:
+        LabyMod.getInstance().displayMessageInChat(ModColor.cl('e') + title + ModColor.cl('7') + ": " + ModColor.cl('f') + description);
+        break;
+      case ACHIEVEMENT:
         LabyMod.getInstance().getGuiCustomAchievement().displayAchievement(title, description);
+        break;
+      default:
+        break;
     }
-
-    public static void notifyUsingLabyConnectSetting(String title, String description) {
-        switch (LabyMod.getInstance().getLabyConnect().getAlertDisplayType()) {
-            case CHAT:
-                LabyMod.getInstance().displayMessageInChat(ModColor.cl('e') + title + ModColor.cl('7') + ": " + ModColor.cl('f') + description);
-                break;
-            case ACHIEVEMENT:
-                LabyMod.getInstance().getGuiCustomAchievement().displayAchievement(title, description);
-                break;
-            default:
-                break;
-        }
-    }
+  }
 }

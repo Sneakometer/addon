@@ -29,54 +29,54 @@ import java.util.UUID;
 @ParametersAreNonnullByDefault
 public interface AddonConfig extends Serializable {
 
-    @Nonnull
-    String getServerHost();
+  @Nonnull
+  String getServerHost();
 
-    void setServerHost(String serverHost);
+  void setServerHost(String serverHost);
 
-    int getServerPort();
+  int getServerPort();
 
-    void setServerPort(int serverPort);
+  void setServerPort(int serverPort);
 
-    String getGuidelinesUrl();
+  @Nonnull
+  String getGuidelinesUrl();
 
-    @Nonnull
-    InetAddress getServerAddress();
+  @Nonnull
+  InetAddress getServerAddress();
 
-    long getFirstReconnectInterval();
+  long getFirstReconnectInterval();
 
-    void setFirstReconnectInterval(long firstReconnectInterval);
+  void setFirstReconnectInterval(long firstReconnectInterval);
 
-    long getReconnectInterval();
+  long getReconnectInterval();
 
-    void setReconnectInterval(long reconnectInterval);
+  void setReconnectInterval(long reconnectInterval);
 
-    boolean showSkinsOfOtherPlayers();
+  boolean showSkinsOfOtherPlayers();
 
-    void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers);
+  void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers);
 
-    @Nonnull
-    Resolution getMaxSkinResolution();
+  @Nonnull
+  Resolution getMaxSkinResolution();
 
-    void setMaxSkinResolution(Resolution resolution);
+  void setMaxSkinResolution(Resolution resolution);
 
-    boolean isSlim();
+  boolean isSlim();
 
-    void setSlim(boolean slim);
+  void setSlim(boolean slim);
 
-    @Nonnull
-    Collection<UUID> getDisabledSkins();
+  @Nonnull
+  Collection<UUID> getDisabledSkins();
 
-    void removeAllDisabledSkins();
+  void removeAllDisabledSkins();
 
-    void disableSkin(UUID playerUniqueId);
+  void disableSkin(UUID playerUniqueId);
 
-    void enableSkin(UUID playerUniqueId);
+  void enableSkin(UUID playerUniqueId);
 
-    boolean isSkinDisabled(UUID playerUniqueId);
+  boolean isSkinDisabled(UUID playerUniqueId);
 
-    boolean hasAcceptedGuidelines();
+  boolean hasAcceptedGuidelines();
 
-    void setGuidelinesAccepted(boolean accepted);
-
+  void setGuidelinesAccepted(boolean accepted);
 }

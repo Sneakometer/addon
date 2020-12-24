@@ -19,14 +19,23 @@ package de.hdskins.labymod.shared;
 
 import de.hdskins.labymod.shared.eventbus.EventBus;
 import de.hdskins.labymod.shared.eventbus.defaults.DefaultEventBus;
+import net.labymod.main.Source;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public interface Constants {
-    String SUCCESS = "§a§l✔";
-    String FAILURE = "§c§l✖";
-    String SPACE = " ";
-    EventBus EVENT_BUS = new DefaultEventBus();
-    ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+  String SUCCESS = "§a§l✔";
+  String FAILURE = "§c§l✖";
+  String SPACE = " ";
+  EventBus EVENT_BUS = new DefaultEventBus();
+  ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+  AtomicReference<String> ADDON_VERSION = new AtomicReference<>();
+
+  @Nonnull
+  static String getUserAgent() {
+    return "HDSkins v" + ADDON_VERSION.get() + " on LabyMod v" + Source.ABOUT_VERSION + " on mc " + Source.ABOUT_MC_VERSION;
+  }
 }

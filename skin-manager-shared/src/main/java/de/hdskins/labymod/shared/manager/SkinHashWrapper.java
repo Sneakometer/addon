@@ -25,55 +25,55 @@ import javax.annotation.Nullable;
 
 public class SkinHashWrapper {
 
-    private String skinHash;
-    private boolean slim;
+  private String skinHash;
+  private boolean slim;
 
-    @Nonnull
-    public static SkinHashWrapper newEmpty() {
-        return new SkinHashWrapper();
-    }
+  @Nonnull
+  public static SkinHashWrapper newEmpty() {
+    return new SkinHashWrapper();
+  }
 
-    @Nonnull
-    public static SkinHashWrapper wrap(@Nonnull PacketServerResponseSkinId packet) {
-        return wrap(packet.getSkinId(), packet.isSlim());
-    }
+  @Nonnull
+  public static SkinHashWrapper wrap(@Nonnull PacketServerResponseSkinId packet) {
+    return wrap(packet.getSkinId(), packet.isSlim());
+  }
 
-    @Nonnull
-    public static SkinHashWrapper wrap(@Nonnull String skinHash) {
-        return wrap(skinHash, Boolean.FALSE);
-    }
+  @Nonnull
+  public static SkinHashWrapper wrap(@Nonnull String skinHash) {
+    return wrap(skinHash, Boolean.FALSE);
+  }
 
-    @Nonnull
-    public static SkinHashWrapper wrap(@Nonnull String skinHash, boolean slim) {
-        return new SkinHashWrapper().setSkinHash(skinHash).setSlim(slim);
-    }
+  @Nonnull
+  public static SkinHashWrapper wrap(@Nonnull String skinHash, boolean slim) {
+    return new SkinHashWrapper().setSkinHash(skinHash).setSlim(slim);
+  }
 
-    public boolean hasSkin() {
-        return this.skinHash != null;
-    }
+  public boolean hasSkin() {
+    return this.skinHash != null;
+  }
 
-    public String getSkinHash() {
-        return this.skinHash;
-    }
+  public String getSkinHash() {
+    return this.skinHash;
+  }
 
-    @Nonnull
-    public SkinHashWrapper setSkinHash(@Nullable String skinHash) {
-        this.skinHash = skinHash;
-        return this;
-    }
+  @Nonnull
+  public SkinHashWrapper setSkinHash(@Nullable String skinHash) {
+    this.skinHash = skinHash;
+    return this;
+  }
 
-    public boolean isSlim() {
-        return this.slim;
-    }
+  public boolean isSlim() {
+    return this.slim;
+  }
 
-    @Nonnull
-    public SkinHashWrapper setSlim(boolean slim) {
-        this.slim = slim;
-        return this;
-    }
+  @Nonnull
+  public SkinHashWrapper setSlim(boolean slim) {
+    this.slim = slim;
+    return this;
+  }
 
-    @Nonnull
-    public HDMinecraftProfileTexture toProfileTexture() {
-        return HDMinecraftProfileTexture.texture(this);
-    }
+  @Nonnull
+  public HDMinecraftProfileTexture toProfileTexture() {
+    return HDMinecraftProfileTexture.texture(this);
+  }
 }

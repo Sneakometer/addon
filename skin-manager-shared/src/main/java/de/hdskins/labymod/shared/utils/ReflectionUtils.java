@@ -22,88 +22,88 @@ import java.lang.reflect.Modifier;
 
 public final class ReflectionUtils {
 
-    private static final Field MODIFIERS_FIELD;
+  private static final Field MODIFIERS_FIELD;
 
-    static {
-        try {
-            MODIFIERS_FIELD = Field.class.getDeclaredField("modifiers");
-            MODIFIERS_FIELD.setAccessible(true);
-        } catch (NoSuchFieldException exception) {
-            // unreachable code
-            throw new RuntimeException(exception);
-        }
+  static {
+    try {
+      MODIFIERS_FIELD = Field.class.getDeclaredField("modifiers");
+      MODIFIERS_FIELD.setAccessible(true);
+    } catch (NoSuchFieldException exception) {
+      // unreachable code
+      throw new RuntimeException(exception);
+    }
+  }
+
+  private ReflectionUtils() {
+    throw new UnsupportedOperationException();
+  }
+
+  public static Field getFieldByNames(Class<?> clazz, String... fieldNames) {
+    for (String fieldName : fieldNames) {
+      Field field = getFieldByName(clazz, fieldName);
+      if (field != null) {
+        return field;
+      }
     }
 
-    private ReflectionUtils() {
-        throw new UnsupportedOperationException();
+    return null;
+  }
+
+  public static Field getFieldByName(Class<?> clazz, String fieldName) {
+    try {
+      Field field = clazz.getDeclaredField(fieldName);
+      if (!field.isAccessible()) {
+        field.setAccessible(true);
+      }
+      return field;
+    } catch (NoSuchFieldException exception) {
+      return null;
+    }
+  }
+
+  public static void set(Class<?> source, Object instance, Object newValue, String... fieldNames) {
+    Field field = getFieldByNames(source, fieldNames);
+    if (field != null) {
+      set(instance, newValue, field);
+    }
+  }
+
+  public static void set(Object instance, Object newValue, Field field) {
+    try {
+      if (MODIFIERS_FIELD != null && Modifier.isFinal(field.getModifiers())) {
+        MODIFIERS_FIELD.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+      }
+
+      if (!field.isAccessible()) {
+        field.setAccessible(true);
+      }
+
+      field.set(instance, newValue);
+    } catch (IllegalAccessException exception) {
+      exception.printStackTrace();
+    }
+  }
+
+  public static <T> T get(Class<T> unused, Class<?> source, Object instance, String... fieldNames) {
+    for (String fieldName : fieldNames) {
+      Field field = getFieldByName(source, fieldName);
+      if (field != null) {
+        return get(unused, field, instance);
+      }
     }
 
-    public static Field getFieldByNames(Class<?> clazz, String... fieldNames) {
-        for (String fieldName : fieldNames) {
-            Field field = getFieldByName(clazz, fieldName);
-            if (field != null) {
-                return field;
-            }
-        }
+    return null;
+  }
 
-        return null;
+  @SuppressWarnings({"unchecked", "unused"})
+  public static <T> T get(Class<T> unused, Field field, Object instance) {
+    try {
+      if (!field.isAccessible()) {
+        field.setAccessible(true);
+      }
+      return (T) field.get(instance);
+    } catch (IllegalAccessException exception) {
+      return null;
     }
-
-    public static Field getFieldByName(Class<?> clazz, String fieldName) {
-        try {
-            Field field = clazz.getDeclaredField(fieldName);
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
-            return field;
-        } catch (NoSuchFieldException exception) {
-            return null;
-        }
-    }
-
-    public static void set(Class<?> source, Object instance, Object newValue, String... fieldNames) {
-        Field field = getFieldByNames(source, fieldNames);
-        if (field != null) {
-            set(instance, newValue, field);
-        }
-    }
-
-    public static void set(Object instance, Object newValue, Field field) {
-        try {
-            if (MODIFIERS_FIELD != null && Modifier.isFinal(field.getModifiers())) {
-                MODIFIERS_FIELD.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            }
-
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
-
-            field.set(instance, newValue);
-        } catch (IllegalAccessException exception) {
-            exception.printStackTrace();
-        }
-    }
-
-    public static <T> T get(Class<T> unused, Class<?> source, Object instance, String... fieldNames) {
-        for (String fieldName : fieldNames) {
-            Field field = getFieldByName(source, fieldName);
-            if (field != null) {
-                return get(unused, field, instance);
-            }
-        }
-
-        return null;
-    }
-
-    @SuppressWarnings({"unchecked", "unused"})
-    public static <T> T get(Class<T> unused, Field field, Object instance) {
-        try {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
-            return (T) field.get(instance);
-        } catch (IllegalAccessException exception) {
-            return null;
-        }
-    }
+  }
 }

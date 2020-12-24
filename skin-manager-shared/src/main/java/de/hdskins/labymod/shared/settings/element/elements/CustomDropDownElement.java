@@ -29,43 +29,43 @@ import java.util.function.BiConsumer;
 @ParametersAreNonnullByDefault
 public final class CustomDropDownElement<T> extends DropDownElement<T> {
 
-    private final DropDownMenu<T> dropDownMenu;
-    private final BiConsumer<DropDownElement<T>, T> changeListener;
-    private boolean enabled = false;
+  private final DropDownMenu<T> dropDownMenu;
+  private final BiConsumer<DropDownElement<T>, T> changeListener;
+  private boolean enabled = false;
 
-    private CustomDropDownElement(String displayName, ControlElement.IconData iconData, DropDownMenu<T> dropDownMenu, BiConsumer<DropDownElement<T>, T> changeListener) {
-        super(displayName, "", dropDownMenu, iconData, null);
-        this.changeListener = changeListener;
-        this.dropDownMenu = dropDownMenu;
-    }
+  private CustomDropDownElement(String displayName, ControlElement.IconData iconData, DropDownMenu<T> dropDownMenu, BiConsumer<DropDownElement<T>, T> changeListener) {
+    super(displayName, "", dropDownMenu, iconData, null);
+    this.changeListener = changeListener;
+    this.dropDownMenu = dropDownMenu;
+  }
 
-    @Nonnull
-    public static <T> DropDownElement<T> of(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener) {
-        DropDownMenu<T> dropDownMenu = buildDropDownMenu(initialValue, values);
-        return new CustomDropDownElement<>(displayName, iconData, dropDownMenu, changeListener);
-    }
+  @Nonnull
+  public static <T> DropDownElement<T> of(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener) {
+    DropDownMenu<T> dropDownMenu = buildDropDownMenu(initialValue, values);
+    return new CustomDropDownElement<>(displayName, iconData, dropDownMenu, changeListener);
+  }
 
-    @Nonnull
-    private static <T> DropDownMenu<T> buildDropDownMenu(T initialValue, List<T> values) {
-        DropDownMenu<T> dropDownMenu = new DropDownMenu<>("", 0, 0, 0, 0);
-        dropDownMenu.setSelected(initialValue);
-        for (T value : values) {
-            dropDownMenu.addOption(value);
-        }
-        return dropDownMenu;
+  @Nonnull
+  private static <T> DropDownMenu<T> buildDropDownMenu(T initialValue, List<T> values) {
+    DropDownMenu<T> dropDownMenu = new DropDownMenu<>("", 0, 0, 0, 0);
+    dropDownMenu.setSelected(initialValue);
+    for (T value : values) {
+      dropDownMenu.addOption(value);
     }
+    return dropDownMenu;
+  }
 
-    @Override
-    public boolean onClickDropDown(int mouseX, int mouseY, int mouseButton) {
-        if (this.enabled && this.dropDownMenu.onClick(mouseX, mouseY, mouseButton)) {
-            this.changeListener.accept(this, this.dropDownMenu.getSelected());
-            return true;
-        }
-        return false;
+  @Override
+  public boolean onClickDropDown(int mouseX, int mouseY, int mouseButton) {
+    if (this.enabled && this.dropDownMenu.onClick(mouseX, mouseY, mouseButton)) {
+      this.changeListener.accept(this, this.dropDownMenu.getSelected());
+      return true;
     }
+    return false;
+  }
 
-    @Override
-    public void setSettingEnabled(boolean settingEnabled) {
-        this.enabled = settingEnabled;
-    }
+  @Override
+  public void setSettingEnabled(boolean settingEnabled) {
+    this.enabled = settingEnabled;
+  }
 }

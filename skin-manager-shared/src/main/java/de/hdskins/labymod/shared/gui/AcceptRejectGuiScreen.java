@@ -37,138 +37,141 @@ import java.util.function.BiConsumer;
 @ParametersAreNonnullByDefault
 public abstract class AcceptRejectGuiScreen extends GuiScreen {
 
-    protected static final Collection<String> SINGLE_STRING_LIST = Collections.singleton(Constants.SPACE);
-    protected static AcceptRejectGuiScreenFactory factory;
+  protected static final Collection<String> SINGLE_STRING_LIST = Collections.singleton(Constants.SPACE);
+  protected static AcceptRejectGuiScreenFactory factory;
 
-    protected final String acceptText;
-    protected final String rejectText;
-    protected final Collection<String> messageLines;
-    protected final BiConsumer<AcceptRejectGuiScreen, Boolean> callback;
-    // buttons (will be re-initialized when the gui get initialized, so every time f.ex. the window is resized)
-    protected volatile GuiOptionButton acceptButton;
-    protected volatile GuiOptionButton rejectButton;
-    protected volatile List<String> textLines;
-    // Used by requestFocus() and returnBack()
-    protected volatile GuiScreen before;
-    protected final Scrollbar scrollbar = new Scrollbar(this.getFontRenderer().FONT_HEIGHT);
+  protected final String acceptText;
+  protected final String rejectText;
+  protected final Collection<String> messageLines;
+  protected final BiConsumer<AcceptRejectGuiScreen, Boolean> callback;
+  protected final Scrollbar scrollbar = new Scrollbar(this.getFontRenderer().FONT_HEIGHT);
+  // buttons (will be re-initialized when the gui get initialized, so every time f.ex. the window is resized)
+  protected volatile GuiOptionButton acceptButton;
+  protected volatile GuiOptionButton rejectButton;
+  protected volatile List<String> textLines;
+  // Used by requestFocus() and returnBack()
+  protected volatile GuiScreen before;
 
-    public AcceptRejectGuiScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback) {
-        this.acceptText = acceptText;
-        this.rejectText = rejectText;
-        this.messageLines = messageLines;
-        this.callback = callback;
+  public AcceptRejectGuiScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback) {
+    this.acceptText = acceptText;
+    this.rejectText = rejectText;
+    this.messageLines = messageLines;
+    this.callback = callback;
+  }
+
+  @Nonnull
+  public static AcceptRejectGuiScreen newScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback) {
+    return factory.newScreen(acceptText, rejectText, messageLines, callback);
+  }
+
+  public abstract void requestFocus();
+
+  public void returnBack() {
+    this.returnBack(null);
+  }
+
+  public abstract void returnBack(@Nullable GuiScreen target);
+
+  @Nonnull
+  protected abstract FontRenderer getFontRenderer();
+
+  public abstract void drawString(String line, int x, int y, int color);
+
+  @Nonnull
+  public abstract Collection<String> listFormattedStringToWidth(String line, int width);
+
+  protected abstract void checkInitialized();
+
+  protected abstract void drawButtons(int mouseX, int mouseY, float partialTicks);
+
+  @Override
+  public void initGui() {
+    this.acceptButton = new GuiOptionButton(0, this.width / 2 - 155, this.height - 35, this.acceptText);
+    this.rejectButton = new GuiOptionButton(1, this.width / 2 - 155 + 160, this.height - 35, this.rejectText);
+    this.initializeText();
+    // scrollbar
+    this.scrollbar.setPosition(this.width - 16, 5, this.width - 10, this.height - 55);
+    this.scrollbar.update(this.textLines.size());
+    this.scrollbar.setSpeed(20);
+    this.scrollbar.init();
+  }
+
+  @Override
+  public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    this.drawDefaultBackground();
+    this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.DRAGGING);
+    this.scrollbar.draw();
+    this.drawText();
+    this.drawButtons(mouseX, mouseY, partialTicks);
+  }
+
+  @Override
+  protected void mouseClicked(int mouseX, int mouseY, int clickedButton) {
+    this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.DRAGGING);
+    if (clickedButton == 0) { // 0 is the left key of the mouse
+      GuiButton clicked = null;
+      if (this.acceptButton.mousePressed(this.mc, mouseX, mouseY)) {
+        clicked = this.acceptButton;
+      } else if (this.rejectButton.mousePressed(this.mc, mouseX, mouseY)) {
+        clicked = this.rejectButton;
+      }
+      if (clicked != null) {
+        this.actionPerformed(clicked);
+      }
     }
+  }
 
-    @Nonnull
-    public static AcceptRejectGuiScreen newScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback) {
-        return factory.newScreen(acceptText, rejectText, messageLines, callback);
-    }
+  @Override
+  protected void mouseReleased(int mouseX, int mouseY, int releasedButton) {
+    this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.RELEASED);
+  }
 
-    public abstract void requestFocus();
+  @Override
+  protected void actionPerformed(GuiButton button) {
+    this.callback.accept(this, this.acceptButton != null && button.id == this.acceptButton.id);
+  }
 
-    public abstract void returnBack(@Nullable GuiScreen target);
+  @Override
+  public void handleMouseInput() throws IOException {
+    super.handleMouseInput();
+    this.scrollbar.mouseInput();
+  }
 
-    @Nonnull
-    protected abstract FontRenderer getFontRenderer();
-
-    public abstract void drawString(String line, int x, int y, int color);
-
-    @Nonnull
-    public abstract Collection<String> listFormattedStringToWidth(String line, int width);
-
-    protected abstract void checkInitialized();
-
-    protected abstract void drawButtons(int mouseX, int mouseY, float partialTicks);
-
-    @Override
-    public void initGui() {
-        this.acceptButton = new GuiOptionButton(0, this.width / 2 - 155, this.height - 35, this.acceptText);
-        this.rejectButton = new GuiOptionButton(1, this.width / 2 - 155 + 160, this.height - 35, this.rejectText);
-        this.initializeText();
-        // scrollbar
-        this.scrollbar.setPosition(this.width - 16, 5, this.width - 10, this.height - 55);
-        this.scrollbar.update(this.textLines.size());
-        this.scrollbar.setSpeed(20);
-        this.scrollbar.init();
-    }
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.drawDefaultBackground();
-        this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.DRAGGING);
-        this.scrollbar.draw();
-        this.drawText();
-        this.drawButtons(mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int clickedButton) {
-        this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.DRAGGING);
-        if (clickedButton == 0) { // 0 is the left key of the mouse
-            GuiButton clicked = null;
-            if (this.acceptButton.mousePressed(this.mc, mouseX, mouseY)) {
-                clicked = this.acceptButton;
-            } else if (this.rejectButton.mousePressed(this.mc, mouseX, mouseY)) {
-                clicked = this.rejectButton;
-            }
-            if (clicked != null) {
-                this.actionPerformed(clicked);
-            }
-        }
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int releasedButton) {
-        this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.RELEASED);
-    }
-
-    @Override
-    protected void actionPerformed(GuiButton button) {
-        this.callback.accept(this, this.acceptButton != null && button.id == this.acceptButton.id);
-        this.returnBack(this.before);
-    }
-
-    @Override
-    public void handleMouseInput() throws IOException {
-        super.handleMouseInput();
-        this.scrollbar.mouseInput();
-    }
-
-    protected void initializeText() {
-        this.textLines = new ArrayList<>();
-        for (String messageLine : this.messageLines) {
-            if (messageLine.trim().isEmpty()) {
-                // hack:
-                // To render a string minecraft internally visits each char of the string
-                // if the string is empty minecraft just skips the rendering - we are preventing
-                // this by providing a non-empty line
-                this.textLines.add(Constants.SPACE);
-            } else {
-                this.textLines.addAll(this.listFormattedStringToWidth(messageLine, this.width - 50));
-            }
-        }
-    }
-
-    protected void drawText() {
-        this.checkInitialized();
+  protected void initializeText() {
+    this.textLines = new ArrayList<>();
+    for (String messageLine : this.messageLines) {
+      if (messageLine.trim().isEmpty()) {
         // hack:
-        // we disable bidi to prevent the render of color codes correctly
-        final boolean bidi = this.getFontRenderer().getBidiFlag();
-        this.getFontRenderer().setBidiFlag(false);
-        // calculate the position flags for the actual render
-        final int fontHeight = this.getFontRenderer().FONT_HEIGHT;
-        final int maxLinesRenderAmount = Math.max(fontHeight, this.height - 55) / Math.max(1, fontHeight);
-        final int textEntryPoint = (int) (Math.abs(this.scrollbar.getScrollY()) / Math.max(1, fontHeight));
-        final int maxTextLinesListEntry = textEntryPoint + maxLinesRenderAmount;
-        // the current height starts at 0 and is increased by the font height in the loop
-        int currentHeightPosition = 0;
-        for (int i = textEntryPoint; i < maxTextLinesListEntry; i++) {
-            if (i >= this.textLines.size()) {
-                break;
-            }
-            this.drawString(this.textLines.get(i), 15, currentHeightPosition += fontHeight, 0xffffff);
-        }
-        // now we can reset the bidi flag of the font renderer
-        this.getFontRenderer().setBidiFlag(bidi);
+        // To render a string minecraft internally visits each char of the string
+        // if the string is empty minecraft just skips the rendering - we are preventing
+        // this by providing a non-empty line
+        this.textLines.add(Constants.SPACE);
+      } else {
+        this.textLines.addAll(this.listFormattedStringToWidth(messageLine, this.width - 50));
+      }
     }
+  }
+
+  protected void drawText() {
+    this.checkInitialized();
+    // hack:
+    // we disable bidi to prevent the render of color codes correctly
+    final boolean bidi = this.getFontRenderer().getBidiFlag();
+    this.getFontRenderer().setBidiFlag(false);
+    // calculate the position flags for the actual render
+    final int fontHeight = this.getFontRenderer().FONT_HEIGHT;
+    final int maxLinesRenderAmount = Math.max(fontHeight, this.height - 55) / Math.max(1, fontHeight);
+    final int textEntryPoint = (int) (Math.abs(this.scrollbar.getScrollY()) / Math.max(1, fontHeight));
+    final int maxTextLinesListEntry = textEntryPoint + maxLinesRenderAmount;
+    // the current height starts at 0 and is increased by the font height in the loop
+    int currentHeightPosition = 0;
+    for (int i = textEntryPoint; i < maxTextLinesListEntry; i++) {
+      if (i >= this.textLines.size()) {
+        break;
+      }
+      this.drawString(this.textLines.get(i), 15, currentHeightPosition += fontHeight, 0xffffff);
+    }
+    // now we can reset the bidi flag of the font renderer
+    this.getFontRenderer().setBidiFlag(bidi);
+  }
 }

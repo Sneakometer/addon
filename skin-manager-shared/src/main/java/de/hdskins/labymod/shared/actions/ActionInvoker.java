@@ -28,21 +28,21 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 public final class ActionInvoker {
 
-    private static final List<UserActionEntry> REGISTERED_USER_ACTION_ENTRIES;
+  private static final List<UserActionEntry> REGISTERED_USER_ACTION_ENTRIES;
 
-    static {
-        REGISTERED_USER_ACTION_ENTRIES = ReflectionUtils.get(List.class, UserActionGui.class, LabyMod.getInstance().getUserManager().getUserActionGui(), "defaultEntries");
-    }
+  static {
+    REGISTERED_USER_ACTION_ENTRIES = ReflectionUtils.get(List.class, UserActionGui.class, LabyMod.getInstance().getUserManager().getUserActionGui(), "defaultEntries");
+  }
 
-    private ActionInvoker() {
-        throw new UnsupportedOperationException();
-    }
+  private ActionInvoker() {
+    throw new UnsupportedOperationException();
+  }
 
-    public static void addUserActionEntry(UserActionEntry userActionEntry) {
-        REGISTERED_USER_ACTION_ENTRIES.add(userActionEntry);
-    }
+  public static void addUserActionEntry(UserActionEntry userActionEntry) {
+    REGISTERED_USER_ACTION_ENTRIES.add(userActionEntry);
+  }
 
-    public static void unregisterMarkedEntries() {
-        REGISTERED_USER_ACTION_ENTRIES.removeIf(entry -> entry instanceof MarkedUserActionEntry);
-    }
+  public static void unregisterMarkedEntries() {
+    REGISTERED_USER_ACTION_ENTRIES.removeIf(entry -> entry instanceof MarkedUserActionEntry);
+  }
 }

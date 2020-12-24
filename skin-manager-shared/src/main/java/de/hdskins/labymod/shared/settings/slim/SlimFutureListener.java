@@ -17,9 +17,9 @@
  */
 package de.hdskins.labymod.shared.settings.slim;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
-import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
@@ -30,47 +30,47 @@ import java.util.concurrent.CompletableFuture;
 @ParametersAreNonnullByDefault
 public class SlimFutureListener implements FutureListener<PacketBase>, Constants {
 
-    private final boolean target;
-    private final AddonContext addonContext;
-    private final CompletableFuture<Boolean> future;
+  private final boolean target;
+  private final AddonContext addonContext;
+  private final CompletableFuture<Boolean> future;
 
-    public SlimFutureListener(boolean target, AddonContext addonContext, CompletableFuture<Boolean> future) {
-        this.target = target;
-        this.addonContext = addonContext;
-        this.future = future;
-    }
+  public SlimFutureListener(boolean target, AddonContext addonContext, CompletableFuture<Boolean> future) {
+    this.target = target;
+    this.addonContext = addonContext;
+    this.future = future;
+  }
 
-    @Override
-    public void nullResult() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+  @Override
+  public void nullResult() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+    this.addonContext.getAddonConfig().setSlim(!this.target);
+    this.future.complete(!this.target);
+  }
+
+  @Override
+  public void nonNullResult(PacketBase packetBase) {
+    if (packetBase instanceof PacketServerQueryResponse) {
+      PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
+      if (response.isSuccess()) {
+        String targetResult = this.target ? "slim" : "default";
+        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("slim-successfully-toggled", new Object[]{targetResult}));
+        this.future.complete(this.target);
+      } else {
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
         this.addonContext.getAddonConfig().setSlim(!this.target);
         this.future.complete(!this.target);
+      }
+    } else {
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+      this.addonContext.getAddonConfig().setSlim(!this.target);
+      this.future.complete(!this.target);
     }
+  }
 
-    @Override
-    public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerQueryResponse) {
-            PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
-            if (response.isSuccess()) {
-                String targetResult = this.target ? "slim" : "default";
-                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("slim-successfully-toggled", new Object[]{targetResult}));
-                this.future.complete(this.target);
-            } else {
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
-                this.addonContext.getAddonConfig().setSlim(!this.target);
-                this.future.complete(!this.target);
-            }
-        } else {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
-            this.addonContext.getAddonConfig().setSlim(!this.target);
-            this.future.complete(!this.target);
-        }
-    }
-
-    @Override
-    public void cancelled() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
-        this.addonContext.getAddonConfig().setSlim(!this.target);
-        this.future.complete(!this.target);
-    }
+  @Override
+  public void cancelled() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+    this.addonContext.getAddonConfig().setSlim(!this.target);
+    this.future.complete(!this.target);
+  }
 }

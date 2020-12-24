@@ -44,76 +44,76 @@ import java.util.function.Consumer;
 
 public class SkinLoadPacketHandler implements Consumer<PacketBase> {
 
-    private static final Logger LOGGER = LogManager.getLogger(SkinLoadPacketHandler.class);
-    private static final IImageBuffer IMAGE_BUFFER = new ImageBufferDownload();
+  private static final Logger LOGGER = LogManager.getLogger(SkinLoadPacketHandler.class);
+  private static final IImageBuffer IMAGE_BUFFER = new ImageBufferDownload();
 
-    private final Path targetLocalPath;
-    private final HDResourceLocation location;
-    private final TextureManager textureManager;
-    private final Runnable backingLoaderExecutor;
-    private final MinecraftProfileTexture texture;
-    private final MinecraftProfileTexture.Type type;
-    private final SkinManager.SkinAvailableCallback callback;
+  private final Path targetLocalPath;
+  private final HDResourceLocation location;
+  private final TextureManager textureManager;
+  private final Runnable backingLoaderExecutor;
+  private final MinecraftProfileTexture texture;
+  private final MinecraftProfileTexture.Type type;
+  private final SkinManager.SkinAvailableCallback callback;
 
-    protected SkinLoadPacketHandler(Path targetLocalPath, HDResourceLocation location, TextureManager textureManager,
-                                    Runnable backingLoaderExecutor, MinecraftProfileTexture texture, MinecraftProfileTexture.Type type,
-                                    SkinManager.SkinAvailableCallback callback) {
-        this.targetLocalPath = targetLocalPath;
-        this.location = location;
-        this.textureManager = textureManager;
-        this.backingLoaderExecutor = backingLoaderExecutor;
-        this.texture = texture;
-        this.type = type;
-        this.callback = callback;
-    }
+  protected SkinLoadPacketHandler(Path targetLocalPath, HDResourceLocation location, TextureManager textureManager,
+                                  Runnable backingLoaderExecutor, MinecraftProfileTexture texture, MinecraftProfileTexture.Type type,
+                                  SkinManager.SkinAvailableCallback callback) {
+    this.targetLocalPath = targetLocalPath;
+    this.location = location;
+    this.textureManager = textureManager;
+    this.backingLoaderExecutor = backingLoaderExecutor;
+    this.texture = texture;
+    this.type = type;
+    this.callback = callback;
+  }
 
-    @Override
-    public void accept(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerResponseSkin) {
-            PacketServerResponseSkin response = (PacketServerResponseSkin) packetBase;
-            if (response.getSkinData().length == 0) {
-                LOGGER.debug("Unable to load skin with hash {} because server sent an empty result", this.texture.getHash());
-                MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
-                return;
-            }
+  @Override
+  public void accept(PacketBase packetBase) {
+    if (packetBase instanceof PacketServerResponseSkin) {
+      PacketServerResponseSkin response = (PacketServerResponseSkin) packetBase;
+      if (response.getSkinData().length == 0) {
+        LOGGER.debug("Unable to load skin with hash {} because server sent an empty result", this.texture.getHash());
+        MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+        return;
+      }
 
-            final Path parent = this.targetLocalPath.getParent();
-            if (parent != null && Files.notExists(parent)) {
-                try {
-                    Files.createDirectories(parent);
-                } catch (IOException exception) {
-                    LOGGER.debug("Unable to create directory {} for skin download to {}", parent, this.targetLocalPath, exception);
-                    MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
-                    return;
-                }
-            }
-
-            try (InputStream stream = new ByteArrayInputStream(response.getSkinData())) {
-                BufferedImage bufferedImage = IMAGE_BUFFER.parseUserSkin(ImageIO.read(stream));
-                try (OutputStream outputStream = Files.newOutputStream(this.targetLocalPath, StandardOpenOption.CREATE)) {
-                    ImageIO.write(bufferedImage, "png", outputStream);
-                }
-
-                MCUtil.call(ConcurrentUtil.fromRunnable(() -> {
-                    this.textureManager.loadTexture(this.location, new HDSkinTexture(bufferedImage));
-                    if (this.callback != null) {
-                        this.callback.skinAvailable(this.type, this.location, this.texture);
-                    }
-                }));
-            } catch (IOException exception) {
-                LOGGER.debug(
-                    "Unable to load skin of texture: {} type: {} callback: {} path: {}",
-                    this.texture,
-                    this.type,
-                    this.callback,
-                    this.targetLocalPath,
-                    exception
-                );
-                MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
-            }
-        } else {
-            MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
-            //MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
+      final Path parent = this.targetLocalPath.getParent();
+      if (parent != null && Files.notExists(parent)) {
+        try {
+          Files.createDirectories(parent);
+        } catch (IOException exception) {
+          LOGGER.debug("Unable to create directory {} for skin download to {}", parent, this.targetLocalPath, exception);
+          MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+          return;
         }
+      }
+
+      try (InputStream stream = new ByteArrayInputStream(response.getSkinData())) {
+        BufferedImage bufferedImage = IMAGE_BUFFER.parseUserSkin(ImageIO.read(stream));
+        try (OutputStream outputStream = Files.newOutputStream(this.targetLocalPath, StandardOpenOption.CREATE)) {
+          ImageIO.write(bufferedImage, "png", outputStream);
+        }
+
+        MCUtil.call(ConcurrentUtil.fromRunnable(() -> {
+          this.textureManager.loadTexture(this.location, new HDSkinTexture(bufferedImage));
+          if (this.callback != null) {
+            this.callback.skinAvailable(this.type, this.location, this.texture);
+          }
+        }));
+      } catch (IOException exception) {
+        LOGGER.debug(
+          "Unable to load skin of texture: {} type: {} callback: {} path: {}",
+          this.texture,
+          this.type,
+          this.callback,
+          this.targetLocalPath,
+          exception
+        );
+        MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+      }
+    } else {
+      MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+      //MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback)));
     }
+  }
 }

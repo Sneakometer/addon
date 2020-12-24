@@ -17,9 +17,9 @@
  */
 package de.hdskins.labymod.shared.actions.report;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
-import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
@@ -30,35 +30,35 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 class ReportActionFutureListener implements FutureListener<PacketBase>, Constants {
 
-    private final AddonContext addonContext;
-    private final EntityPlayer reported;
+  private final AddonContext addonContext;
+  private final EntityPlayer reported;
 
-    protected ReportActionFutureListener(AddonContext addonContext, EntityPlayer reported) {
-        this.addonContext = addonContext;
-        this.reported = reported;
-    }
+  protected ReportActionFutureListener(AddonContext addonContext, EntityPlayer reported) {
+    this.addonContext = addonContext;
+    this.reported = reported;
+  }
 
-    @Override
-    public void nullResult() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
-    }
+  @Override
+  public void nullResult() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+  }
 
-    @Override
-    public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerQueryResponse) {
-            PacketServerQueryResponse result = (PacketServerQueryResponse) packetBase;
-            if (result.isSuccess()) {
-                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-success", this.reported.getName()));
-            } else {
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(result.getReason(), result.getReason()));
-            }
-        } else {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
-        }
+  @Override
+  public void nonNullResult(PacketBase packetBase) {
+    if (packetBase instanceof PacketServerQueryResponse) {
+      PacketServerQueryResponse result = (PacketServerQueryResponse) packetBase;
+      if (result.isSuccess()) {
+        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-success", this.reported.getName()));
+      } else {
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(result.getReason(), result.getReason()));
+      }
+    } else {
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
     }
+  }
 
-    @Override
-    public void cancelled() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
-    }
+  @Override
+  public void cancelled() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+  }
 }

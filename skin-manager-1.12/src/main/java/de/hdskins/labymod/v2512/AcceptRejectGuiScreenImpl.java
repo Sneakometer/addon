@@ -32,57 +32,57 @@ import java.util.function.BiConsumer;
 @ParametersAreNonnullByDefault
 public class AcceptRejectGuiScreenImpl extends AcceptRejectGuiScreen {
 
-    static void init() {
-        factory = (acceptText, rejectText, messageLines, callback) -> new AcceptRejectGuiScreenImpl(acceptText, rejectText, messageLines, callback);
-    }
+  protected AcceptRejectGuiScreenImpl(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback) {
+    super(acceptText, rejectText, messageLines, callback);
+  }
 
-    protected AcceptRejectGuiScreenImpl(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback) {
-        super(acceptText, rejectText, messageLines, callback);
-    }
+  static void init() {
+    factory = (acceptText, rejectText, messageLines, callback) -> new AcceptRejectGuiScreenImpl(acceptText, rejectText, messageLines, callback);
+  }
 
-    @Override
-    public synchronized void requestFocus() {
-        final Minecraft minecraft = this.mc == null ? Minecraft.getMinecraft() : this.mc;
-        if (minecraft.currentScreen != this) {
-            this.before = minecraft.currentScreen;
-            minecraft.displayGuiScreen(this);
-        }
+  @Override
+  public synchronized void requestFocus() {
+    final Minecraft minecraft = this.mc == null ? Minecraft.getMinecraft() : this.mc;
+    if (minecraft.currentScreen != this) {
+      this.before = minecraft.currentScreen;
+      minecraft.displayGuiScreen(this);
     }
+  }
 
-    @Override
-    public synchronized void returnBack(@Nullable GuiScreen target) {
-        // if this.mc == null this screen was never shown before
-        if (this.mc != null && this.mc.currentScreen == this) {
-            this.mc.displayGuiScreen(target == null ? this.before : target);
-            this.before = null;
-        }
+  @Override
+  public synchronized void returnBack(@Nullable GuiScreen target) {
+    // if this.mc == null this screen was never shown before
+    if (this.mc != null && this.mc.currentScreen == this) {
+      this.mc.displayGuiScreen(target == null ? this.before : target);
+      this.before = null;
     }
+  }
 
-    @Nonnull
-    @Override
-    protected FontRenderer getFontRenderer() {
-        return Minecraft.getMinecraft().fontRenderer;
-    }
+  @Nonnull
+  @Override
+  protected FontRenderer getFontRenderer() {
+    return Minecraft.getMinecraft().fontRenderer;
+  }
 
-    @Override
-    public void drawString(String line, int x, int y, int color) {
-        this.fontRenderer.drawStringWithShadow(line, x, y, color);
-    }
+  @Override
+  public void drawString(String line, int x, int y, int color) {
+    this.fontRenderer.drawStringWithShadow(line, x, y, color);
+  }
 
-    @Nonnull
-    @Override
-    public Collection<String> listFormattedStringToWidth(String line, int width) {
-        return line.trim().isEmpty() ? SINGLE_STRING_LIST : this.fontRenderer.listFormattedStringToWidth(line, width);
-    }
+  @Nonnull
+  @Override
+  public Collection<String> listFormattedStringToWidth(String line, int width) {
+    return line.trim().isEmpty() ? SINGLE_STRING_LIST : this.fontRenderer.listFormattedStringToWidth(line, width);
+  }
 
-    @Override
-    protected void checkInitialized() {
-        Preconditions.checkNotNull(this.fontRenderer, "Illegal call to drawText() in %s", this.getClass().getName());
-    }
+  @Override
+  protected void checkInitialized() {
+    Preconditions.checkNotNull(this.fontRenderer, "Illegal call to drawText() in %s", this.getClass().getName());
+  }
 
-    @Override
-    protected void drawButtons(int mouseX, int mouseY, float partialTicks) {
-        this.acceptButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
-        this.rejectButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
-    }
+  @Override
+  protected void drawButtons(int mouseX, int mouseY, float partialTicks) {
+    this.acceptButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
+    this.rejectButton.drawButton(this.mc, mouseX, mouseY, partialTicks);
+  }
 }

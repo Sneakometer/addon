@@ -31,19 +31,19 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 public final class ActionFactory {
 
-    private ActionFactory() {
-        throw new UnsupportedOperationException();
-    }
+  private ActionFactory() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Nonnull
-    public static List<MarkedUserActionEntry> bakeUserActionEntries(AddonContext addonContext) {
-        MarkedUserActionEntry toggleSkinUserActionEntry = new ToggleSkinUserActionEntry(addonContext);
-        if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
-            MarkedUserActionEntry deleteSkinUserActionEntry = new DeleteUserActionEntry(addonContext);
-            return Arrays.asList(toggleSkinUserActionEntry, deleteSkinUserActionEntry);
-        } else {
-            MarkedUserActionEntry reportSkinUserActionEntry = new ReportUserActionEntry(addonContext);
-            return Arrays.asList(reportSkinUserActionEntry, toggleSkinUserActionEntry);
-        }
+  @Nonnull
+  public static List<MarkedUserActionEntry> bakeUserActionEntries(AddonContext addonContext) {
+    MarkedUserActionEntry toggleSkinUserActionEntry = new ToggleSkinUserActionEntry(addonContext);
+    if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
+      MarkedUserActionEntry deleteSkinUserActionEntry = new DeleteUserActionEntry(addonContext);
+      return Arrays.asList(toggleSkinUserActionEntry, deleteSkinUserActionEntry);
+    } else {
+      MarkedUserActionEntry reportSkinUserActionEntry = new ReportUserActionEntry(addonContext);
+      return Arrays.asList(reportSkinUserActionEntry, toggleSkinUserActionEntry);
     }
+  }
 }

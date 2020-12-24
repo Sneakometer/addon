@@ -32,37 +32,37 @@ import java.util.concurrent.atomic.AtomicLong;
 @ParametersAreNonnullByDefault
 public class ReportUserActionEntry extends MarkedUserActionEntry implements ActionConstants {
 
-    private final AddonContext addonContext;
-    private final AtomicLong nextEnableTime = new AtomicLong();
+  private final AddonContext addonContext;
+  private final AtomicLong nextEnableTime = new AtomicLong();
 
-    public ReportUserActionEntry(AddonContext addonContext) {
-        super(
-            addonContext.getTranslationRegistry().translateMessage("user-skin-report-choose-display-name"),
-            EnumActionType.NONE,
-            null,
-            null
-        );
-        this.addonContext = addonContext;
+  public ReportUserActionEntry(AddonContext addonContext) {
+    super(
+      addonContext.getTranslationRegistry().translateMessage("user-skin-report-choose-display-name"),
+      EnumActionType.NONE,
+      null,
+      null
+    );
+    this.addonContext = addonContext;
+  }
+
+  @Override
+  public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
+    if (this.nextEnableTime.get() >= System.currentTimeMillis()) {
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(
+        "user-skin-report-rate-limited",
+        TimeUnit.MILLISECONDS.toSeconds(this.nextEnableTime.get() - System.currentTimeMillis())
+      ));
+      return;
+    } else if (this.addonContext.getRateLimits().getReportRateLimit() > 0) {
+      this.nextEnableTime.set(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.addonContext.getRateLimits().getReportRateLimit()));
     }
 
-    @Override
-    public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
-        if (this.nextEnableTime.get() >= System.currentTimeMillis()) {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(
-                "user-skin-report-rate-limited",
-                TimeUnit.MILLISECONDS.toSeconds(this.nextEnableTime.get() - System.currentTimeMillis())
-            ));
-            return;
-        } else if (this.addonContext.getRateLimits().getReportRateLimit() > 0) {
-            this.nextEnableTime.set(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.addonContext.getRateLimits().getReportRateLimit()));
-        }
-
-        AddonContext.ServerResult serverResult = this.addonContext.reportSkin(entityPlayer.getGameProfile().getId());
-        if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
-            LOGGER.debug("Unable to report hd skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
-        } else {
-            serverResult.getFuture().addListener(new ReportActionFutureListener(this.addonContext, entityPlayer));
-        }
+    AddonContext.ServerResult serverResult = this.addonContext.reportSkin(entityPlayer.getGameProfile().getId());
+    if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
+      LOGGER.debug("Unable to report hd skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+    } else {
+      serverResult.getFuture().addListener(new ReportActionFutureListener(this.addonContext, entityPlayer));
     }
+  }
 }

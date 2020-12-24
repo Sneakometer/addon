@@ -26,48 +26,48 @@ import java.util.function.Consumer;
 
 public class FunctionalFutureListener<T> implements FutureListener<T> {
 
-    private final Consumer<T> resultHandler;
-    private final Runnable noResultHandler;
+  private final Consumer<T> resultHandler;
+  private final Runnable noResultHandler;
 
-    protected FunctionalFutureListener(Consumer<T> resultHandler, Runnable noResultHandler) {
-        this.resultHandler = resultHandler;
-        this.noResultHandler = noResultHandler;
-    }
+  protected FunctionalFutureListener(Consumer<T> resultHandler, Runnable noResultHandler) {
+    this.resultHandler = resultHandler;
+    this.noResultHandler = noResultHandler;
+  }
 
-    @Nonnull
-    public static <X> FutureListener<X> listener(@Nonnull Consumer<X> resultHandler) {
-        return listener(resultHandler, null);
-    }
+  @Nonnull
+  public static <X> FutureListener<X> listener(@Nonnull Consumer<X> resultHandler) {
+    return listener(resultHandler, null);
+  }
 
-    @Nonnull
-    public static <X> FutureListener<X> listener(@Nonnull Runnable noResultHandler) {
-        return listener(null, noResultHandler);
-    }
+  @Nonnull
+  public static <X> FutureListener<X> listener(@Nonnull Runnable noResultHandler) {
+    return listener(null, noResultHandler);
+  }
 
-    @Nonnull
-    public static <X> FutureListener<X> listener(@Nullable Consumer<X> resultHandler, @Nullable Runnable noResultHandler) {
-        Preconditions.checkArgument(resultHandler != null || noResultHandler != null);
-        return new FunctionalFutureListener<>(resultHandler, noResultHandler);
-    }
+  @Nonnull
+  public static <X> FutureListener<X> listener(@Nullable Consumer<X> resultHandler, @Nullable Runnable noResultHandler) {
+    Preconditions.checkArgument(resultHandler != null || noResultHandler != null);
+    return new FunctionalFutureListener<>(resultHandler, noResultHandler);
+  }
 
-    @Override
-    public void nullResult() {
-        if (this.noResultHandler != null) {
-            this.noResultHandler.run();
-        }
+  @Override
+  public void nullResult() {
+    if (this.noResultHandler != null) {
+      this.noResultHandler.run();
     }
+  }
 
-    @Override
-    public void nonNullResult(@Nonnull T t) {
-        if (this.resultHandler != null) {
-            this.resultHandler.accept(t);
-        }
+  @Override
+  public void nonNullResult(@Nonnull T t) {
+    if (this.resultHandler != null) {
+      this.resultHandler.accept(t);
     }
+  }
 
-    @Override
-    public void cancelled() {
-        if (this.noResultHandler != null) {
-            this.noResultHandler.run();
-        }
+  @Override
+  public void cancelled() {
+    if (this.noResultHandler != null) {
+      this.noResultHandler.run();
     }
+  }
 }

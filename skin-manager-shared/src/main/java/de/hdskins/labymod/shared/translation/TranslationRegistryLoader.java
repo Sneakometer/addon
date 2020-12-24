@@ -34,57 +34,57 @@ import java.util.Properties;
 @ParametersAreNonnullByDefault
 public final class TranslationRegistryLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger(TranslationRegistryLoader.class);
+  private static final Logger LOGGER = LogManager.getLogger(TranslationRegistryLoader.class);
 
-    private TranslationRegistryLoader() {
-        throw new UnsupportedOperationException();
-    }
+  private TranslationRegistryLoader() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Nonnull
-    public static TranslationRegistry buildInternalTranslationRegistry() {
-        try (InputStream inputStream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("languages")) {
-            if (inputStream == null) {
-                return TranslationRegistry.empty();
-            }
+  @Nonnull
+  public static TranslationRegistry buildInternalTranslationRegistry() {
+    try (InputStream inputStream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("languages")) {
+      if (inputStream == null) {
+        return TranslationRegistry.empty();
+      }
 
-            Map<String, Properties> languages = new HashMap<>();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.startsWith("# ") || line.trim().isEmpty() || !line.contains(":")) {
-                        continue;
-                    }
+      Map<String, Properties> languages = new HashMap<>();
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          if (line.startsWith("# ") || line.trim().isEmpty() || !line.contains(":")) {
+            continue;
+          }
 
-                    String[] parts = line.split(":");
-                    if (parts.length == 2) {
-                        openStreamOrLog(parts[1], stream -> {
-                            Properties properties = new Properties();
-                            properties.load(stream);
-                            languages.put(parts[0], properties);
-                        });
-                    }
-                }
-            }
-
-            return TranslationRegistry.fromMap(languages);
-        } catch (IOException exception) {
-            LOGGER.debug("Unable to load language files", exception);
-            return TranslationRegistry.empty();
+          String[] parts = line.split(":");
+          if (parts.length == 2) {
+            openStreamOrLog(parts[1], stream -> {
+              Properties properties = new Properties();
+              properties.load(stream);
+              languages.put(parts[0], properties);
+            });
+          }
         }
-    }
+      }
 
-    private static void openStreamOrLog(String file, IOExceptionConsumer<InputStream> consumer) {
-        try (InputStream stream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("lang/" + file)) {
-            if (stream != null) {
-                consumer.accept(stream);
-            }
-        } catch (IOException exception) {
-            LOGGER.debug("Unable to load language file {}", file, exception);
-        }
+      return TranslationRegistry.fromMap(languages);
+    } catch (IOException exception) {
+      LOGGER.debug("Unable to load language files", exception);
+      return TranslationRegistry.empty();
     }
+  }
 
-    @FunctionalInterface
-    private interface IOExceptionConsumer<T> {
-        void accept(@Nonnull T t) throws IOException;
+  private static void openStreamOrLog(String file, IOExceptionConsumer<InputStream> consumer) {
+    try (InputStream stream = TranslationRegistryLoader.class.getClassLoader().getResourceAsStream("lang/" + file)) {
+      if (stream != null) {
+        consumer.accept(stream);
+      }
+    } catch (IOException exception) {
+      LOGGER.debug("Unable to load language file {}", file, exception);
     }
+  }
+
+  @FunctionalInterface
+  private interface IOExceptionConsumer<T> {
+    void accept(@Nonnull T t) throws IOException;
+  }
 }

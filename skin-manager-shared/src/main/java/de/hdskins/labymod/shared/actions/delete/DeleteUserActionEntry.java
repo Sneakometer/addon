@@ -30,26 +30,26 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class DeleteUserActionEntry extends MarkedUserActionEntry implements ActionConstants {
 
-    private final AddonContext addonContext;
+  private final AddonContext addonContext;
 
-    public DeleteUserActionEntry(AddonContext addonContext) {
-        super(
-            addonContext.getTranslationRegistry().translateMessage("team-delete-skin-button"),
-            EnumActionType.NONE,
-            null,
-            null
-        );
-        this.addonContext = addonContext;
-    }
+  public DeleteUserActionEntry(AddonContext addonContext) {
+    super(
+      addonContext.getTranslationRegistry().translateMessage("team-delete-skin-button"),
+      EnumActionType.NONE,
+      null,
+      null
+    );
+    this.addonContext = addonContext;
+  }
 
-    @Override
-    public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
-        AddonContext.ServerResult serverResult = this.addonContext.deleteSkin(entityPlayer.getGameProfile().getId());
-        if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
-            LOGGER.debug("Unable to delete skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
-        } else {
-            serverResult.getFuture().addListener(new DeleteActionFutureListener(this.addonContext, entityPlayer));
-        }
+  @Override
+  public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
+    AddonContext.ServerResult serverResult = this.addonContext.deleteSkin(entityPlayer.getGameProfile().getId());
+    if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
+      LOGGER.debug("Unable to delete skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+    } else {
+      serverResult.getFuture().addListener(new DeleteActionFutureListener(this.addonContext, entityPlayer));
     }
+  }
 }

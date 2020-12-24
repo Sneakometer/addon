@@ -22,10 +22,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.config.gson.ServerConfigSerializer;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.ConfigChangeEvent;
-import de.hdskins.labymod.shared.Constants;
 import net.labymod.addon.AddonLoader;
 import net.labymod.api.LabyModAddon;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -54,303 +54,303 @@ import java.util.concurrent.TimeUnit;
 
 @ParametersAreNonnullByDefault
 public class JsonAddonConfig implements AddonConfig {
-    // server default network stuff
-    // these values aren't in the config as they may change between releases and
-    // are only useful for development reasons (normally)
-    private static final int DEFAULT_PORT = 2007;
-    private static final String DEFAULT_HOST = "api.hdskins.de";
-    private static final ServerConfig DEFAULT_SERVER_CONFIG = new ServerConfig(DEFAULT_HOST, DEFAULT_PORT, "http://dl.hdskins.de/guidelines.txt");
-    private static final InetAddress DEFAULT_SERVER_ADDRESS = new InetSocketAddress(DEFAULT_HOST, DEFAULT_PORT).getAddress();
-    // networking magic
-    private static final int FIRST_NON_ROOT_PORT = 1025;
-    private static final int MAX_POSSIBLE_PORT_NUMBER = 65535;
-    // time magic
-    private static final long MIN_RECONNECT_TIME = TimeUnit.SECONDS.toMillis(1);
-    // json utils
-    private static final JsonParser PARSER = new JsonParser();
-    private static final Gson GSON = new GsonBuilder()
-        .serializeNulls()
-        .setPrettyPrinting()
-        .disableHtmlEscaping()
-        .registerTypeAdapter(ServerConfig.class, new ServerConfigSerializer(DEFAULT_SERVER_CONFIG))
-        .create();
-    private static final Type CONFIG_TYPE = new TypeToken<JsonAddonConfig>() {
-    }.getType();
-    // lazy initialized by load (LabyModAddon) method
-    private static Path configPath;
-    // visibility settings
-    private final Collection<UUID> disabledSkins;
-    // server settings
-    private final ServerConfig serverConfig;
-    // lazy initialized by getServerAddress() call
-    private transient InetAddress serverAddress;
-    // connection settings
-    private long firstReconnectInterval;
-    private long reconnectInterval;
-    // client settings
-    private boolean slim;
-    private Resolution maxSkinResolution;
-    private boolean showSkinsOfOtherPlayers;
+  // server default network stuff
+  // these values aren't in the config as they may change between releases and
+  // are only useful for development reasons (normally)
+  private static final int DEFAULT_PORT = 2007;
+  private static final String DEFAULT_HOST = "api.hdskins.de";
+  private static final ServerConfig DEFAULT_SERVER_CONFIG = new ServerConfig(DEFAULT_HOST, DEFAULT_PORT, "http://dl.hdskins.de/guidelines.txt");
+  private static final InetAddress DEFAULT_SERVER_ADDRESS = new InetSocketAddress(DEFAULT_HOST, DEFAULT_PORT).getAddress();
+  // networking magic
+  private static final int FIRST_NON_ROOT_PORT = 1025;
+  private static final int MAX_POSSIBLE_PORT_NUMBER = 65535;
+  // time magic
+  private static final long MIN_RECONNECT_TIME = TimeUnit.SECONDS.toMillis(1);
+  // json utils
+  private static final JsonParser PARSER = new JsonParser();
+  private static final Gson GSON = new GsonBuilder()
+    .serializeNulls()
+    .setPrettyPrinting()
+    .disableHtmlEscaping()
+    .registerTypeAdapter(ServerConfig.class, new ServerConfigSerializer(DEFAULT_SERVER_CONFIG))
+    .create();
+  private static final Type CONFIG_TYPE = new TypeToken<JsonAddonConfig>() {
+  }.getType();
+  // lazy initialized by load (LabyModAddon) method
+  private static Path configPath;
+  // visibility settings
+  private final Collection<UUID> disabledSkins;
+  // server settings
+  private final ServerConfig serverConfig;
+  // lazy initialized by getServerAddress() call
+  private transient InetAddress serverAddress;
+  // connection settings
+  private long firstReconnectInterval;
+  private long reconnectInterval;
+  // client settings
+  private boolean slim;
+  private Resolution maxSkinResolution;
+  private boolean showSkinsOfOtherPlayers;
+  // guidelines
+  private boolean acceptedGuidelines;
 
-    private boolean acceptedGuidelines;
+  private JsonAddonConfig() {
+    this.serverConfig = DEFAULT_SERVER_CONFIG;
+    this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
+    this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
+    this.slim = false;
+    this.disabledSkins = new ArrayList<>();
+    this.maxSkinResolution = Resolution.RESOLUTION_ALL;
+    this.showSkinsOfOtherPlayers = true;
+    this.acceptedGuidelines = false;
+  }
 
-    private JsonAddonConfig() {
-        this.serverConfig = DEFAULT_SERVER_CONFIG;
-        this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
-        this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
-        this.slim = false;
-        this.disabledSkins = new ArrayList<>();
-        this.maxSkinResolution = Resolution.RESOLUTION_ALL;
-        this.showSkinsOfOtherPlayers = true;
-
-        this.acceptedGuidelines = false;
+  public static AddonConfig load(LabyModAddon labyModAddon) {
+    if (configPath == null) {
+      configPath = AddonLoader.getConfigDirectory().toPath().resolve(labyModAddon.about.name + ".json");
     }
 
-    public static AddonConfig load(LabyModAddon labyModAddon) {
-        if (configPath == null) {
-            configPath = AddonLoader.getConfigDirectory().toPath().resolve(labyModAddon.about.name + ".json");
-        }
-
-        if (Files.notExists(configPath)) {
-            JsonAddonConfig addonConfig = new JsonAddonConfig();
-            addonConfig.save();
-            return addonConfig;
-        }
-
-        try (InputStream inputStream = Files.newInputStream(configPath);
-             Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-            JsonObject config = PARSER.parse(reader).getAsJsonObject();
-
-            if (!config.has("configuration") || config.get("configuration").isJsonNull()) {
-                JsonAddonConfig addonConfig = new JsonAddonConfig();
-                addonConfig.save();
-                return addonConfig;
-            }
-
-            return GSON.fromJson(config.get("configuration").getAsJsonObject(), CONFIG_TYPE);
-        } catch (IOException exception) {
-            exception.printStackTrace();
-            return new JsonAddonConfig();
-        }
+    if (Files.notExists(configPath)) {
+      JsonAddonConfig addonConfig = new JsonAddonConfig();
+      addonConfig.save();
+      return addonConfig;
     }
 
-    @Nonnull
-    @Override
-    public String getServerHost() {
-        return this.serverConfig.host == null ? DEFAULT_HOST : this.serverConfig.host;
+    try (InputStream inputStream = Files.newInputStream(configPath);
+         Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+      JsonObject config = PARSER.parse(reader).getAsJsonObject();
+
+      if (!config.has("configuration") || config.get("configuration").isJsonNull()) {
+        JsonAddonConfig addonConfig = new JsonAddonConfig();
+        addonConfig.save();
+        return addonConfig;
+      }
+
+      return GSON.fromJson(config.get("configuration").getAsJsonObject(), CONFIG_TYPE);
+    } catch (IOException exception) {
+      exception.printStackTrace();
+      return new JsonAddonConfig();
+    }
+  }
+
+  @Nonnull
+  @Override
+  public String getServerHost() {
+    return this.serverConfig.host == null ? DEFAULT_HOST : this.serverConfig.host;
+  }
+
+  @Override
+  public void setServerHost(String serverHost) {
+    if (this.serverConfig.host == null || !this.serverConfig.host.equals(serverHost)) {
+      this.serverConfig.host = serverHost;
+      this.serverAddress = null;
+      this.save();
+    }
+  }
+
+  @Override
+  public int getServerPort() {
+    return Math.min(Math.max(this.serverConfig.port == null ? DEFAULT_PORT : this.serverConfig.port, FIRST_NON_ROOT_PORT), MAX_POSSIBLE_PORT_NUMBER);
+  }
+
+  @Override
+  public void setServerPort(int serverPort) {
+    if (this.serverConfig.port == null || this.serverConfig.port != serverPort && serverPort >= FIRST_NON_ROOT_PORT && serverPort <= MAX_POSSIBLE_PORT_NUMBER) {
+      this.serverConfig.port = serverPort;
+      this.save();
+    }
+  }
+
+  @Nonnull
+  @Override
+  public String getGuidelinesUrl() {
+    return this.serverConfig.getGuidelinesUrl();
+  }
+
+  @Nonnull
+  @Override
+  public InetAddress getServerAddress() {
+    try {
+      return this.serverAddress == null
+        ? this.serverAddress = InetAddress.getByName(this.getServerHost())
+        : this.serverAddress;
+    } catch (UnknownHostException exception) {
+      return DEFAULT_SERVER_ADDRESS;
+    }
+  }
+
+  @Override
+  public long getFirstReconnectInterval() {
+    return Math.max(this.firstReconnectInterval, MIN_RECONNECT_TIME);
+  }
+
+  @Override
+  public void setFirstReconnectInterval(long firstReconnectInterval) {
+    if (this.firstReconnectInterval != firstReconnectInterval && firstReconnectInterval >= MIN_RECONNECT_TIME) {
+      this.firstReconnectInterval = firstReconnectInterval;
+      this.save();
+    }
+  }
+
+  @Override
+  public long getReconnectInterval() {
+    return Math.min(1000, this.reconnectInterval);
+  }
+
+  @Override
+  public void setReconnectInterval(long reconnectInterval) {
+    if (this.reconnectInterval != reconnectInterval && reconnectInterval >= MIN_RECONNECT_TIME) {
+      this.reconnectInterval = reconnectInterval;
+      this.save();
+    }
+  }
+
+  @Override
+  public boolean showSkinsOfOtherPlayers() {
+    return this.showSkinsOfOtherPlayers;
+  }
+
+  @Override
+  public void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers) {
+    if (this.showSkinsOfOtherPlayers != showSkinsOfOtherPlayers) {
+      this.showSkinsOfOtherPlayers = showSkinsOfOtherPlayers;
+      this.save();
+    }
+  }
+
+  @Nonnull
+  @Override
+  public Resolution getMaxSkinResolution() {
+    return this.maxSkinResolution;
+  }
+
+  @Override
+  public void setMaxSkinResolution(Resolution resolution) {
+    if (this.maxSkinResolution != resolution) {
+      this.maxSkinResolution = resolution;
+      this.save();
+    }
+  }
+
+  @Override
+  public boolean isSlim() {
+    return this.slim;
+  }
+
+  @Override
+  public void setSlim(boolean slim) {
+    if (this.slim != slim) {
+      this.slim = slim;
+      this.save();
+    }
+  }
+
+  @Nonnull
+  @Override
+  public Collection<UUID> getDisabledSkins() {
+    return this.disabledSkins;
+  }
+
+  @Override
+  public void removeAllDisabledSkins() {
+    if (!this.disabledSkins.isEmpty()) {
+      this.disabledSkins.clear();
+      this.save();
+    }
+  }
+
+  @Override
+  public void disableSkin(UUID playerUniqueId) {
+    if (!this.disabledSkins.contains(playerUniqueId)) {
+      this.disabledSkins.add(playerUniqueId);
+      this.save();
+    }
+  }
+
+  @Override
+  public void enableSkin(UUID playerUniqueId) {
+    if (this.disabledSkins.contains(playerUniqueId)) {
+      this.disabledSkins.remove(playerUniqueId);
+      this.save();
+    }
+  }
+
+  @Override
+  public boolean isSkinDisabled(UUID playerUniqueId) {
+    return this.disabledSkins.contains(playerUniqueId);
+  }
+
+  @Override
+  public boolean hasAcceptedGuidelines() {
+    return this.acceptedGuidelines;
+  }
+
+  @Override
+  public void setGuidelinesAccepted(boolean accepted) {
+    if (this.acceptedGuidelines != accepted) {
+      this.acceptedGuidelines = accepted;
+      this.save();
+    }
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o.getClass().equals(this.getClass()) && EqualsBuilder.reflectionEquals(this, o, false);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this, false);
+  }
+
+  private void save() {
+    final Path parent = configPath.getParent();
+    if (parent != null && Files.notExists(parent)) {
+      try {
+        Files.createDirectories(parent);
+      } catch (IOException exception) {
+        exception.printStackTrace();
+        return;
+      }
     }
 
-    @Override
-    public void setServerHost(String serverHost) {
-        if (this.serverConfig.host == null || !this.serverConfig.host.equals(serverHost)) {
-            this.serverConfig.host = serverHost;
-            this.serverAddress = null;
-            this.save();
-        }
+    try (Writer out = new OutputStreamWriter(Files.newOutputStream(configPath), StandardCharsets.UTF_8)) {
+      JsonObject object = new JsonObject();
+      object.add("configuration", GSON.toJsonTree(this));
+      GSON.toJson(object, out);
+    } catch (IOException exception) {
+      exception.printStackTrace();
     }
 
-    @Override
-    public int getServerPort() {
-        return Math.min(Math.max(this.serverConfig.port == null ? DEFAULT_PORT : this.serverConfig.port, FIRST_NON_ROOT_PORT), MAX_POSSIBLE_PORT_NUMBER);
+    Constants.EVENT_BUS.postReported(new ConfigChangeEvent(this));
+  }
+
+  public static class ServerConfig {
+    private String host;
+    private Integer port;
+    private final String guidelinesUrl;
+
+    public ServerConfig(String host, Integer port, String guidelinesUrl) {
+      this.host = host;
+      this.port = port;
+      this.guidelinesUrl = guidelinesUrl;
     }
 
-    @Override
-    public void setServerPort(int serverPort) {
-        if (this.serverConfig.port == null || this.serverConfig.port != serverPort && serverPort >= FIRST_NON_ROOT_PORT && serverPort <= MAX_POSSIBLE_PORT_NUMBER) {
-            this.serverConfig.port = serverPort;
-            this.save();
-        }
+    public String getHost() {
+      return this.host;
     }
 
-    @Override
+    public Integer getPort() {
+      return this.port;
+    }
+
     public String getGuidelinesUrl() {
-        return this.serverConfig.getGuidelinesUrl();
+      return this.guidelinesUrl;
     }
-
-    @Nonnull
-    @Override
-    public InetAddress getServerAddress() {
-        try {
-            return this.serverAddress == null
-                ? this.serverAddress = InetAddress.getByName(this.getServerHost())
-                : this.serverAddress;
-        } catch (UnknownHostException exception) {
-            return DEFAULT_SERVER_ADDRESS;
-        }
-    }
-
-    @Override
-    public long getFirstReconnectInterval() {
-        return Math.max(this.firstReconnectInterval, MIN_RECONNECT_TIME);
-    }
-
-    @Override
-    public void setFirstReconnectInterval(long firstReconnectInterval) {
-        if (this.firstReconnectInterval != firstReconnectInterval && firstReconnectInterval >= MIN_RECONNECT_TIME) {
-            this.firstReconnectInterval = firstReconnectInterval;
-            this.save();
-        }
-    }
-
-    @Override
-    public long getReconnectInterval() {
-        return Math.min(1000, this.reconnectInterval);
-    }
-
-    @Override
-    public void setReconnectInterval(long reconnectInterval) {
-        if (this.reconnectInterval != reconnectInterval && reconnectInterval >= MIN_RECONNECT_TIME) {
-            this.reconnectInterval = reconnectInterval;
-            this.save();
-        }
-    }
-
-    @Override
-    public boolean showSkinsOfOtherPlayers() {
-        return this.showSkinsOfOtherPlayers;
-    }
-
-    @Override
-    public void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers) {
-        if (this.showSkinsOfOtherPlayers != showSkinsOfOtherPlayers) {
-            this.showSkinsOfOtherPlayers = showSkinsOfOtherPlayers;
-            this.save();
-        }
-    }
-
-    @Nonnull
-    @Override
-    public Resolution getMaxSkinResolution() {
-        return this.maxSkinResolution;
-    }
-
-    @Override
-    public void setMaxSkinResolution(Resolution resolution) {
-        if (this.maxSkinResolution != resolution) {
-            this.maxSkinResolution = resolution;
-            this.save();
-        }
-    }
-
-    @Override
-    public boolean isSlim() {
-        return this.slim;
-    }
-
-    @Override
-    public void setSlim(boolean slim) {
-        if (this.slim != slim) {
-            this.slim = slim;
-            this.save();
-        }
-    }
-
-    @Nonnull
-    @Override
-    public Collection<UUID> getDisabledSkins() {
-        return this.disabledSkins;
-    }
-
-    @Override
-    public void removeAllDisabledSkins() {
-        if (!this.disabledSkins.isEmpty()) {
-            this.disabledSkins.clear();
-            this.save();
-        }
-    }
-
-    @Override
-    public void disableSkin(UUID playerUniqueId) {
-        if (!this.disabledSkins.contains(playerUniqueId)) {
-            this.disabledSkins.add(playerUniqueId);
-            this.save();
-        }
-    }
-
-    @Override
-    public void enableSkin(UUID playerUniqueId) {
-        if (this.disabledSkins.contains(playerUniqueId)) {
-            this.disabledSkins.remove(playerUniqueId);
-            this.save();
-        }
-    }
-
-    @Override
-    public boolean isSkinDisabled(UUID playerUniqueId) {
-        return this.disabledSkins.contains(playerUniqueId);
-    }
-
-    @Override
-    public boolean hasAcceptedGuidelines() {
-        return this.acceptedGuidelines;
-    }
-
-    @Override
-    public void setGuidelinesAccepted(boolean accepted) {
-        if (this.acceptedGuidelines != accepted) {
-            this.acceptedGuidelines = true;
-            this.save();
-        }
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o.getClass().equals(this.getClass()) && EqualsBuilder.reflectionEquals(this, o, false);
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, false);
-    }
-
-    private void save() {
-        final Path parent = configPath.getParent();
-        if (parent != null && Files.notExists(parent)) {
-            try {
-                Files.createDirectories(parent);
-            } catch (IOException exception) {
-                exception.printStackTrace();
-                return;
-            }
-        }
-
-        try (Writer out = new OutputStreamWriter(Files.newOutputStream(configPath), StandardCharsets.UTF_8)) {
-            JsonObject object = new JsonObject();
-            object.add("configuration", GSON.toJsonTree(this));
-            GSON.toJson(object, out);
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
-        Constants.EVENT_BUS.postReported(new ConfigChangeEvent(this));
-    }
-
-    public static class ServerConfig {
-        private String host;
-        private Integer port;
-        private String guidelinesUrl;
-
-        public ServerConfig(String host, Integer port, String guidelinesUrl) {
-            this.host = host;
-            this.port = port;
-            this.guidelinesUrl = guidelinesUrl;
-        }
-
-        public String getHost() {
-            return this.host;
-        }
-
-        public Integer getPort() {
-            return this.port;
-        }
-
-        public String getGuidelinesUrl() {
-            return this.guidelinesUrl;
-        }
-    }
+  }
 }

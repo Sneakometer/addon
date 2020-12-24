@@ -21,13 +21,13 @@ import de.hdskins.labymod.shared.config.AddonConfig;
 
 public class ConfigChangeEvent {
 
-    private final AddonConfig addonConfig;
+  private final AddonConfig addonConfig;
 
-    public ConfigChangeEvent(AddonConfig addonConfig) {
-        this.addonConfig = addonConfig;
-    }
+  public ConfigChangeEvent(AddonConfig addonConfig) {
+    this.addonConfig = addonConfig;
+  }
 
-    public AddonConfig getAddonConfig() {
-        return this.addonConfig;
-    }
+  public AddonConfig getAddonConfig() {
+    return this.addonConfig;
+  }
 }

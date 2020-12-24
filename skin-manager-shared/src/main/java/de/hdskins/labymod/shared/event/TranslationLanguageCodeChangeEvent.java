@@ -18,8 +18,8 @@
 package de.hdskins.labymod.shared.event;
 
 public final class TranslationLanguageCodeChangeEvent {
-    public static final TranslationLanguageCodeChangeEvent EVENT = new TranslationLanguageCodeChangeEvent();
+  public static final TranslationLanguageCodeChangeEvent EVENT = new TranslationLanguageCodeChangeEvent();
 
-    private TranslationLanguageCodeChangeEvent() {
-    }
+  private TranslationLanguageCodeChangeEvent() {
+  }
 }

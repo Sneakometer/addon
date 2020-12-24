@@ -21,7 +21,7 @@ import net.labymod.user.util.UserActionEntry;
 
 public abstract class MarkedUserActionEntry extends UserActionEntry {
 
-    public MarkedUserActionEntry(String displayName, EnumActionType type, String value, ActionExecutor executor) {
-        super(displayName, type, value, executor);
-    }
+  public MarkedUserActionEntry(String displayName, EnumActionType type, String value, ActionExecutor executor) {
+    super(displayName, type, value, executor);
+  }
 }
