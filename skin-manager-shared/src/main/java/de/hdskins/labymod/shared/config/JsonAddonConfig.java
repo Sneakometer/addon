@@ -59,7 +59,7 @@ public class JsonAddonConfig implements AddonConfig {
     // are only useful for development reasons (normally)
     private static final int DEFAULT_PORT = 2007;
     private static final String DEFAULT_HOST = "api.hdskins.de";
-    private static final ServerConfig DEFAULT_SERVER_CONFIG = new ServerConfig(DEFAULT_HOST, DEFAULT_PORT);
+    private static final ServerConfig DEFAULT_SERVER_CONFIG = new ServerConfig(DEFAULT_HOST, DEFAULT_PORT, "http://dl.hdskins.de/guidelines.txt");
     private static final InetAddress DEFAULT_SERVER_ADDRESS = new InetSocketAddress(DEFAULT_HOST, DEFAULT_PORT).getAddress();
     // networking magic
     private static final int FIRST_NON_ROOT_PORT = 1025;
@@ -92,6 +92,8 @@ public class JsonAddonConfig implements AddonConfig {
     private Resolution maxSkinResolution;
     private boolean showSkinsOfOtherPlayers;
 
+    private boolean acceptedGuidelines;
+
     private JsonAddonConfig() {
         this.serverConfig = DEFAULT_SERVER_CONFIG;
         this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
@@ -100,6 +102,8 @@ public class JsonAddonConfig implements AddonConfig {
         this.disabledSkins = new ArrayList<>();
         this.maxSkinResolution = Resolution.RESOLUTION_ALL;
         this.showSkinsOfOtherPlayers = true;
+
+        this.acceptedGuidelines = false;
     }
 
     public static AddonConfig load(LabyModAddon labyModAddon) {
@@ -156,6 +160,11 @@ public class JsonAddonConfig implements AddonConfig {
             this.serverConfig.port = serverPort;
             this.save();
         }
+    }
+
+    @Override
+    public String getGuidelinesUrl() {
+        return this.serverConfig.getGuidelinesUrl();
     }
 
     @Nonnull
@@ -272,6 +281,19 @@ public class JsonAddonConfig implements AddonConfig {
     }
 
     @Override
+    public boolean hasAcceptedGuidelines() {
+        return this.acceptedGuidelines;
+    }
+
+    @Override
+    public void setGuidelinesAccepted(boolean accepted) {
+        if (this.acceptedGuidelines != accepted) {
+            this.acceptedGuidelines = true;
+            this.save();
+        }
+    }
+
+    @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
@@ -311,10 +333,12 @@ public class JsonAddonConfig implements AddonConfig {
     public static class ServerConfig {
         private String host;
         private Integer port;
+        private String guidelinesUrl;
 
-        public ServerConfig(String host, Integer port) {
+        public ServerConfig(String host, Integer port, String guidelinesUrl) {
             this.host = host;
             this.port = port;
+            this.guidelinesUrl = guidelinesUrl;
         }
 
         public String getHost() {
@@ -323,6 +347,10 @@ public class JsonAddonConfig implements AddonConfig {
 
         public Integer getPort() {
             return this.port;
+        }
+
+        public String getGuidelinesUrl() {
+            return this.guidelinesUrl;
         }
     }
 }

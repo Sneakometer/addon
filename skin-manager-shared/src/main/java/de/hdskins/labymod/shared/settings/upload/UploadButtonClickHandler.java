@@ -18,6 +18,8 @@
 package de.hdskins.labymod.shared.settings.upload;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
+import de.hdskins.labymod.shared.gui.AcceptRejectGuiScreen;
+import de.hdskins.labymod.shared.gui.GuidelineUtils;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
@@ -29,12 +31,13 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Iterator;
 
 @ParametersAreNonnullByDefault
@@ -70,6 +73,21 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
     }
 
     private void handleApprove(ButtonElement buttonElement, JFileChooser chooser) {
+        if (!this.addonContext.getAddonConfig().hasAcceptedGuidelines()) {
+            Collection<String> lines = GuidelineUtils.readGuidelines(this.addonContext.getAddonConfig().getGuidelinesUrl());
+            AcceptRejectGuiScreen.newScreen(
+                "Accept", "Decline",
+                lines,
+                (acceptRejectGuiScreen, accepted) -> {
+                    if (accepted) {
+                        this.addonContext.getAddonConfig().setGuidelinesAccepted(true);
+                        this.handleApprove(buttonElement, chooser);
+                    }
+                }
+            ).requestFocus();
+            return;
+        }
+
         ImageCheckResult result = this.processImage(chooser.getSelectedFile());
         if (result == ImageCheckResult.OK) {
             if (this.addonContext.getRateLimits().getUploadSkinRateLimit() > 0) {

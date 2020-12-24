@@ -50,7 +50,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
     protected volatile List<String> textLines;
     // Used by requestFocus() and returnBack()
     protected volatile GuiScreen before;
-    protected volatile Scrollbar scrollbar;
+    protected final Scrollbar scrollbar = new Scrollbar(this.getFontRenderer().FONT_HEIGHT);
 
     public AcceptRejectGuiScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback) {
         this.acceptText = acceptText;
@@ -86,7 +86,6 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
         this.rejectButton = new GuiOptionButton(1, this.width / 2 - 155 + 160, this.height - 35, this.rejectText);
         this.initializeText();
         // scrollbar
-        this.scrollbar = new Scrollbar(this.getFontRenderer().FONT_HEIGHT);
         this.scrollbar.setPosition(this.width - 16, 5, this.width - 10, this.height - 55);
         this.scrollbar.update(this.textLines.size());
         this.scrollbar.setSpeed(20);
@@ -126,6 +125,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         this.callback.accept(this, this.acceptButton != null && button.id == this.acceptButton.id);
+        this.returnBack(this.before);
     }
 
     @Override
