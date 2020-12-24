@@ -116,6 +116,8 @@ public class HDSkinManager extends SkinManager {
     this.assetsDirectory = mcAssetsDir.toPath();
     this.addonContext = addonContext;
     this.skinInvalidator = skinInvalidator;
+    // Register skin manager to addon context
+    addonContext.setSkinManager(this);
     // Register listeners to this skin manager
     addonContext.getNetworkClient().getPacketListenerRegistry().registerListeners(new NetworkListeners(this, addonContext.getTranslationRegistry()));
     // We are ready
@@ -377,7 +379,7 @@ public class HDSkinManager extends SkinManager {
     this.updateSkin(playerUniqueId, wrapper);
   }
 
-  private void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {
+  public void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {
     if (wrapper != null && wrapper != NO_SKIN) {
       for (Map.Entry<MinecraftProfileTexture, HDResourceLocation> entry : this.textureToLocationCache.asMap().entrySet()) {
         if (entry.getKey().getHash().equals(wrapper.getSkinHash())) {

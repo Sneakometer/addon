@@ -47,9 +47,11 @@ public class ToggleSkinUserActionEntry extends MarkedUserActionEntry implements 
     boolean blacklisted = this.addonContext.getAddonConfig().isSkinDisabled(entityPlayer.getGameProfile().getId());
     if (blacklisted) {
       this.addonContext.getAddonConfig().enableSkin(entityPlayer.getGameProfile().getId());
+      this.addonContext.getSkinManager().updateSkin(entityPlayer.getGameProfile().getId(), null);
       NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-shown"));
     } else {
       this.addonContext.getAddonConfig().disableSkin(entityPlayer.getGameProfile().getId());
+      this.addonContext.getSkinManager().pushSkinDelete(entityPlayer.getGameProfile().getId());
       NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-hidden"));
     }
   }

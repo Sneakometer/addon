@@ -17,10 +17,12 @@
  */
 package de.hdskins.labymod.shared.addon;
 
+import com.google.common.base.Preconditions;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
+import de.hdskins.labymod.shared.manager.HDSkinManager;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
 import de.hdskins.protocol.PacketBase;
@@ -62,6 +64,7 @@ public class AddonContext {
   private final AtomicBoolean active = new AtomicBoolean(true);
   private final AtomicBoolean reconnecting = new AtomicBoolean(false);
   // changeable
+  private HDSkinManager skinManager;
   private ClientSettings clientSettings;
   private UserRole userRole = UserRole.USER;
   private PacketServerUpdateRateLimits.RateLimits rateLimits = EMPTY;
@@ -88,6 +91,15 @@ public class AddonContext {
 
   public TranslationRegistry getTranslationRegistry() {
     return this.translationRegistry;
+  }
+
+  public HDSkinManager getSkinManager() {
+    return this.skinManager;
+  }
+
+  public void setSkinManager(HDSkinManager skinManager) {
+    Preconditions.checkArgument(this.skinManager == null, "Cannot redefine singleton skin manager");
+    this.skinManager = skinManager;
   }
 
   public AtomicBoolean getActive() {
