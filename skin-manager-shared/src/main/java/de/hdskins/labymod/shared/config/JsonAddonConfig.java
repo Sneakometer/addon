@@ -331,9 +331,9 @@ public class JsonAddonConfig implements AddonConfig {
   }
 
   public static class ServerConfig {
+    private final String guidelinesUrl;
     private String host;
     private Integer port;
-    private final String guidelinesUrl;
 
     public ServerConfig(String host, Integer port, String guidelinesUrl) {
       this.host = host;

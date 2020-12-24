@@ -20,11 +20,11 @@ package de.hdskins.labymod.shared.settings.upload;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.gui.AcceptRejectGuiScreen;
-import de.hdskins.labymod.shared.utils.GuidelineUtils;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
+import de.hdskins.labymod.shared.utils.GuidelineUtils;
 import net.labymod.utils.Consumer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
