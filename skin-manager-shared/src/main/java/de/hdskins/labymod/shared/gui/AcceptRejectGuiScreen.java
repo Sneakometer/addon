@@ -17,7 +17,7 @@
  */
 package de.hdskins.labymod.shared.gui;
 
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 import net.labymod.gui.elements.Scrollbar;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;

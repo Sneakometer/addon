@@ -25,7 +25,7 @@ import com.google.gson.reflect.TypeToken;
 import de.hdskins.labymod.shared.config.gson.ServerConfigSerializer;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.ConfigChangeEvent;
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 import net.labymod.addon.AddonLoader;
 import net.labymod.api.LabyModAddon;
 import org.apache.commons.lang3.builder.EqualsBuilder;

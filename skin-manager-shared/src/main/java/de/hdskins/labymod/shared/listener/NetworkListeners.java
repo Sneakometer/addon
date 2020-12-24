@@ -27,7 +27,7 @@ import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.texture.HDSkinManager;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
 import de.hdskins.protocol.packets.general.PacketDisconnect;

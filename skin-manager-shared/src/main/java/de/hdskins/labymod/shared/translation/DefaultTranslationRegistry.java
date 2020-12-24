@@ -18,7 +18,7 @@
 package de.hdskins.labymod.shared.translation;
 
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
-import de.hdskins.labymod.shared.utils.Constants;
+import de.hdskins.labymod.shared.Constants;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.LocaleUtils;
 
