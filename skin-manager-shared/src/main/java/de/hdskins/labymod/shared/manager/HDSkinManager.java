@@ -32,6 +32,7 @@ import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
 import de.hdskins.labymod.shared.concurrent.FunctionalFutureListener;
+import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.listener.ClientListeners;
 import de.hdskins.labymod.shared.listener.NetworkListeners;
 import de.hdskins.labymod.shared.resource.HDResourceLocation;
@@ -81,6 +82,7 @@ public class HDSkinManager extends SkinManager {
 
   private final Path assetsDirectory;
   private final AddonContext addonContext;
+  private final Runnable allSkinsInvalidator;
   private final Consumer<UUID> skinInvalidator;
   private final Queue<UUID> nonSentUnloads = new ConcurrentLinkedQueue<>();
   private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
@@ -111,10 +113,11 @@ public class HDSkinManager extends SkinManager {
     .ticker(Ticker.systemTicker())
     .build();
 
-  public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Consumer<UUID> skinInvalidator) {
+  public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Consumer<UUID> skinInvalidator, Runnable allSkinsInvalidator) {
     super(Minecraft.getMinecraft().getTextureManager(), new File(mcAssetsDir, "skins"), Minecraft.getMinecraft().getSessionService());
     this.assetsDirectory = mcAssetsDir.toPath();
     this.addonContext = addonContext;
+    this.allSkinsInvalidator = allSkinsInvalidator;
     this.skinInvalidator = skinInvalidator;
     // Register skin manager to addon context
     addonContext.setSkinManager(this);
@@ -154,7 +157,16 @@ public class HDSkinManager extends SkinManager {
     final Path localSkinPath = this.assetsDirectory.resolve(location.getPath());
     if (Files.exists(localSkinPath)) {
       try {
-        if (this.textureManager.loadTexture(location, new HDSkinTexture(localSkinPath))) {
+        // We have to ensure that the texture is not exceeding the max resolution limits
+        final HDSkinTexture skinTexture = new HDSkinTexture(localSkinPath);
+        final Resolution maxResolution = this.addonContext.getAddonConfig().getMaxSkinResolution();
+        if (maxResolution != Resolution.RESOLUTION_ALL
+          && skinTexture.getBufferedImage().getHeight() > maxResolution.getHeight() && skinTexture.getBufferedImage().getWidth() > maxResolution.getWidth()) {
+          LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", localSkinPath, maxResolution);
+          return super.loadSkin(texture, type, callback);
+        }
+        // Now we can load the texture
+        if (this.textureManager.loadTexture(location, skinTexture)) {
           // If a callback is provided by the method we should post the result to it
           if (callback != null) {
             MCUtil.call(ConcurrentUtil.fromRunnable(() -> callback.skinAvailable(type, location, texture)));
@@ -384,6 +396,12 @@ public class HDSkinManager extends SkinManager {
     for (UUID uuid : this.uniqueIdToSkinHashCache.asMap().keySet()) {
       this.skinInvalidator.accept(uuid);
     }
+    this.textureToLocationCache.invalidateAll();
+    this.uniqueIdToSkinHashCache.invalidateAll();
+  }
+
+  public void invalidateAllSkins() {
+    this.allSkinsInvalidator.run();
     this.textureToLocationCache.invalidateAll();
     this.uniqueIdToSkinHashCache.invalidateAll();
   }

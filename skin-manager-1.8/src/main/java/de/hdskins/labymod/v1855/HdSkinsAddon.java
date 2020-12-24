@@ -59,6 +59,14 @@ public class HdSkinsAddon extends LabyModAddonBase {
               }
             }
           }
+        },
+        () -> {
+          NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getNetHandler();
+          if (netHandler != null) {
+            for (NetworkPlayerInfo info : netHandler.getPlayerInfoMap()) {
+              ReflectionUtils.set(info, Boolean.FALSE, playerTexturesLoaded);
+            }
+          }
         }
       ), "skinManager", "field_152350_aA", "aL");
     });

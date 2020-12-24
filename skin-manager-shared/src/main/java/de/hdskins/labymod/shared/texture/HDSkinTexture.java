@@ -111,4 +111,8 @@ public class HDSkinTexture extends SimpleTexture {
       this.glTextureId = -1;
     }
   }
+
+  public BufferedImage getBufferedImage() {
+    return this.bufferedImage;
+  }
 }
