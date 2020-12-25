@@ -64,11 +64,6 @@ public class AcceptRejectGuiScreenImpl extends AcceptRejectGuiScreen {
     return Minecraft.getMinecraft().fontRenderer;
   }
 
-  @Override
-  public void drawString(String line, int x, int y, int color) {
-    this.fontRenderer.drawStringWithShadow(line, x, y, color);
-  }
-
   @Nonnull
   @Override
   public Collection<String> listFormattedStringToWidth(String line, int width) {

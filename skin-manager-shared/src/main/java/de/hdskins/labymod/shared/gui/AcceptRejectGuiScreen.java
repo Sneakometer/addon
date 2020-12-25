@@ -18,8 +18,8 @@
 package de.hdskins.labymod.shared.gui;
 
 import de.hdskins.labymod.shared.Constants;
+import de.hdskins.labymod.shared.text.TextLine;
 import net.labymod.gui.elements.Scrollbar;
-import net.labymod.main.LabyMod;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiOptionButton;
@@ -40,6 +40,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
 
   protected static final Collection<String> SINGLE_STRING_LIST = Collections.singleton(Constants.SPACE);
   protected static final int RIGHT_SPACE = 50;
+  protected static final int RIGHT_ENTRY_SPACE = 15;
   protected static AcceptRejectGuiScreenFactory factory;
 
   protected final String acceptText;
@@ -76,8 +77,6 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
 
   @Nonnull
   protected abstract FontRenderer getFontRenderer();
-
-  public abstract void drawString(String line, int x, int y, int color);
 
   @Nonnull
   public abstract Collection<String> listFormattedStringToWidth(String line, int width);
@@ -147,11 +146,11 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
         // To render a string minecraft internally visits each char of the string
         // if the string is empty minecraft just skips the rendering - we are preventing
         // this by providing a non-empty line
-        this.textLines.add(TextLine.leftAligned(Constants.SPACE, this.getFontRenderer()));
+        this.textLines.add(TextLine.line(Constants.SPACE, this.getFontRenderer()));
       } else {
-        TextLine line = TextLine.parse(messageLine, this.getFontRenderer());
-        for (String formattedLine : this.listFormattedStringToWidth(line.getLine(), this.width - RIGHT_SPACE)) {
-          this.textLines.add(TextLine.of(formattedLine, this.getFontRenderer(), line.isCentered()));
+        final TextLine line = TextLine.parse(messageLine, this.getFontRenderer());
+        for (String formattedLine : this.listFormattedStringToWidth(line.getPlainText(), this.width - RIGHT_SPACE)) {
+          this.textLines.add(line.setPlainText(formattedLine));
         }
       }
     }
@@ -174,14 +173,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
       if (i >= this.textLines.size()) {
         break;
       }
-      TextLine line = this.textLines.get(i);
-      int x = 15;
-      if (line.isCentered()) {
-        int fullWidth = LabyMod.getInstance().getDrawUtils().getScaledResolution().getScaledWidth() - RIGHT_SPACE;
-        x += (fullWidth / 2) - (line.getWidth() / 2);
-      }
-
-      this.drawString(line.getLine(), x, currentHeightPosition += fontHeight, 0xffffff);
+      this.textLines.get(i).draw(RIGHT_ENTRY_SPACE, RIGHT_SPACE, currentHeightPosition += fontHeight, 0xffffff);
     }
     // now we can reset the bidi flag of the font renderer
     this.getFontRenderer().setBidiFlag(bidi);
