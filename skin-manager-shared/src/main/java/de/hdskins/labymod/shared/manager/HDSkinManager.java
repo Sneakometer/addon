@@ -208,7 +208,8 @@ public class HDSkinManager extends SkinManager {
     final UUID self = LabyMod.getInstance().getPlayerUUID();
     final UUID profileId = GameProfileUtils.getUniqueId(profile);
 
-    if (profileId == null || (!profileId.equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profileId)) {
+    if (profileId == null || profileId.version() != 4
+      || (!profileId.equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profileId)) {
       LOGGER.debug("Not loading skin for profile: {} callback: {} secure: {} because the unique id is blocked locally.", profile, callback, requireSecure);
       super.loadProfileTextures(profile, callback, requireSecure);
       return;
