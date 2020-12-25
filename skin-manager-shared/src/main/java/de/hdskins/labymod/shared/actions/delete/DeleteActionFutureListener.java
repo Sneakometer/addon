@@ -17,9 +17,9 @@
  */
 package de.hdskins.labymod.shared.actions.delete;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
-import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
@@ -30,35 +30,35 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 class DeleteActionFutureListener implements FutureListener<PacketBase>, Constants {
 
-    private final AddonContext addonContext;
-    private final EntityPlayer targetDelete;
+  private final AddonContext addonContext;
+  private final EntityPlayer targetDelete;
 
-    protected DeleteActionFutureListener(AddonContext addonContext, EntityPlayer targetDelete) {
-        this.addonContext = addonContext;
-        this.targetDelete = targetDelete;
-    }
+  protected DeleteActionFutureListener(AddonContext addonContext, EntityPlayer targetDelete) {
+    this.addonContext = addonContext;
+    this.targetDelete = targetDelete;
+  }
 
-    @Override
-    public void nullResult() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
-    }
+  @Override
+  public void nullResult() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+  }
 
-    @Override
-    public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerQueryResponse) {
-            PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
-            if (response.isSuccess()) {
-                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-successfully", this.targetDelete.getName()));
-            } else {
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
-            }
-        } else {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
-        }
+  @Override
+  public void nonNullResult(PacketBase packetBase) {
+    if (packetBase instanceof PacketServerQueryResponse) {
+      PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
+      if (response.isSuccess()) {
+        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-successfully", this.targetDelete.getName()));
+      } else {
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
+      }
+    } else {
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
     }
+  }
 
-    @Override
-    public void cancelled() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
-    }
+  @Override
+  public void cancelled() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+  }
 }

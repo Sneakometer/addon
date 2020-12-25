@@ -17,10 +17,10 @@
  */
 package de.hdskins.labymod.shared.settings.toggle;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
-import de.hdskins.labymod.shared.Constants;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
@@ -29,21 +29,23 @@ import java.util.function.BiFunction;
 @ParametersAreNonnullByDefault
 public class SkinToggleButtonClickHandler implements BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>>, Constants {
 
-    private final AddonContext addonContext;
+  private final AddonContext addonContext;
 
-    public SkinToggleButtonClickHandler(AddonContext addonContext) {
-        this.addonContext = addonContext;
+  public SkinToggleButtonClickHandler(AddonContext addonContext) {
+    this.addonContext = addonContext;
+  }
+
+  @Override
+  public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean aBoolean) {
+    this.addonContext.getAddonConfig().setShowSkinsOfOtherPlayers(aBoolean);
+    if (aBoolean) {
+      this.addonContext.getSkinManager().invalidateAllSkins();
+      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-enabled"));
+    } else {
+      this.addonContext.getSkinManager().invalidateAll();
+      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-disabled"));
     }
 
-    @Override
-    public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean aBoolean) {
-        if (aBoolean) {
-            NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-enabled"));
-        } else {
-            NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-disabled"));
-        }
-
-        this.addonContext.getAddonConfig().setShowSkinsOfOtherPlayers(aBoolean);
-        return CompletableFuture.completedFuture(aBoolean);
-    }
+    return CompletableFuture.completedFuture(aBoolean);
+  }
 }

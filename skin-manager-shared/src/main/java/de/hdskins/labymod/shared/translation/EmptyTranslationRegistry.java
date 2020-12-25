@@ -28,50 +28,50 @@ import java.util.Properties;
 @ParametersAreNonnullByDefault
 public class EmptyTranslationRegistry implements TranslationRegistry {
 
-    protected static final TranslationRegistry EMPTY = new EmptyTranslationRegistry();
+  protected static final TranslationRegistry EMPTY = new EmptyTranslationRegistry();
 
-    private EmptyTranslationRegistry() {
-    }
+  private EmptyTranslationRegistry() {
+  }
 
-    @Override
-    public void updateTranslation(String language, String translationKey, String message) {
-    }
+  @Override
+  public void updateTranslation(String language, String translationKey, String message) {
+  }
 
-    @Nonnull
-    @Override
-    public String translateMessage(String translationKey, Object... replacements) {
-        return this.translateMessageOrDefault(translationKey, "translation <" + translationKey + "> is missing", replacements);
-    }
+  @Nonnull
+  @Override
+  public String translateMessage(String translationKey, Object... replacements) {
+    return this.translateMessageOrDefault(translationKey, "translation <" + translationKey + "> is missing", replacements);
+  }
 
-    @Nonnull
-    @Override
-    public String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements) {
-        return resultIfAbsent;
-    }
+  @Nonnull
+  @Override
+  public String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements) {
+    return resultIfAbsent;
+  }
 
-    @Nonnull
-    @Override
-    public Locale getCurrentLocale() {
-        return LocaleUtils.toLocale(Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode());
-    }
+  @Nonnull
+  @Override
+  public Locale getCurrentLocale() {
+    return LocaleUtils.toLocale(Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode());
+  }
 
-    @Nonnull
-    @Override
-    public String getCurrentLocaleKey() {
-        return Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
-    }
+  @Nonnull
+  @Override
+  public String getCurrentLocaleKey() {
+    return Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
+  }
 
-    @Override
-    public void reSyncLanguageCode() {
-    }
+  @Override
+  public void reSyncLanguageCode() {
+  }
 
-    @Override
-    public boolean isTranslationPresent(String language, String translationKey) {
-        return false;
-    }
+  @Override
+  public boolean isTranslationPresent(String language, String translationKey) {
+    return false;
+  }
 
-    @Override
-    public boolean loadLanguageFile(String languageKey, Properties languageFile) {
-        return false;
-    }
+  @Override
+  public boolean loadLanguageFile(String languageKey, Properties languageFile) {
+    return false;
+  }
 }

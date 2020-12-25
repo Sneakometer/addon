@@ -28,53 +28,53 @@ import java.util.Map;
 
 public class HDMinecraftProfileTexture extends MinecraftProfileTexture {
 
-    private static final Map<String, String> SLIM = ImmutableMap.of("model", "slim");
+  private static final Map<String, String> SLIM = ImmutableMap.of("model", "slim");
 
-    protected HDMinecraftProfileTexture(String hash, @Nullable Map<String, String> metadata) {
-        super(hash, metadata);
+  protected HDMinecraftProfileTexture(String hash, @Nullable Map<String, String> metadata) {
+    super(hash, metadata);
+  }
+
+  @Nonnull
+  public static HDMinecraftProfileTexture texture(@Nonnull SkinHashWrapper wrapper) {
+    return texture(wrapper.getSkinHash(), wrapper.isSlim() ? SLIM : null);
+  }
+
+  @Nonnull
+  public static HDMinecraftProfileTexture texture(@Nonnull PacketServerResponseSkinId packet) {
+    return texture(packet.getSkinId(), packet.isSlim() ? SLIM : null);
+  }
+
+  @Nonnull
+  public static HDMinecraftProfileTexture texture(@Nonnull String hash) {
+    return texture(hash, null);
+  }
+
+  @Nonnull
+  public static HDMinecraftProfileTexture texture(@Nonnull String hash, @Nullable Map<String, String> metadata) {
+    return new HDMinecraftProfileTexture(hash, metadata);
+  }
+
+  @Override
+  public String getHash() {
+    // Easy workaround
+    return super.getUrl();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
 
-    @Nonnull
-    public static HDMinecraftProfileTexture texture(@Nonnull SkinHashWrapper wrapper) {
-        return texture(wrapper.getSkinHash(), wrapper.isSlim() ? SLIM : null);
+    if (!(obj instanceof HDMinecraftProfileTexture)) {
+      return false;
     }
 
-    @Nonnull
-    public static HDMinecraftProfileTexture texture(@Nonnull PacketServerResponseSkinId packet) {
-        return texture(packet.getSkinId(), packet.isSlim() ? SLIM : null);
-    }
+    return ((HDMinecraftProfileTexture) obj).getHash().equals(this.getHash());
+  }
 
-    @Nonnull
-    public static HDMinecraftProfileTexture texture(@Nonnull String hash) {
-        return texture(hash, null);
-    }
-
-    @Nonnull
-    public static HDMinecraftProfileTexture texture(@Nonnull String hash, @Nullable Map<String, String> metadata) {
-        return new HDMinecraftProfileTexture(hash, metadata);
-    }
-
-    @Override
-    public String getHash() {
-        // Easy workaround
-        return super.getUrl();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof HDMinecraftProfileTexture)) {
-            return false;
-        }
-
-        return ((HDMinecraftProfileTexture) obj).getHash().equals(this.getHash());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getHash().hashCode();
-    }
+  @Override
+  public int hashCode() {
+    return this.getHash().hashCode();
+  }
 }

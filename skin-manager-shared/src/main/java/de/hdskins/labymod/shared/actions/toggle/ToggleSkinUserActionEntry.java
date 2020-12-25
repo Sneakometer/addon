@@ -30,27 +30,29 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class ToggleSkinUserActionEntry extends MarkedUserActionEntry implements ActionConstants {
 
-    private final AddonContext addonContext;
+  private final AddonContext addonContext;
 
-    public ToggleSkinUserActionEntry(AddonContext addonContext) {
-        super(
-            addonContext.getTranslationRegistry().translateMessage("toggle-skin-button-name"),
-            EnumActionType.NONE,
-            null,
-            null
-        );
-        this.addonContext = addonContext;
-    }
+  public ToggleSkinUserActionEntry(AddonContext addonContext) {
+    super(
+      addonContext.getTranslationRegistry().translateMessage("toggle-skin-button-name"),
+      EnumActionType.NONE,
+      null,
+      null
+    );
+    this.addonContext = addonContext;
+  }
 
-    @Override
-    public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
-        boolean blacklisted = this.addonContext.getAddonConfig().isSkinDisabled(entityPlayer.getGameProfile().getId());
-        if (blacklisted) {
-            this.addonContext.getAddonConfig().enableSkin(entityPlayer.getGameProfile().getId());
-            NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-shown"));
-        } else {
-            this.addonContext.getAddonConfig().disableSkin(entityPlayer.getGameProfile().getId());
-            NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-hidden"));
-        }
+  @Override
+  public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
+    boolean blacklisted = this.addonContext.getAddonConfig().isSkinDisabled(entityPlayer.getGameProfile().getId());
+    if (blacklisted) {
+      this.addonContext.getAddonConfig().enableSkin(entityPlayer.getGameProfile().getId());
+      this.addonContext.getSkinManager().updateSkin(entityPlayer.getGameProfile().getId(), null);
+      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-shown"));
+    } else {
+      this.addonContext.getAddonConfig().disableSkin(entityPlayer.getGameProfile().getId());
+      this.addonContext.getSkinManager().pushSkinDelete(entityPlayer.getGameProfile().getId());
+      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-hidden"));
     }
+  }
 }

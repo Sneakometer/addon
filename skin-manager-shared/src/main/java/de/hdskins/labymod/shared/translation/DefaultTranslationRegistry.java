@@ -17,8 +17,8 @@
  */
 package de.hdskins.labymod.shared.translation;
 
-import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import de.hdskins.labymod.shared.Constants;
+import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.LocaleUtils;
 
@@ -32,80 +32,80 @@ import java.util.Properties;
 @ParametersAreNonnullByDefault
 public class DefaultTranslationRegistry implements TranslationRegistry {
 
-    private final Map<String, Properties> loadedLanguageFiles;
-    private String currentLocale;
+  private final Map<String, Properties> loadedLanguageFiles;
+  private String currentLocale;
 
-    protected DefaultTranslationRegistry(Map<String, Properties> loadedLanguageFiles) {
-        this.loadedLanguageFiles = loadedLanguageFiles;
-        this.reSyncLanguageCode();
+  protected DefaultTranslationRegistry(Map<String, Properties> loadedLanguageFiles) {
+    this.loadedLanguageFiles = loadedLanguageFiles;
+    this.reSyncLanguageCode();
+  }
+
+  @Override
+  public void updateTranslation(String language, String translationKey, String message) {
+    Properties properties = this.loadedLanguageFiles.get(language);
+    if (properties == null) {
+      return;
     }
 
-    @Override
-    public void updateTranslation(String language, String translationKey, String message) {
-        Properties properties = this.loadedLanguageFiles.get(language);
-        if (properties == null) {
-            return;
-        }
+    properties.setProperty(translationKey, message);
+  }
 
-        properties.setProperty(translationKey, message);
+  @Nonnull
+  @Override
+  public String translateMessage(String translationKey, Object... replacements) {
+    return this.translateMessageOrDefault(translationKey, "translation <" + translationKey + "> is missing", replacements);
+  }
+
+  @Nonnull
+  @Override
+  public String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements) {
+    this.reSyncLanguageCode();
+    Properties source = this.loadedLanguageFiles.get(this.currentLocale);
+    if (source == null) {
+      // Try to use english as fallback
+      source = this.loadedLanguageFiles.get("en");
     }
 
-    @Nonnull
-    @Override
-    public String translateMessage(String translationKey, Object... replacements) {
-        return this.translateMessageOrDefault(translationKey, "translation <" + translationKey + "> is missing", replacements);
+    return source == null ? MessageFormat.format(resultIfAbsent, replacements) : MessageFormat.format(source.getProperty(translationKey, resultIfAbsent), replacements);
+  }
+
+  @Nonnull
+  @Override
+  public Locale getCurrentLocale() {
+    this.reSyncLanguageCode();
+    return LocaleUtils.toLocale(this.currentLocale);
+  }
+
+  @Nonnull
+  @Override
+  public String getCurrentLocaleKey() {
+    this.reSyncLanguageCode();
+    return this.currentLocale;
+  }
+
+  @Override
+  public void reSyncLanguageCode() {
+    String chosenLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
+    if (this.currentLocale == null || !this.currentLocale.equals(chosenLocale)) {
+      this.currentLocale = chosenLocale;
+      Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
+    }
+  }
+
+  @Override
+  public boolean isTranslationPresent(String language, String translationKey) {
+    this.reSyncLanguageCode();
+    Properties source = this.loadedLanguageFiles.get(language);
+    return source != null && source.containsKey(translationKey);
+  }
+
+  @Override
+  public boolean loadLanguageFile(String languageKey, Properties languageFile) {
+    if (this.loadedLanguageFiles.containsKey(languageKey)) {
+      return false;
     }
 
-    @Nonnull
-    @Override
-    public String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements) {
-        this.reSyncLanguageCode();
-        Properties source = this.loadedLanguageFiles.get(this.currentLocale);
-        if (source == null) {
-            // Try to use english as fallback
-            source = this.loadedLanguageFiles.get("en");
-        }
-
-        return source == null ? MessageFormat.format(resultIfAbsent, replacements) : MessageFormat.format(source.getProperty(translationKey, resultIfAbsent), replacements);
-    }
-
-    @Nonnull
-    @Override
-    public Locale getCurrentLocale() {
-        this.reSyncLanguageCode();
-        return LocaleUtils.toLocale(this.currentLocale);
-    }
-
-    @Nonnull
-    @Override
-    public String getCurrentLocaleKey() {
-        this.reSyncLanguageCode();
-        return this.currentLocale;
-    }
-
-    @Override
-    public void reSyncLanguageCode() {
-        String chosenLocale = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().split("_")[0];
-        if (this.currentLocale == null || !this.currentLocale.equals(chosenLocale)) {
-            this.currentLocale = chosenLocale;
-            Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
-        }
-    }
-
-    @Override
-    public boolean isTranslationPresent(String language, String translationKey) {
-        this.reSyncLanguageCode();
-        Properties source = this.loadedLanguageFiles.get(language);
-        return source != null && source.containsKey(translationKey);
-    }
-
-    @Override
-    public boolean loadLanguageFile(String languageKey, Properties languageFile) {
-        if (this.loadedLanguageFiles.containsKey(languageKey)) {
-            return false;
-        }
-
-        this.loadedLanguageFiles.put(languageKey, languageFile);
-        return true;
-    }
+    this.loadedLanguageFiles.put(languageKey, languageFile);
+    return true;
+  }
 }

@@ -26,81 +26,81 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public interface EventBus {
 
-    void registerListener(Object listenerClass);
+  void registerListener(Object listenerClass);
 
-    void unregister(Object listenerClass);
+  void unregister(Object listenerClass);
 
-    void unregisterAll();
+  void unregisterAll();
+
+  @Nonnull
+  PostResult post(Object event);
+
+  void postReported(Object event);
+
+  final class PostResult {
+    private static final PostResult SUCCESS = new PostResult(HashMultimap.create());
+    private final Multimap<Object, Throwable> exceptions;
+
+    private PostResult(Multimap<Object, Throwable> exceptions) {
+      this.exceptions = exceptions;
+    }
 
     @Nonnull
-    PostResult post(Object event);
-
-    void postReported(Object event);
-
-    final class PostResult {
-        private static final PostResult SUCCESS = new PostResult(HashMultimap.create());
-        private final Multimap<Object, Throwable> exceptions;
-
-        private PostResult(Multimap<Object, Throwable> exceptions) {
-            this.exceptions = exceptions;
-        }
-
-        @Nonnull
-        public static PostResult success() {
-            return SUCCESS;
-        }
-
-        @Nonnull
-        public static PostResult failure(Multimap<Object, Throwable> exceptions) {
-            return new PostResult(exceptions);
-        }
-
-        public boolean wasSuccessful() {
-            return this.exceptions.isEmpty();
-        }
-
-        @Nonnull
-        public Multimap<Object, Throwable> getExceptions() {
-            return this.exceptions;
-        }
-
-        public void publish() {
-            if (!this.wasSuccessful()) {
-                throw new PostException(this);
-            }
-        }
-
-        public void print() {
-            for (Throwable value : this.exceptions.values()) {
-                value.printStackTrace();
-            }
-        }
-
-        @Override
-        public String toString() {
-            if (this.wasSuccessful()) {
-                return "PostResult{type=success}";
-            } else {
-                return "PostResult{type=failure, exceptions=" + this.exceptions + '}';
-            }
-        }
+    public static PostResult success() {
+      return SUCCESS;
     }
 
-    final class PostException extends RuntimeException {
-        private final PostResult result;
-
-        PostException(PostResult result) {
-            super("Exceptions occurred whilst posting to subscribers");
-            this.result = result;
-        }
-
-        public PostResult result() {
-            return this.result;
-        }
-
-        @Nonnull
-        public PostResult getResult() {
-            return this.result;
-        }
+    @Nonnull
+    public static PostResult failure(Multimap<Object, Throwable> exceptions) {
+      return new PostResult(exceptions);
     }
+
+    public boolean wasSuccessful() {
+      return this.exceptions.isEmpty();
+    }
+
+    @Nonnull
+    public Multimap<Object, Throwable> getExceptions() {
+      return this.exceptions;
+    }
+
+    public void publish() {
+      if (!this.wasSuccessful()) {
+        throw new PostException(this);
+      }
+    }
+
+    public void print() {
+      for (Throwable value : this.exceptions.values()) {
+        value.printStackTrace();
+      }
+    }
+
+    @Override
+    public String toString() {
+      if (this.wasSuccessful()) {
+        return "PostResult{type=success}";
+      } else {
+        return "PostResult{type=failure, exceptions=" + this.exceptions + '}';
+      }
+    }
+  }
+
+  final class PostException extends RuntimeException {
+    private final PostResult result;
+
+    PostException(PostResult result) {
+      super("Exceptions occurred whilst posting to subscribers");
+      this.result = result;
+    }
+
+    public PostResult result() {
+      return this.result;
+    }
+
+    @Nonnull
+    public PostResult getResult() {
+      return this.result;
+    }
+  }
 }

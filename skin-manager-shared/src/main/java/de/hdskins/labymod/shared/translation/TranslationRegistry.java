@@ -26,31 +26,31 @@ import java.util.Properties;
 @ParametersAreNonnullByDefault
 public interface TranslationRegistry {
 
-    static TranslationRegistry empty() {
-        return EmptyTranslationRegistry.EMPTY;
-    }
+  static TranslationRegistry empty() {
+    return EmptyTranslationRegistry.EMPTY;
+  }
 
-    static TranslationRegistry fromMap(Map<String, Properties> loadedLanguages) {
-        return new DefaultTranslationRegistry(loadedLanguages);
-    }
+  static TranslationRegistry fromMap(Map<String, Properties> loadedLanguages) {
+    return new DefaultTranslationRegistry(loadedLanguages);
+  }
 
-    void updateTranslation(String language, String translationKey, String message);
+  void updateTranslation(String language, String translationKey, String message);
 
-    @Nonnull
-    String translateMessage(String translationKey, Object... replacements);
+  @Nonnull
+  String translateMessage(String translationKey, Object... replacements);
 
-    @Nonnull
-    String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements);
+  @Nonnull
+  String translateMessageOrDefault(String translationKey, String resultIfAbsent, Object... replacements);
 
-    @Nonnull
-    Locale getCurrentLocale();
+  @Nonnull
+  Locale getCurrentLocale();
 
-    @Nonnull
-    String getCurrentLocaleKey();
+  @Nonnull
+  String getCurrentLocaleKey();
 
-    void reSyncLanguageCode();
+  void reSyncLanguageCode();
 
-    boolean isTranslationPresent(String language, String translationKey);
+  boolean isTranslationPresent(String language, String translationKey);
 
-    boolean loadLanguageFile(String languageKey, Properties languageFile);
+  boolean loadLanguageFile(String languageKey, Properties languageFile);
 }

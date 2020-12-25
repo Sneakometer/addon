@@ -36,66 +36,66 @@ import java.util.stream.Collectors;
 @ParametersAreNonnullByDefault
 public final class SettingsFactory {
 
-    private static final String RESOLUTION_NAME_PREFIX = "RESOLUTION_";
+  private static final String RESOLUTION_NAME_PREFIX = "RESOLUTION_";
 
-    public SettingsFactory() {
-        throw new UnsupportedOperationException();
-    }
+  public SettingsFactory() {
+    throw new UnsupportedOperationException();
+  }
 
-    public static Collection<SettingsElement> bakeSettings(AddonContext addonContext) {
-        SettingsElement setSlimElement = ElementFactory.defaultFactory().brewBooleanElement(
-            addonContext.getTranslationRegistry().translateMessage("slim-skin-change-option"),
-            new ControlElement.IconData(Material.REDSTONE_COMPARATOR),
-            addonContext.getTranslationRegistry().translateMessage("slim-skin-option-on"),
-            addonContext.getTranslationRegistry().translateMessage("slim-skin-option-off"),
-            addonContext.getAddonConfig().isSlim(),
-            new SlimButtonClickHandler(addonContext),
-            element -> {
-                element.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("slim-skin-option-description"));
-            }
-        );
-        SettingsElement uploadSkinElement = ElementFactory.defaultFactory().brewButtonElement(
-            addonContext.getTranslationRegistry().translateMessage("change-skin-option-name"),
-            new ControlElement.IconData(Material.PAINTING),
-            addonContext.getTranslationRegistry().translateMessage("button-click-here"),
-            new UploadButtonClickHandler(addonContext),
-            buttonElement -> {
-                buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("change-skin-option-description"));
-            }
-        );
-        SettingsElement deleteSkinElement = ElementFactory.defaultFactory().brewButtonElement(
-            addonContext.getTranslationRegistry().translateMessage("delete-skin-option-name"),
-            new ControlElement.IconData(Material.BARRIER),
-            addonContext.getTranslationRegistry().translateMessage("button-click-here"),
-            new DeleteButtonClickHandler(addonContext),
-            buttonElement -> {
-                buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("delete-skin-option-description"));
-            }
-        );
-        SettingsElement toggleSkinVisibilityElement = ElementFactory.defaultFactory().brewBooleanElement(
-            addonContext.getTranslationRegistry().translateMessage("show-all-skins"),
-            new ControlElement.IconData(Material.SKULL_ITEM),
-            addonContext.getTranslationRegistry().translateMessage("show-all-skins-option-on"),
-            addonContext.getTranslationRegistry().translateMessage("show-all-skins-option-off"),
-            addonContext.getAddonConfig().showSkinsOfOtherPlayers(),
-            new SkinToggleButtonClickHandler(addonContext),
-            element -> {
-                element.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("show-all-skins-description"));
-            }
-        );
-        SettingsElement maxResolutionLoadOption = ElementFactory.defaultFactory().brewDropDownElement(
-            addonContext.getTranslationRegistry().translateMessage("set-max-resolution-option-name"),
-            new ControlElement.IconData(Material.RECORD_9),
-            addonContext.getAddonConfig().getMaxSkinResolution().name().replaceFirst(RESOLUTION_NAME_PREFIX, ""),
-            Arrays.stream(Resolution.VALUES).map(Enum::name).map(value -> value.replaceFirst(RESOLUTION_NAME_PREFIX, "")).collect(Collectors.toList()),
-            (ignored, newValue) -> Resolution.byName(RESOLUTION_NAME_PREFIX + newValue).ifPresent(addonContext::setMaxSkinResolution),
-            dropDownElement -> {
-                dropDownElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("set-max-resolution-option-description"));
-            }
-        );
-        SettingsElement skinRenderElement = ElementFactory.defaultFactory().brewRenderElement(element -> {
-        });
+  public static Collection<SettingsElement> bakeSettings(AddonContext addonContext) {
+    SettingsElement setSlimElement = ElementFactory.defaultFactory().brewBooleanElement(
+      addonContext.getTranslationRegistry().translateMessage("slim-skin-change-option"),
+      new ControlElement.IconData(Material.REDSTONE_COMPARATOR),
+      addonContext.getTranslationRegistry().translateMessage("slim-skin-option-on"),
+      addonContext.getTranslationRegistry().translateMessage("slim-skin-option-off"),
+      addonContext.getAddonConfig().isSlim(),
+      new SlimButtonClickHandler(addonContext),
+      element -> {
+        element.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("slim-skin-option-description"));
+      }
+    );
+    SettingsElement uploadSkinElement = ElementFactory.defaultFactory().brewButtonElement(
+      addonContext.getTranslationRegistry().translateMessage("change-skin-option-name"),
+      new ControlElement.IconData(Material.PAINTING),
+      addonContext.getTranslationRegistry().translateMessage("button-click-here"),
+      new UploadButtonClickHandler(addonContext),
+      buttonElement -> {
+        buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("change-skin-option-description"));
+      }
+    );
+    SettingsElement deleteSkinElement = ElementFactory.defaultFactory().brewButtonElement(
+      addonContext.getTranslationRegistry().translateMessage("delete-skin-option-name"),
+      new ControlElement.IconData(Material.BARRIER),
+      addonContext.getTranslationRegistry().translateMessage("button-click-here"),
+      new DeleteButtonClickHandler(addonContext),
+      buttonElement -> {
+        buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("delete-skin-option-description"));
+      }
+    );
+    SettingsElement toggleSkinVisibilityElement = ElementFactory.defaultFactory().brewBooleanElement(
+      addonContext.getTranslationRegistry().translateMessage("show-all-skins"),
+      new ControlElement.IconData(Material.SKULL_ITEM),
+      addonContext.getTranslationRegistry().translateMessage("show-all-skins-option-on"),
+      addonContext.getTranslationRegistry().translateMessage("show-all-skins-option-off"),
+      addonContext.getAddonConfig().showSkinsOfOtherPlayers(),
+      new SkinToggleButtonClickHandler(addonContext),
+      element -> {
+        element.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("show-all-skins-description"));
+      }
+    );
+    SettingsElement maxResolutionLoadOption = ElementFactory.defaultFactory().brewDropDownElement(
+      addonContext.getTranslationRegistry().translateMessage("set-max-resolution-option-name"),
+      new ControlElement.IconData(Material.RECORD_9),
+      addonContext.getAddonConfig().getMaxSkinResolution().name().replaceFirst(RESOLUTION_NAME_PREFIX, ""),
+      Arrays.stream(Resolution.VALUES).map(Enum::name).map(value -> value.replaceFirst(RESOLUTION_NAME_PREFIX, "")).collect(Collectors.toList()),
+      (ignored, newValue) -> Resolution.byName(RESOLUTION_NAME_PREFIX + newValue).ifPresent(addonContext::setMaxSkinResolution),
+      dropDownElement -> {
+        dropDownElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("set-max-resolution-option-description"));
+      }
+    );
+    SettingsElement skinRenderElement = ElementFactory.defaultFactory().brewRenderElement(element -> {
+    });
 
-        return Arrays.asList(setSlimElement, uploadSkinElement, deleteSkinElement, toggleSkinVisibilityElement, maxResolutionLoadOption, skinRenderElement);
-    }
+    return Arrays.asList(setSlimElement, uploadSkinElement, deleteSkinElement, toggleSkinVisibilityElement, maxResolutionLoadOption, skinRenderElement);
+  }
 }

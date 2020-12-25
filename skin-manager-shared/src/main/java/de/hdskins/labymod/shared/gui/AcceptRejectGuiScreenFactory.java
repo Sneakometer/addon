@@ -26,6 +26,6 @@ import java.util.function.BiConsumer;
 @ParametersAreNonnullByDefault
 public interface AcceptRejectGuiScreenFactory {
 
-    @Nonnull
-    AcceptRejectGuiScreen newScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback);
+  @Nonnull
+  AcceptRejectGuiScreen newScreen(String acceptText, String rejectText, Collection<String> messageLines, BiConsumer<AcceptRejectGuiScreen, Boolean> callback);
 }

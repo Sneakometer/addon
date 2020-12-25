@@ -17,9 +17,9 @@
  */
 package de.hdskins.labymod.shared.settings.upload;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
-import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
@@ -29,33 +29,33 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class UploadFutureListener implements FutureListener<PacketBase>, Constants {
 
-    private final AddonContext addonContext;
+  private final AddonContext addonContext;
 
-    public UploadFutureListener(AddonContext addonContext) {
-        this.addonContext = addonContext;
-    }
+  public UploadFutureListener(AddonContext addonContext) {
+    this.addonContext = addonContext;
+  }
 
-    @Override
-    public void nullResult() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
-    }
+  @Override
+  public void nullResult() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
+  }
 
-    @Override
-    public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerQueryResponse) {
-            PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
-            if (response.isSuccess()) {
-                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-completed"));
-            } else {
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
-            }
-        } else {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
-        }
+  @Override
+  public void nonNullResult(PacketBase packetBase) {
+    if (packetBase instanceof PacketServerQueryResponse) {
+      PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
+      if (response.isSuccess()) {
+        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-completed"));
+      } else {
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
+      }
+    } else {
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
     }
+  }
 
-    @Override
-    public void cancelled() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
-    }
+  @Override
+  public void cancelled() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
+  }
 }

@@ -17,21 +17,21 @@
  */
 package de.hdskins.labymod.shared.settings.upload;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.gui.AcceptRejectGuiScreen;
-import de.hdskins.labymod.shared.gui.GuidelineUtils;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
-import de.hdskins.labymod.shared.Constants;
+import de.hdskins.labymod.shared.utils.GuidelineUtils;
 import net.labymod.utils.Consumer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import javax.swing.*;
+import javax.swing.JFileChooser;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,130 +43,131 @@ import java.util.Iterator;
 @ParametersAreNonnullByDefault
 public class UploadButtonClickHandler implements Consumer<ButtonElement>, Constants {
 
-    private static final int MAX_FILE_SIZE = 4 * 1024 * 1024;
+  private static final int MAX_FILE_SIZE = 4 * 1024 * 1024;
 
-    private final UploadFutureListener uploadFutureListener;
-    private final AddonContext addonContext;
-    private JFileChooser jFileChooser;
-    private File lastUsedDirectory;
+  private final UploadFutureListener uploadFutureListener;
+  private final AddonContext addonContext;
+  private JFileChooser jFileChooser;
+  private File lastUsedDirectory;
 
-    public UploadButtonClickHandler(AddonContext addonContext) {
-        this.uploadFutureListener = new UploadFutureListener(addonContext);
-        this.addonContext = addonContext;
+  public UploadButtonClickHandler(AddonContext addonContext) {
+    this.uploadFutureListener = new UploadFutureListener(addonContext);
+    this.addonContext = addonContext;
+  }
+
+  @Override
+  public void accept(ButtonElement buttonElement) {
+    if (this.jFileChooser != null) {
+      this.jFileChooser.requestFocus();
+    } else {
+      EXECUTOR.execute(() -> {
+        this.jFileChooser = new JFileChooser(this.lastUsedDirectory);
+        if (this.jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+          UploadButtonClickHandler.this.handleApprove(buttonElement, this.jFileChooser);
+        }
+
+        this.lastUsedDirectory = this.jFileChooser.getCurrentDirectory();
+        this.jFileChooser = null;
+      });
+    }
+  }
+
+  private void handleApprove(ButtonElement buttonElement, JFileChooser chooser) {
+    if (!this.addonContext.getAddonConfig().hasAcceptedGuidelines()) {
+      Collection<String> lines = GuidelineUtils.readGuidelines(this.addonContext.getAddonConfig().getGuidelinesUrl());
+      AcceptRejectGuiScreen.newScreen(
+        "Accept", "Decline",
+        lines,
+        (screen, accepted) -> {
+          if (accepted) {
+            this.addonContext.getAddonConfig().setGuidelinesAccepted(true);
+            this.handleApprove(buttonElement, chooser);
+          }
+          screen.returnBack();
+        }
+      ).requestFocus();
+      return;
     }
 
-    @Override
-    public void accept(ButtonElement buttonElement) {
-        if (this.jFileChooser != null) {
-            this.jFileChooser.requestFocus();
-        } else {
-            EXECUTOR.execute(() -> {
-                this.jFileChooser = new JFileChooser(this.lastUsedDirectory);
-                if (this.jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    UploadButtonClickHandler.this.handleApprove(buttonElement, this.jFileChooser);
-                }
+    ImageCheckResult result = this.processImage(chooser.getSelectedFile());
+    if (result == ImageCheckResult.OK) {
+      if (this.addonContext.getRateLimits().getUploadSkinRateLimit() > 0) {
+        SettingsCountdownRegistry.registerTask(
+          new ButtonCountdownElementNameChanger(buttonElement),
+          this.addonContext.getRateLimits().getUploadSkinRateLimit()
+        );
+      }
 
-                this.lastUsedDirectory = this.jFileChooser.getCurrentDirectory();
-                this.jFileChooser = null;
-            });
-        }
+      AddonContext.ServerResult serverResult = this.addonContext.uploadSkin(chooser.getSelectedFile());
+      if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
+      } else {
+        serverResult.getFuture().addListener(this.uploadFutureListener);
+      }
+
+      return;
     }
 
-    private void handleApprove(ButtonElement buttonElement, JFileChooser chooser) {
-        if (!this.addonContext.getAddonConfig().hasAcceptedGuidelines()) {
-            Collection<String> lines = GuidelineUtils.readGuidelines(this.addonContext.getAddonConfig().getGuidelinesUrl());
-            AcceptRejectGuiScreen.newScreen(
-                "Accept", "Decline",
-                lines,
-                (acceptRejectGuiScreen, accepted) -> {
-                    if (accepted) {
-                        this.addonContext.getAddonConfig().setGuidelinesAccepted(true);
-                        this.handleApprove(buttonElement, chooser);
-                    }
-                }
-            ).requestFocus();
-            return;
-        }
+    switch (result) {
+      case NOT_PNG:
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-png"));
+        break;
+      case WRONG_PROPORTIONS:
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-wrong-proportions"));
+        break;
+      case NOT_HD:
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-hd"));
+        break;
+      case TOO_BIG:
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-too-large"));
+        break;
+      default:
+        break;
+    }
+  }
 
-        ImageCheckResult result = this.processImage(chooser.getSelectedFile());
-        if (result == ImageCheckResult.OK) {
-            if (this.addonContext.getRateLimits().getUploadSkinRateLimit() > 0) {
-                SettingsCountdownRegistry.registerTask(
-                    new ButtonCountdownElementNameChanger(buttonElement),
-                    this.addonContext.getRateLimits().getUploadSkinRateLimit()
-                );
-            }
-
-            AddonContext.ServerResult serverResult = this.addonContext.uploadSkin(chooser.getSelectedFile());
-            if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
-            } else {
-                serverResult.getFuture().addListener(this.uploadFutureListener);
-            }
-
-            return;
-        }
-
-        switch (result) {
-            case NOT_PNG:
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-png"));
-                break;
-            case WRONG_PROPORTIONS:
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-wrong-proportions"));
-                break;
-            case NOT_HD:
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-hd"));
-                break;
-            case TOO_BIG:
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-too-large"));
-                break;
-            default:
-                break;
-        }
+  private ImageCheckResult processImage(File file) {
+    if (file.length() > MAX_FILE_SIZE) {
+      return ImageCheckResult.TOO_BIG;
     }
 
-    private ImageCheckResult processImage(File file) {
-        if (file.length() > MAX_FILE_SIZE) {
-            return ImageCheckResult.TOO_BIG;
-        }
+    try (InputStream inputStream = new FileInputStream(file); ImageInputStream stream = ImageIO.createImageInputStream(inputStream)) {
+      Iterator<ImageReader> imageReaderIterator = ImageIO.getImageReaders(stream);
+      if (!imageReaderIterator.hasNext()) {
+        return ImageCheckResult.NOT_PNG;
+      }
 
-        try (InputStream inputStream = new FileInputStream(file); ImageInputStream stream = ImageIO.createImageInputStream(inputStream)) {
-            Iterator<ImageReader> imageReaderIterator = ImageIO.getImageReaders(stream);
-            if (!imageReaderIterator.hasNext()) {
-                return ImageCheckResult.NOT_PNG;
-            }
+      ImageReader imageReader = imageReaderIterator.next();
+      imageReader.setInput(stream);
+      if (!imageReader.getFormatName().equals("png")) {
+        return ImageCheckResult.NOT_PNG;
+      }
 
-            ImageReader imageReader = imageReaderIterator.next();
-            imageReader.setInput(stream);
-            if (!imageReader.getFormatName().equals("png")) {
-                return ImageCheckResult.NOT_PNG;
-            }
+      BufferedImage bufferedImage = imageReader.read(0);
+      if (bufferedImage == null) {
+        return ImageCheckResult.NOT_PNG;
+      }
 
-            BufferedImage bufferedImage = imageReader.read(0);
-            if (bufferedImage == null) {
-                return ImageCheckResult.NOT_PNG;
-            }
+      if (bufferedImage.getHeight() <= 32 || bufferedImage.getWidth() <= 64) {
+        return ImageCheckResult.NOT_HD;
+      }
 
-            if (bufferedImage.getHeight() <= 32 || bufferedImage.getWidth() <= 64) {
-                return ImageCheckResult.NOT_HD;
-            }
+      if (bufferedImage.getHeight() != bufferedImage.getWidth() && bufferedImage.getHeight() != bufferedImage.getWidth() / 2) {
+        return ImageCheckResult.WRONG_PROPORTIONS;
+      }
 
-            if (bufferedImage.getHeight() != bufferedImage.getWidth() && bufferedImage.getHeight() != bufferedImage.getWidth() / 2) {
-                return ImageCheckResult.WRONG_PROPORTIONS;
-            }
-
-            return ImageCheckResult.OK;
-        } catch (IOException exception) {
-            return ImageCheckResult.NOT_PNG;
-        }
+      return ImageCheckResult.OK;
+    } catch (IOException exception) {
+      return ImageCheckResult.NOT_PNG;
     }
+  }
 
-    private enum ImageCheckResult {
+  private enum ImageCheckResult {
 
-        NOT_PNG,
-        NOT_HD,
-        WRONG_PROPORTIONS,
-        TOO_BIG,
-        OK
-    }
+    NOT_PNG,
+    NOT_HD,
+    WRONG_PROPORTIONS,
+    TOO_BIG,
+    OK
+  }
 }

@@ -34,27 +34,27 @@ import java.util.UUID;
 
 public final class GameProfileUtils {
 
-    private static final Gson GSON = new GsonBuilder()
-        .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
-        .create();
+  private static final Gson GSON = new GsonBuilder()
+    .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
+    .create();
 
-    private GameProfileUtils() {
-        throw new UnsupportedOperationException();
+  private GameProfileUtils() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Nullable
+  public static UUID getUniqueId(@Nonnull GameProfile profile) {
+    final Property textureProperty = Iterables.getFirst(profile.getProperties().get("textures"), null);
+    if (textureProperty == null) {
+      return profile.getId();
     }
 
-    @Nullable
-    public static UUID getUniqueId(@Nonnull GameProfile profile) {
-        final Property textureProperty = Iterables.getFirst(profile.getProperties().get("textures"), null);
-        if (textureProperty == null) {
-            return profile.getId();
-        }
-
-        try {
-            final String json = new String(Base64.getDecoder().decode(textureProperty.getValue()), StandardCharsets.UTF_8);
-            final MinecraftTexturesPayload result = GSON.fromJson(json, MinecraftTexturesPayload.class);
-            return result == null || result.getProfileId() == null ? profile.getId() : result.getProfileId();
-        } catch (JsonParseException exception) {
-            return profile.getId();
-        }
+    try {
+      final String json = new String(Base64.getDecoder().decode(textureProperty.getValue()), StandardCharsets.UTF_8);
+      final MinecraftTexturesPayload result = GSON.fromJson(json, MinecraftTexturesPayload.class);
+      return result == null || result.getProfileId() == null ? profile.getId() : result.getProfileId();
+    } catch (JsonParseException exception) {
+      return profile.getId();
     }
+  }
 }

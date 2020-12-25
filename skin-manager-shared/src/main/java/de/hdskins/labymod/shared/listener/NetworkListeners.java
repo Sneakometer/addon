@@ -17,17 +17,17 @@
  */
 package de.hdskins.labymod.shared.listener;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.actions.ActionFactory;
 import de.hdskins.labymod.shared.actions.ActionInvoker;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
+import de.hdskins.labymod.shared.manager.HDSkinManager;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
-import de.hdskins.labymod.shared.manager.HDSkinManager;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
-import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
 import de.hdskins.protocol.packets.general.PacketDisconnect;
@@ -49,110 +49,110 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public final class NetworkListeners {
 
-    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
-    private final HDSkinManager hdSkinManager;
-    private final TranslationRegistry translationRegistry;
+  private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+  private final HDSkinManager hdSkinManager;
+  private final TranslationRegistry translationRegistry;
 
-    public NetworkListeners(HDSkinManager hdSkinManager, TranslationRegistry translationRegistry) {
-        this.hdSkinManager = hdSkinManager;
-        this.translationRegistry = translationRegistry;
+  public NetworkListeners(HDSkinManager hdSkinManager, TranslationRegistry translationRegistry) {
+    this.hdSkinManager = hdSkinManager;
+    this.translationRegistry = translationRegistry;
+  }
+
+  @ChannelInactiveListener
+  @SuppressWarnings("unused")
+  public void handleChannelInactive(Channel channel) {
+    if (this.hdSkinManager.getAddonContext().getActive().getAndSet(false) && !this.hdSkinManager.getAddonContext().getReconnecting().getAndSet(true)) {
+      // The skin manager is still active and not reconnecting so lets do it!
+      BackendUtils.reconnect(this.hdSkinManager.getAddonContext()).thenRunAsync(() -> {
+        // We are now connected to the server again so we can re-enable the skin manager
+        this.hdSkinManager.getAddonContext().getActive().set(true);
+        this.hdSkinManager.getAddonContext().getReconnecting().set(false);
+      });
+    }
+  }
+
+  @PacketListener
+  public void handleLanguageOverride(PacketServerOverrideMessage packet) {
+    packet.getMessages().forEach((key, message) ->
+      this.translationRegistry.updateTranslation(packet.getLanguage(), key, message));
+
+    // update the elements
+    Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
+  }
+
+  @PacketListener
+  public void handleLiveSkinUpdate(PacketServerLiveUpdateSkin packet) {
+    this.hdSkinManager.pushSkinUpdate(packet.getUniqueId(), packet.getSkinId());
+  }
+
+  @PacketListener
+  public void handleLiveSkinSlimUpdate(PacketServerLiveUpdateSlim packet) {
+    this.hdSkinManager.pushSkinSlimChange(packet.getUniqueId(), packet.isSlim());
+  }
+
+  @PacketListener
+  public void handleLiveDeleteByHash(PacketServerLiveUpdateDeleteSkin packet) {
+    this.hdSkinManager.pushSkinDelete(packet.getSkinId());
+  }
+
+  @PacketListener
+  public void handleLiveDeleteByPlayer(PacketServerLiveUpdateDeletePlayer packet) {
+    this.hdSkinManager.pushSkinDelete(packet.getUniqueId());
+  }
+
+  @PacketListener
+  public void handleUserRoleUpdate(PacketServerLiveUpdateRole packet) {
+    final UserRole newRole = UserRole.roleFromOrdinalIndex(packet.getOrdinalIndex());
+    final boolean staffBefore = this.hdSkinManager.getAddonContext().getRole().isHigherOrEqualThan(UserRole.STAFF);
+    final boolean staffNow = newRole.isHigherOrEqualThan(UserRole.STAFF);
+
+    this.hdSkinManager.getAddonContext().updateRole(newRole);
+    if (staffNow != staffBefore) {
+      ActionInvoker.unregisterMarkedEntries();
+      for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext())) {
+        ActionInvoker.addUserActionEntry(entry);
+      }
+    }
+  }
+
+  @PacketListener
+  public void handleDisplayMessage(PacketServerDisplayChatMessage packet) {
+    final String message;
+    if (packet.isTranslationKey()) {
+      message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getMessage(), EMPTY_OBJECT_ARRAY);
+    } else {
+      message = packet.getMessage();
     }
 
-    @ChannelInactiveListener
-    @SuppressWarnings("unused")
-    public void handleChannelInactive(Channel channel) {
-        if (this.hdSkinManager.getAddonContext().getActive().getAndSet(false) && !this.hdSkinManager.getAddonContext().getReconnecting().getAndSet(true)) {
-            // The skin manager is still active and not reconnecting so lets do it!
-            BackendUtils.reconnect(this.hdSkinManager.getAddonContext()).thenRunAsync(() -> {
-                // We are now connected to the server again so we can re-enable the skin manager
-                this.hdSkinManager.getAddonContext().getActive().set(true);
-                this.hdSkinManager.getAddonContext().getReconnecting().set(false);
-            });
-        }
+    LabyMod.getInstance().displayMessageInChat(message);
+  }
+
+  @PacketListener
+  public void handleDisconnect(PacketDisconnect packet) {
+    this.handleDisplayMessage(packet);
+  }
+
+  @PacketListener
+  public void handleBanUpdate(PacketServerLiveUpdateBan packet) {
+    SettingInvoker.pushSettingStateUpdate(!packet.isBanned());
+    if (packet.isBanned()) {
+      ActionInvoker.unregisterMarkedEntries();
+    } else {
+      ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext());
     }
 
-    @PacketListener
-    public void handleLanguageOverride(PacketServerOverrideMessage packet) {
-        packet.getMessages().forEach((key, message) ->
-            this.translationRegistry.updateTranslation(packet.getLanguage(), key, message));
+    if (packet.getReason().trim().isEmpty()) {
+      String message = packet.getReason();
+      if (packet.isTranslate()) {
+        message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getReason(), EMPTY_OBJECT_ARRAY);
+      }
 
-        // update the elements
-        Constants.EVENT_BUS.postReported(TranslationLanguageCodeChangeEvent.EVENT);
+      NotificationUtil.notify((packet.isBanned() ? Constants.FAILURE : Constants.SUCCESS) + "BAN UPDATE", message);
     }
+  }
 
-    @PacketListener
-    public void handleLiveSkinUpdate(PacketServerLiveUpdateSkin packet) {
-        this.hdSkinManager.pushSkinUpdate(packet.getUniqueId(), packet.getSkinId());
-    }
-
-    @PacketListener
-    public void handleLiveSkinSlimUpdate(PacketServerLiveUpdateSlim packet) {
-        this.hdSkinManager.pushSkinSlimChange(packet.getUniqueId(), packet.isSlim());
-    }
-
-    @PacketListener
-    public void handleLiveDeleteByHash(PacketServerLiveUpdateDeleteSkin packet) {
-        this.hdSkinManager.pushSkinDelete(packet.getSkinId());
-    }
-
-    @PacketListener
-    public void handleLiveDeleteByPlayer(PacketServerLiveUpdateDeletePlayer packet) {
-        this.hdSkinManager.pushSkinDelete(packet.getUniqueId());
-    }
-
-    @PacketListener
-    public void handleUserRoleUpdate(PacketServerLiveUpdateRole packet) {
-        final UserRole newRole = UserRole.roleFromOrdinalIndex(packet.getOrdinalIndex());
-        final boolean staffBefore = this.hdSkinManager.getAddonContext().getRole().isHigherOrEqualThan(UserRole.STAFF);
-        final boolean staffNow = newRole.isHigherOrEqualThan(UserRole.STAFF);
-
-        this.hdSkinManager.getAddonContext().updateRole(newRole);
-        if (staffNow != staffBefore) {
-            ActionInvoker.unregisterMarkedEntries();
-            for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext())) {
-                ActionInvoker.addUserActionEntry(entry);
-            }
-        }
-    }
-
-    @PacketListener
-    public void handleDisplayMessage(PacketServerDisplayChatMessage packet) {
-        final String message;
-        if (packet.isTranslationKey()) {
-            message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getMessage(), EMPTY_OBJECT_ARRAY);
-        } else {
-            message = packet.getMessage();
-        }
-
-        LabyMod.getInstance().displayMessageInChat(message);
-    }
-
-    @PacketListener
-    public void handleDisconnect(PacketDisconnect packet) {
-        this.handleDisplayMessage(packet);
-    }
-
-    @PacketListener
-    public void handleBanUpdate(PacketServerLiveUpdateBan packet) {
-        SettingInvoker.pushSettingStateUpdate(!packet.isBanned());
-        if (packet.isBanned()) {
-            ActionInvoker.unregisterMarkedEntries();
-        } else {
-            ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext());
-        }
-
-        if (packet.getReason().trim().isEmpty()) {
-            String message = packet.getReason();
-            if (packet.isTranslate()) {
-                message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getReason(), EMPTY_OBJECT_ARRAY);
-            }
-
-            NotificationUtil.notify((packet.isBanned() ? Constants.FAILURE : Constants.SUCCESS) + "BAN UPDATE", message);
-        }
-    }
-
-    @PacketListener
-    public void handleRateLimitUpdate(PacketServerUpdateRateLimits packet) {
-        this.hdSkinManager.getAddonContext().setRateLimits(packet.getRateLimits());
-    }
+  @PacketListener
+  public void handleRateLimitUpdate(PacketServerUpdateRateLimits packet) {
+    this.hdSkinManager.getAddonContext().setRateLimits(packet.getRateLimits());
+  }
 }

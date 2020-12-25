@@ -21,22 +21,22 @@ import java.util.concurrent.Future;
 
 public final class ConcurrentUtil {
 
-    private ConcurrentUtil() {
-        throw new UnsupportedOperationException();
-    }
+  private ConcurrentUtil() {
+    throw new UnsupportedOperationException();
+  }
 
-    public static <T> T waitedGet(Future<T> future) {
-        try {
-            return future.get();
-        } catch (Throwable throwable) {
-            return null;
-        }
+  public static <T> T waitedGet(Future<T> future) {
+    try {
+      return future.get();
+    } catch (Throwable throwable) {
+      return null;
     }
+  }
 
-    public static SilentCallable<Void> fromRunnable(Runnable runnable) {
-        return () -> {
-            runnable.run();
-            return null;
-        };
-    }
+  public static SilentCallable<Void> fromRunnable(Runnable runnable) {
+    return () -> {
+      runnable.run();
+      return null;
+    };
+  }
 }

@@ -19,46 +19,47 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 
 plugins {
-    id("java")
+  id("java")
+  id("checkstyle")
 }
 
 defaultTasks("clean", "build")
 
 allprojects {
-    version = "2"
-    group = "de.hdskins"
+  version = "2"
+  group = "de.hdskins"
 
-    tasks.withType<JavaCompile> {
-        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-        targetCompatibility = JavaVersion.VERSION_1_8.toString()
-        // options
-        options.isIncremental = true
-        options.encoding = StandardCharsets.UTF_8.name()
-        options.compilerArgs = listOf("-Xlint:deprecation", "-Xlint:unchecked")
+  tasks.withType<JavaCompile> {
+    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    // options
+    options.isIncremental = true
+    options.encoding = StandardCharsets.UTF_8.name()
+    options.compilerArgs = listOf("-Xlint:deprecation", "-Xlint:unchecked")
+  }
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+      name = "jitpack.io"
+      url = uri("https://jitpack.io")
     }
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            name = "jitpack.io"
-            url = uri("https://jitpack.io")
-        }
-        maven {
-            name = "HDSkins"
-            url = uri("https://repo.hdskins.de")
-        }
+    maven {
+      name = "HDSkins"
+      url = uri("https://repo.hdskins.de")
     }
+  }
 
-    project.ext.set("dependencyNetworkClientVersion", "1.20-SNAPSHOT")
-    project.ext.set("currentShortGitRevision", getCurrentShortGitRevision())
+  project.ext.set("dependencyNetworkClientVersion", "1.20-SNAPSHOT")
+  project.ext.set("currentShortGitRevision", getCurrentShortGitRevision())
 }
 
 fun getCurrentShortGitRevision(): String {
-    val stream = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "HEAD")
-        standardOutput = stream
-    }
-    return stream.toString().trim().substring(0, 8)
+  val stream = ByteArrayOutputStream()
+  exec {
+    commandLine("git", "rev-parse", "HEAD")
+    standardOutput = stream
+  }
+  return stream.toString().trim().substring(0, 8)
 }

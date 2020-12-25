@@ -18,8 +18,8 @@
 package de.hdskins.labymod.shared.event;
 
 public final class MaxSkinResolutionChangeEvent {
-    public static final MaxSkinResolutionChangeEvent EVENT = new MaxSkinResolutionChangeEvent();
+  public static final MaxSkinResolutionChangeEvent EVENT = new MaxSkinResolutionChangeEvent();
 
-    private MaxSkinResolutionChangeEvent() {
-    }
+  private MaxSkinResolutionChangeEvent() {
+  }
 }

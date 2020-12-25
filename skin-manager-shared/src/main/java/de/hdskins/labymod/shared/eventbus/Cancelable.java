@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.eventbus;
 
 public interface Cancelable {
 
-    boolean isCanceled();
+  boolean isCanceled();
 
-    void setCanceled(boolean canceled);
+  void setCanceled(boolean canceled);
 }

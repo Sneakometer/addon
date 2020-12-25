@@ -17,9 +17,9 @@
  */
 package de.hdskins.labymod.shared.settings.delete;
 
+import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.notify.NotificationUtil;
-import de.hdskins.labymod.shared.Constants;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
@@ -30,39 +30,39 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @ParametersAreNonnullByDefault
 public class DeleteFutureListener implements FutureListener<PacketBase>, Constants {
 
-    private final AddonContext addonContext;
-    private final AtomicBoolean stateListener;
+  private final AddonContext addonContext;
+  private final AtomicBoolean stateListener;
 
-    public DeleteFutureListener(AddonContext addonContext, AtomicBoolean stateListener) {
-        this.addonContext = addonContext;
-        this.stateListener = stateListener;
+  public DeleteFutureListener(AddonContext addonContext, AtomicBoolean stateListener) {
+    this.addonContext = addonContext;
+    this.stateListener = stateListener;
+  }
+
+  @Override
+  public void nullResult() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
+    this.stateListener.set(false);
+  }
+
+  @Override
+  public void nonNullResult(PacketBase packetBase) {
+    if (packetBase instanceof PacketServerQueryResponse) {
+      PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
+      if (response.isSuccess()) {
+        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-success"));
+      } else {
+        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
+      }
+    } else {
+      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
     }
 
-    @Override
-    public void nullResult() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
-        this.stateListener.set(false);
-    }
+    this.stateListener.set(false);
+  }
 
-    @Override
-    public void nonNullResult(PacketBase packetBase) {
-        if (packetBase instanceof PacketServerQueryResponse) {
-            PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
-            if (response.isSuccess()) {
-                NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-success"));
-            } else {
-                NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
-            }
-        } else {
-            NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
-        }
-
-        this.stateListener.set(false);
-    }
-
-    @Override
-    public void cancelled() {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
-        this.stateListener.set(false);
-    }
+  @Override
+  public void cancelled() {
+    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
+    this.stateListener.set(false);
+  }
 }

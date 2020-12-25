@@ -35,82 +35,82 @@ import java.util.function.Supplier;
 
 public final class BackendUtils {
 
-    private static final Logger LOGGER = LogManager.getLogger(BackendUtils.class);
-    private static final Supplier<String> NAME_SUPPLIER = LabyMod.getInstance()::getPlayerName;
-    private static final Function<String, Boolean> SERVER_JOINER = serverId -> {
-        final Session session = Minecraft.getMinecraft().getSession();
-        if (session != null) {
-            try {
-                Minecraft.getMinecraft().getSessionService().joinServer(session.getProfile(), session.getToken(), serverId);
-                return true;
-            } catch (AuthenticationException exception) {
-                exception.printStackTrace();
-                return false;
-            }
-        } else {
-            return false;
-        }
-    };
+  private static final Logger LOGGER = LogManager.getLogger(BackendUtils.class);
+  private static final Supplier<String> NAME_SUPPLIER = LabyMod.getInstance()::getPlayerName;
+  private static final Function<String, Boolean> SERVER_JOINER = serverId -> {
+    final Session session = Minecraft.getMinecraft().getSession();
+    if (session != null) {
+      try {
+        Minecraft.getMinecraft().getSessionService().joinServer(session.getProfile(), session.getToken(), serverId);
+        return true;
+      } catch (AuthenticationException exception) {
+        exception.printStackTrace();
+        return false;
+      }
+    } else {
+      return false;
+    }
+  };
 
-    private BackendUtils() {
-        throw new UnsupportedOperationException();
+  private BackendUtils() {
+    throw new UnsupportedOperationException();
+  }
+
+  public static CompletableFuture<NetworkClient> connectToServer(AddonConfig addonConfig) {
+    return CompletableFuture.supplyAsync(() -> {
+      NetworkClient networkClient = NetworkClient.create(addonConfig.getServerAddress().getHostAddress(), addonConfig.getServerPort(), NAME_SUPPLIER, SERVER_JOINER);
+      networkClient.setFirstReconnectInterval(addonConfig.getFirstReconnectInterval());
+      networkClient.setReconnectInterval(addonConfig.getReconnectInterval());
+      return connect0(networkClient, addonConfig);
+    }).thenApply(networkClient -> {
+      networkClient.sendPacket(new PacketClientSkinSettings(new ClientSettings(
+        addonConfig.getMaxSkinResolution().getWidth(),
+        addonConfig.getMaxSkinResolution().getHeight()
+      )));
+      return networkClient;
+    });
+  }
+
+  public static CompletableFuture<Void> reconnect(AddonContext addonContext) {
+    return CompletableFuture.supplyAsync(() -> {
+      connect0(addonContext.getNetworkClient(), addonContext.getAddonConfig()).sendPacket(new PacketClientSkinSettings(new ClientSettings(
+        addonContext.getAddonConfig().getMaxSkinResolution().getWidth(),
+        addonContext.getAddonConfig().getMaxSkinResolution().getHeight()
+      )));
+      return null;
+    });
+  }
+
+  private static NetworkClient connect0(NetworkClient networkClient, AddonConfig addonConfig) {
+    if (networkClient.connect()) {
+      LOGGER.debug("Successfully connected to network server {}:{} after the first attempt", addonConfig.getServerHost(), addonConfig.getServerPort());
+      return networkClient;
     }
 
-    public static CompletableFuture<NetworkClient> connectToServer(AddonConfig addonConfig) {
-        return CompletableFuture.supplyAsync(() -> {
-            NetworkClient networkClient = NetworkClient.create(addonConfig.getServerAddress().getHostAddress(), addonConfig.getServerPort(), NAME_SUPPLIER, SERVER_JOINER);
-            networkClient.setFirstReconnectInterval(addonConfig.getFirstReconnectInterval());
-            networkClient.setReconnectInterval(addonConfig.getReconnectInterval());
-            return connect0(networkClient, addonConfig);
-        }).thenApply(networkClient -> {
-            networkClient.sendPacket(new PacketClientSkinSettings(new ClientSettings(
-                addonConfig.getMaxSkinResolution().getWidth(),
-                addonConfig.getMaxSkinResolution().getHeight()
-            )));
-            return networkClient;
-        });
+    int reconnectAttempts = 0;
+    do {
+      if (reconnectAttempts++ == 0) {
+        sleep(networkClient.getFirstReconnectInterval());
+      } else {
+        sleep(networkClient.getReconnectInterval());
+
+        LOGGER.debug(
+          "Connection attempt to server at {}:{} failed the {} time. (reconnect times: first: {}, always: {}) Retry...",
+          addonConfig.getServerHost(), addonConfig.getServerPort(), reconnectAttempts,
+          networkClient.getFirstReconnectInterval(), networkClient.getReconnectInterval()
+        );
+      }
+    } while (!networkClient.connect());
+
+    LOGGER.debug("Successfully connected to network server {}:{} after the {} attempt", addonConfig.getServerHost(), addonConfig.getServerPort(), reconnectAttempts);
+    return networkClient;
+  }
+
+  private static void sleep(long millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException exception) {
+      Thread.currentThread().interrupt();
     }
-
-    public static CompletableFuture<Void> reconnect(AddonContext addonContext) {
-        return CompletableFuture.supplyAsync(() -> {
-            connect0(addonContext.getNetworkClient(), addonContext.getAddonConfig()).sendPacket(new PacketClientSkinSettings(new ClientSettings(
-                addonContext.getAddonConfig().getMaxSkinResolution().getWidth(),
-                addonContext.getAddonConfig().getMaxSkinResolution().getHeight()
-            )));
-            return null;
-        });
-    }
-
-    private static NetworkClient connect0(NetworkClient networkClient, AddonConfig addonConfig) {
-        if (networkClient.connect()) {
-            LOGGER.debug("Successfully connected to network server {}:{} after the first attempt", addonConfig.getServerHost(), addonConfig.getServerPort());
-            return networkClient;
-        }
-
-        int reconnectAttempts = 0;
-        do {
-            if (reconnectAttempts++ == 0) {
-                sleep(networkClient.getFirstReconnectInterval());
-            } else {
-                sleep(networkClient.getReconnectInterval());
-
-                LOGGER.debug(
-                    "Connection attempt to server at {}:{} failed the {} time. (reconnect times: first: {}, always: {}) Retry...",
-                    addonConfig.getServerHost(), addonConfig.getServerPort(), reconnectAttempts,
-                    networkClient.getFirstReconnectInterval(), networkClient.getReconnectInterval()
-                );
-            }
-        } while (!networkClient.connect());
-
-        LOGGER.debug("Successfully connected to network server {}:{} after the {} attempt", addonConfig.getServerHost(), addonConfig.getServerPort(), reconnectAttempts);
-        return networkClient;
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
-    }
+  }
 }

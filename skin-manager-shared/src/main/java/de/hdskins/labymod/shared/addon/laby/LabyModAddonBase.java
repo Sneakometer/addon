@@ -27,39 +27,39 @@ import java.util.UUID;
 
 public abstract class LabyModAddonBase extends LabyModAddon {
 
-    @Override
-    public void onEnable() {
-        System.out.println("\n        __  ______  _____ __   _\n" +
-            "       / / / / __ \\/ ___// /__(_)___  _____\n" +
-            "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n" +
-            "     / __  / /_/ /___/ / ,< / / / / (__  )\n" +
-            "    /_/ /_/_____//____/_/|_/_/_/ /_/____/\n" +
-            "\n" +
-            "          Copyright (c) 2020 HDSkins\n" +
-            "   Support Discord: https://discord.gg/KN8rDZJ");
-    }
+  @Override
+  public void onEnable() {
+    System.out.println("\n        __  ______  _____ __   _\n" +
+      "       / / / / __ \\/ ___// /__(_)___  _____\n" +
+      "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n" +
+      "     / __  / /_/ /___/ / ,< / / / / (__  )\n" +
+      "    /_/ /_/_____//____/_/|_/_/_/ /_/____/\n" +
+      "\n" +
+      "          Copyright (c) 2020 HDSkins\n" +
+      "   Support Discord: https://discord.gg/KN8rDZJ");
+  }
 
-    @Override
-    public void loadConfig() {
-    }
+  @Override
+  public void loadConfig() {
+  }
 
-    @Override
-    public void saveConfig() {
-        // discard - use our config manager
-    }
+  @Override
+  public void saveConfig() {
+    // discard - use our config manager
+  }
 
-    @Override
-    public void init(String addonName, UUID uuid) {
-        this.about = new About(uuid, addonName);
-        this.about.loaded = true;
+  @Override
+  public void init(String addonName, UUID uuid) {
+    this.about = new About(uuid, addonName);
+    this.about.loaded = true;
 
-        SettingInvoker.setAbout(this.about);
-        this.createAddonContext();
-    }
+    SettingInvoker.setAbout(this.about);
+    this.createAddonContext();
+  }
 
-    @Override
-    protected void fillSettings(List<SettingsElement> list) {
-    }
+  @Override
+  protected void fillSettings(List<SettingsElement> list) {
+  }
 
-    protected abstract void createAddonContext();
+  protected abstract void createAddonContext();
 }

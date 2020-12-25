@@ -17,10 +17,11 @@
  */
 package de.hdskins.labymod.v1855;
 
-import de.hdskins.labymod.shared.utils.ReflectionUtils;
 import de.hdskins.labymod.shared.addon.AddonContextLoader;
 import de.hdskins.labymod.shared.addon.laby.LabyModAddonBase;
 import de.hdskins.labymod.shared.manager.HDSkinManager;
+import de.hdskins.labymod.shared.utils.GameProfileUtils;
+import de.hdskins.labymod.shared.utils.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -28,34 +29,46 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.UUID;
 
 public class HdSkinsAddon extends LabyModAddonBase {
 
-    @Override
-    protected void createAddonContext() {
-        AddonContextLoader.initAddon(this).thenAcceptAsync(context -> {
-            // Initialize screen factory
-            AcceptRejectGuiScreenImpl.init();
-            // assets directory
-            File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "fileAssets", "field_110446_Y", "ak");
-            Objects.requireNonNull(assetsDir, "Unable to assets dir correctly!");
-            // Network player info bridge
-            Field playerTexturesLoaded = ReflectionUtils.getFieldByNames(NetworkPlayerInfo.class, "playerTexturesLoaded", "field_178864_d", "d");
-            Objects.requireNonNull(playerTexturesLoaded, "Unable to find playerTexturesLoaded boolean");
+  @Override
+  protected void createAddonContext() {
+    AddonContextLoader.initAddon(this).thenAcceptAsync(context -> {
+      // Initialize screen factory
+      AcceptRejectGuiScreenImpl.init();
+      // assets directory
+      File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "fileAssets", "field_110446_Y", "ak");
+      Objects.requireNonNull(assetsDir, "Unable to assets dir correctly!");
+      // Network player info bridge
+      Field playerTexturesLoaded = ReflectionUtils.getFieldByNames(NetworkPlayerInfo.class, "playerTexturesLoaded", "field_178864_d", "d");
+      Objects.requireNonNull(playerTexturesLoaded, "Unable to find playerTexturesLoaded boolean");
 
-            ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(
-                context,
-                assetsDir,
-                uniqueId -> {
-                    NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getNetHandler();
-                    if (netHandler != null) {
-                        NetworkPlayerInfo playerInfo = netHandler.getPlayerInfo(uniqueId);
-                        if (playerInfo != null) {
-                            ReflectionUtils.set(playerInfo, Boolean.FALSE, playerTexturesLoaded);
-                        }
-                    }
-                }
-            ), "skinManager", "field_152350_aA", "aL");
-        });
-    }
+      ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(
+        context,
+        assetsDir,
+        uniqueId -> {
+          NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getNetHandler();
+          if (netHandler != null) {
+            UUID playerId;
+            for (NetworkPlayerInfo info : netHandler.getPlayerInfoMap()) {
+              playerId = GameProfileUtils.getUniqueId(info.getGameProfile());
+              if (playerId != null && playerId.equals(uniqueId)) {
+                ReflectionUtils.set(info, Boolean.FALSE, playerTexturesLoaded);
+              }
+            }
+          }
+        },
+        () -> {
+          NetHandlerPlayClient netHandler = Minecraft.getMinecraft().getNetHandler();
+          if (netHandler != null) {
+            for (NetworkPlayerInfo info : netHandler.getPlayerInfoMap()) {
+              ReflectionUtils.set(info, Boolean.FALSE, playerTexturesLoaded);
+            }
+          }
+        }
+      ), "skinManager", "field_152350_aA", "aL");
+    });
+  }
 }
