@@ -38,9 +38,9 @@ import java.util.function.BiConsumer;
 @ParametersAreNonnullByDefault
 public abstract class AcceptRejectGuiScreen extends GuiScreen {
 
-    protected static final Collection<String> SINGLE_STRING_LIST = Collections.singleton(Constants.SPACE);
-    protected static final int RIGHT_SPACE = 50;
-    protected static AcceptRejectGuiScreenFactory factory;
+  protected static final Collection<String> SINGLE_STRING_LIST = Collections.singleton(Constants.SPACE);
+  protected static final int RIGHT_SPACE = 50;
+  protected static AcceptRejectGuiScreenFactory factory;
 
   protected final String acceptText;
   protected final String rejectText;
@@ -50,7 +50,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
   // buttons (will be re-initialized when the gui get initialized, so every time f.ex. the window is resized)
   protected volatile GuiOptionButton acceptButton;
   protected volatile GuiOptionButton rejectButton;
-  protected volatile List<String> textLines;
+  protected volatile List<TextLine> textLines;
   // Used by requestFocus() and returnBack()
   protected volatile GuiScreen before;
 
@@ -147,7 +147,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
         // To render a string minecraft internally visits each char of the string
         // if the string is empty minecraft just skips the rendering - we are preventing
         // this by providing a non-empty line
-          this.textLines.add(TextLine.leftAligned(Constants.SPACE, this.getFontRenderer()));
+        this.textLines.add(TextLine.leftAligned(Constants.SPACE, this.getFontRenderer()));
       } else {
         TextLine line = TextLine.parse(messageLine, this.getFontRenderer());
         for (String formattedLine : this.listFormattedStringToWidth(line.getLine(), this.width - RIGHT_SPACE)) {
