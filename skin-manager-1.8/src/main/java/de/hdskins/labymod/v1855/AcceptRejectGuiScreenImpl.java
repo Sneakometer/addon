@@ -61,7 +61,7 @@ public class AcceptRejectGuiScreenImpl extends AcceptRejectGuiScreen {
   @Nonnull
   @Override
   protected FontRenderer getFontRenderer() {
-    return this.fontRendererObj;
+    return Minecraft.getMinecraft().fontRendererObj;
   }
 
   @Override
