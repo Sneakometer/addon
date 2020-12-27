@@ -108,7 +108,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
 
   @Override
   protected void mouseClicked(int mouseX, int mouseY, int clickedButton) {
-    this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.DRAGGING);
+    this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.CLICKED);
     if (clickedButton == 0) { // 0 is the left key of the mouse
       GuiButton clicked = null;
       if (this.acceptButton.mousePressed(this.mc, mouseX, mouseY)) {
@@ -120,6 +120,11 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
         this.actionPerformed(clicked);
       }
     }
+  }
+
+  @Override
+  protected void mouseClickMove(int mouseX, int mouseY, int lastButtonClicked, long timeSinceMouseClick) {
+    this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.DRAGGING);
   }
 
   @Override
