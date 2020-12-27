@@ -23,7 +23,7 @@ import net.labymod.settings.elements.ControlElement;
 import net.labymod.utils.Consumer;
 import net.minecraft.client.gui.GuiButton;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class ButtonElement extends ControlElement {
 

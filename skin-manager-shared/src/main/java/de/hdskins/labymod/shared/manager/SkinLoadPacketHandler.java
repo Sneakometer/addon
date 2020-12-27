@@ -24,7 +24,6 @@ import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.resource.HDResourceLocation;
 import de.hdskins.labymod.shared.texture.HDSkinTexture;
-import de.hdskins.labymod.shared.utils.MCUtil;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkin;
 import net.minecraft.client.renderer.IImageBuffer;
@@ -78,7 +77,7 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
       PacketServerResponseSkin response = (PacketServerResponseSkin) packetBase;
       if (response.getSkinData().length == 0) {
         LOGGER.debug("Unable to load skin with hash {} because server sent an empty result", this.texture.getHash());
-        MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+        ConcurrentUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
         return;
       }
 
@@ -88,7 +87,7 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
           Files.createDirectories(parent);
         } catch (IOException exception) {
           LOGGER.debug("Unable to create directory {} for skin download to {}", parent, this.targetLocalPath, exception);
-          MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+          ConcurrentUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
           return;
         }
       }
@@ -99,7 +98,7 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
         if (config.getMaxSkinResolution() != Resolution.RESOLUTION_ALL
           && image.getHeight() > config.getMaxSkinResolution().getHeight() && image.getWidth() > config.getMaxSkinResolution().getWidth()) {
           LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", this.texture.getHash(), config.getMaxSkinResolution());
-          MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+          ConcurrentUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
           return;
         }
 
@@ -108,7 +107,7 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
           ImageIO.write(bufferedImage, "png", outputStream);
         }
 
-        MCUtil.call(ConcurrentUtil.fromRunnable(() -> {
+        ConcurrentUtil.call(ConcurrentUtil.fromRunnable(() -> {
           this.textureManager.loadTexture(this.location, new HDSkinTexture(bufferedImage));
           if (this.callback != null) {
             this.callback.skinAvailable(this.type, this.location, this.texture);
@@ -123,10 +122,10 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
           this.targetLocalPath,
           exception
         );
-        MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+        ConcurrentUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
       }
     } else {
-      MCUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
+      ConcurrentUtil.call(ConcurrentUtil.fromRunnable(this.backingLoaderExecutor));
     }
   }
 }

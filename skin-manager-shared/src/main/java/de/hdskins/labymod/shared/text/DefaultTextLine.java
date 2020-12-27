@@ -23,7 +23,8 @@ import net.minecraft.client.gui.FontRenderer;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@ParametersAreNonnullByDefault final class DefaultTextLine implements TextLine {
+@ParametersAreNonnullByDefault
+final class DefaultTextLine implements TextLine {
 
   private final FontRenderer fontRenderer;
   private String plain;
@@ -44,7 +45,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
   }
 
   @Override
-  public @Nonnull TextLine setPlainText(String plainText) {
+  public @Nonnull
+  TextLine setPlainText(String plainText) {
     this.plain = plainText;
     this.width = this.fontRenderer.getStringWidth(plainText);
     return this;
@@ -56,7 +58,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
   }
 
   @Override
-  public @Nonnull TextLine setCentered(boolean centered) {
+  public @Nonnull
+  TextLine setCentered(boolean centered) {
     this.centered = centered;
     return this;
   }

@@ -23,8 +23,8 @@ import com.google.common.cache.CacheBuilder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.properties.Property;
+import de.hdskins.labymod.shared.concurrent.ConcurrentUtil;
 import de.hdskins.labymod.shared.manager.HDSkinManager;
-import de.hdskins.labymod.shared.utils.MCUtil;
 import net.labymod.main.LabyMod;
 import net.labymod.utils.UUIDFetcher;
 import net.minecraft.client.Minecraft;
@@ -97,7 +97,7 @@ public final class SkullRenderer {
   public static void drawPlayerHead(String username, int x, int y, int size) {
     if (username != null) {
       UUIDFetcher.getUUID(username, uniqueId -> {
-        MCUtil.call(() -> {
+        ConcurrentUtil.call(() -> {
           if (uniqueId != null) {
             drawPlayerHead(new GameProfile(uniqueId, username), x, y, size);
           } else {

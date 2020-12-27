@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.FileDialog;
+import java.awt.*;
 import java.io.File;
 import java.io.FilenameFilter;
 
@@ -29,7 +29,8 @@ public final class AwtUtils {
     throw new UnsupportedOperationException();
   }
 
-  public static @Nullable File openFileChooser(@Nonnull FileDialog fileDialog, @Nullable FilenameFilter filter) {
+  public static @Nullable
+  File openFileChooser(@Nonnull FileDialog fileDialog, @Nullable FilenameFilter filter) {
     fileDialog.setMultipleMode(false);
     fileDialog.setFilenameFilter(filter);
     fileDialog.setMode(FileDialog.LOAD);

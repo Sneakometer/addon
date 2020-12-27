@@ -17,12 +17,24 @@
  */
 package de.hdskins.labymod.shared.concurrent;
 
+import net.minecraft.client.Minecraft;
+
 import java.util.concurrent.Future;
 
 public final class ConcurrentUtil {
 
+  private static final Minecraft THE_MINECRAFT = Minecraft.getMinecraft();
+
   private ConcurrentUtil() {
     throw new UnsupportedOperationException();
+  }
+
+  public static <T> T call(SilentCallable<T> callable) {
+    if (THE_MINECRAFT.isCallingFromMinecraftThread()) {
+      return callable.call();
+    } else {
+      return ConcurrentUtil.waitedGet(THE_MINECRAFT.addScheduledTask(callable));
+    }
   }
 
   public static <T> T waitedGet(Future<T> future) {

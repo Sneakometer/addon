@@ -18,12 +18,7 @@
 package de.hdskins.labymod.shared.manager;
 
 import com.google.common.base.Ticker;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalCause;
-import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.*;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -39,7 +34,6 @@ import de.hdskins.labymod.shared.resource.HDResourceLocation;
 import de.hdskins.labymod.shared.texture.HDMinecraftProfileTexture;
 import de.hdskins.labymod.shared.texture.HDSkinTexture;
 import de.hdskins.labymod.shared.utils.GameProfileUtils;
-import de.hdskins.labymod.shared.utils.MCUtil;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketClientReady;
@@ -63,11 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -149,7 +139,7 @@ public class HDSkinManager extends SkinManager {
     if (textureObject != null) {
       // If a callback is provided by the method we should post the result to it
       if (callback != null) {
-        MCUtil.call(ConcurrentUtil.fromRunnable(() -> callback.skinAvailable(type, location, texture)));
+        ConcurrentUtil.call(ConcurrentUtil.fromRunnable(() -> callback.skinAvailable(type, location, texture)));
       }
       return location;
     }
@@ -163,13 +153,13 @@ public class HDSkinManager extends SkinManager {
         if (maxResolution != Resolution.RESOLUTION_ALL
           && skinTexture.getBufferedImage().getHeight() > maxResolution.getHeight() && skinTexture.getBufferedImage().getWidth() > maxResolution.getWidth()) {
           LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", localSkinPath, maxResolution);
-          return MCUtil.call(() -> super.loadSkin(texture, type, callback));
+          return ConcurrentUtil.call(() -> super.loadSkin(texture, type, callback));
         }
         // Now we can load the texture
         if (this.textureManager.loadTexture(location, skinTexture)) {
           // If a callback is provided by the method we should post the result to it
           if (callback != null) {
-            MCUtil.call(ConcurrentUtil.fromRunnable(() -> callback.skinAvailable(type, location, texture)));
+            ConcurrentUtil.call(ConcurrentUtil.fromRunnable(() -> callback.skinAvailable(type, location, texture)));
           }
           return location;
         } else {
@@ -343,7 +333,7 @@ public class HDSkinManager extends SkinManager {
       texture,
       type,
       callback
-    ), () -> MCUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback))));
+    ), () -> ConcurrentUtil.call(ConcurrentUtil.fromRunnable(() -> HDSkinManager.super.loadSkin(texture, type, callback))));
   }
 
   public void pushSkinDelete(String skinHash) {
