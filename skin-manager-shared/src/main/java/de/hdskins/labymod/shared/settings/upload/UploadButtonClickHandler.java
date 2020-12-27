@@ -17,6 +17,7 @@
  */
 package de.hdskins.labymod.shared.settings.upload;
 
+import com.google.common.collect.ImmutableSet;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.gui.AcceptRejectGuiScreen;
@@ -24,6 +25,7 @@ import de.hdskins.labymod.shared.notify.NotificationUtil;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
+import de.hdskins.labymod.shared.utils.AwtUtils;
 import de.hdskins.labymod.shared.utils.GuidelineUtils;
 import net.labymod.utils.Consumer;
 
@@ -31,24 +33,30 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import javax.swing.JFileChooser;
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public class UploadButtonClickHandler implements Consumer<ButtonElement>, Constants {
 
   private static final int MAX_FILE_SIZE = 4 * 1024 * 1024;
 
+  private static final Frame PARENT = new Frame();
+  private static final FileDialog CHOOSER = new FileDialog(PARENT, "Select file");
+  private static final Set<String> ACCEPTED_EXTENSIONS = ImmutableSet.of("jpeg", "jpg", "png", "bmp", "webmp");
+  private static final FilenameFilter FILTER = new SimpleFilenameFilter(ACCEPTED_EXTENSIONS);
+
   private final UploadFutureListener uploadFutureListener;
   private final AddonContext addonContext;
-  private JFileChooser jFileChooser;
-  private File lastUsedDirectory;
 
   public UploadButtonClickHandler(AddonContext addonContext) {
     this.uploadFutureListener = new UploadFutureListener(addonContext);
@@ -57,22 +65,22 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
 
   @Override
   public void accept(ButtonElement buttonElement) {
-    if (this.jFileChooser != null) {
-      this.jFileChooser.requestFocus();
+    if (CHOOSER.isVisible()) {
+      CHOOSER.requestFocus();
     } else {
       EXECUTOR.execute(() -> {
-        this.jFileChooser = new JFileChooser(this.lastUsedDirectory);
-        if (this.jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-          UploadButtonClickHandler.this.handleApprove(buttonElement, this.jFileChooser);
+        final File result = AwtUtils.openFileChooser(CHOOSER, FILTER);
+        CHOOSER.dispose(); // free native screen resources
+        if (result == null || !result.exists() || result.isDirectory()) {
+          NotificationUtil.notify(Constants.FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-not-file"));
+          return;
         }
-
-        this.lastUsedDirectory = this.jFileChooser.getCurrentDirectory();
-        this.jFileChooser = null;
+        this.handleApprove(buttonElement, result);
       });
     }
   }
 
-  private void handleApprove(ButtonElement buttonElement, JFileChooser chooser) {
+  private void handleApprove(ButtonElement buttonElement, File file) {
     if (!this.addonContext.getAddonConfig().hasAcceptedGuidelines()) {
       Collection<String> lines = GuidelineUtils.readGuidelines(this.addonContext.getAddonConfig().getGuidelinesUrl());
       AcceptRejectGuiScreen.newScreen(
@@ -81,7 +89,7 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
         (screen, accepted) -> {
           if (accepted) {
             this.addonContext.getAddonConfig().setGuidelinesAccepted(true);
-            this.handleApprove(buttonElement, chooser);
+            this.handleApprove(buttonElement, file);
           }
           screen.returnBack();
         }
@@ -89,7 +97,7 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
       return;
     }
 
-    ImageCheckResult result = this.processImage(chooser.getSelectedFile());
+    ImageCheckResult result = this.processImage(file);
     if (result == ImageCheckResult.OK) {
       if (this.addonContext.getRateLimits().getUploadSkinRateLimit() > 0) {
         SettingsCountdownRegistry.registerTask(
@@ -98,7 +106,7 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
         );
       }
 
-      AddonContext.ServerResult serverResult = this.addonContext.uploadSkin(chooser.getSelectedFile());
+      AddonContext.ServerResult serverResult = this.addonContext.uploadSkin(file);
       if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
         NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
       } else {
