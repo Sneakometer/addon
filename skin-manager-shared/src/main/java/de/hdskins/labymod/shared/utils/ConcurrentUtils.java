@@ -25,9 +25,9 @@ import javax.annotation.Nullable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public final class ConcurrentUtil {
+public final class ConcurrentUtils {
 
-  private ConcurrentUtil() {
+  private ConcurrentUtils() {
     throw new UnsupportedOperationException();
   }
 
@@ -36,7 +36,7 @@ public final class ConcurrentUtil {
     if (Minecraft.getMinecraft().isCallingFromMinecraftThread()) {
       return callable.call();
     } else {
-      return ConcurrentUtil.getUninterruptedly(Minecraft.getMinecraft().addScheduledTask(callable));
+      return ConcurrentUtils.getUninterruptedly(Minecraft.getMinecraft().addScheduledTask(callable));
     }
   }
 
