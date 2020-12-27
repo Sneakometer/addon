@@ -53,4 +53,6 @@ public interface TranslationRegistry {
   boolean isTranslationPresent(String language, String translationKey);
 
   boolean loadLanguageFile(String languageKey, Properties languageFile);
+
+  void reset();
 }

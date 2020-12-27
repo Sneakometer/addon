@@ -25,6 +25,7 @@ import org.apache.commons.lang3.LocaleUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -32,22 +33,22 @@ import java.util.Properties;
 @ParametersAreNonnullByDefault
 public class DefaultTranslationRegistry implements TranslationRegistry {
 
+  private final Map<String, Properties> originalLanguageFiles;
   private final Map<String, Properties> loadedLanguageFiles;
   private String currentLocale;
 
   protected DefaultTranslationRegistry(Map<String, Properties> loadedLanguageFiles) {
+    this.originalLanguageFiles = new HashMap<>(loadedLanguageFiles);
     this.loadedLanguageFiles = loadedLanguageFiles;
     this.reSyncLanguageCode();
   }
 
   @Override
   public void updateTranslation(String language, String translationKey, String message) {
-    Properties properties = this.loadedLanguageFiles.get(language);
-    if (properties == null) {
-      return;
+    final Properties properties = this.loadedLanguageFiles.get(language);
+    if (properties != null) {
+      properties.setProperty(translationKey, message);
     }
-
-    properties.setProperty(translationKey, message);
   }
 
   @Nonnull
@@ -101,11 +102,12 @@ public class DefaultTranslationRegistry implements TranslationRegistry {
 
   @Override
   public boolean loadLanguageFile(String languageKey, Properties languageFile) {
-    if (this.loadedLanguageFiles.containsKey(languageKey)) {
-      return false;
-    }
+    return this.loadedLanguageFiles.putIfAbsent(languageKey, languageFile) == null;
+  }
 
-    this.loadedLanguageFiles.put(languageKey, languageFile);
-    return true;
+  @Override
+  public void reset() {
+    this.loadedLanguageFiles.clear();
+    this.loadedLanguageFiles.putAll(this.originalLanguageFiles);
   }
 }

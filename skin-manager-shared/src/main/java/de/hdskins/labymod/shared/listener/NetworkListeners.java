@@ -62,6 +62,8 @@ public final class NetworkListeners {
   @SuppressWarnings("unused")
   public void handleChannelInactive(Channel channel) {
     if (this.hdSkinManager.getAddonContext().getActive().getAndSet(false) && !this.hdSkinManager.getAddonContext().getReconnecting().getAndSet(true)) {
+      // Reset the translation registry to remove the language overrides
+      this.hdSkinManager.getAddonContext().getTranslationRegistry().reset();
       // The skin manager is still active and not reconnecting so lets do it!
       BackendUtils.reconnect(this.hdSkinManager.getAddonContext()).thenRunAsync(() -> {
         // We are now connected to the server again so we can re-enable the skin manager

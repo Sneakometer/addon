@@ -74,4 +74,8 @@ public class EmptyTranslationRegistry implements TranslationRegistry {
   public boolean loadLanguageFile(String languageKey, Properties languageFile) {
     return false;
   }
+
+  @Override
+  public void reset() {
+  }
 }
