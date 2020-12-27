@@ -19,6 +19,7 @@ package de.hdskins.labymod.shared;
 
 import de.hdskins.labymod.shared.eventbus.EventBus;
 import de.hdskins.labymod.shared.eventbus.defaults.DefaultEventBus;
+import net.labymod.addon.online.info.AddonInfo;
 import net.labymod.main.Source;
 
 import javax.annotation.Nonnull;
@@ -32,10 +33,15 @@ public interface Constants {
   String SPACE = " ";
   EventBus EVENT_BUS = new DefaultEventBus();
   ExecutorService EXECUTOR = Executors.newCachedThreadPool();
-  AtomicReference<String> ADDON_VERSION = new AtomicReference<>();
+  AtomicReference<AddonInfo> ADDON_INFO = new AtomicReference<>();
 
   @Nonnull
   static String getUserAgent() {
-    return "HDSkins v" + ADDON_VERSION.get() + " on LabyMod v" + Source.ABOUT_VERSION + " on mc " + Source.ABOUT_MC_VERSION;
+    return "HDSkins v" + ADDON_INFO.get().getVersion() + " on LabyMod v" + Source.ABOUT_VERSION + " on mc " + Source.ABOUT_MC_VERSION;
+  }
+
+  @Nonnull
+  static AddonInfo getAddonInfo() {
+    return ADDON_INFO.get();
   }
 }
