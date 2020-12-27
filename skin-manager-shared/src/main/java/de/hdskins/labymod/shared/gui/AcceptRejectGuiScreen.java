@@ -150,7 +150,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
       } else {
         final TextLine line = TextLine.parse(messageLine, this.getFontRenderer());
         for (String formattedLine : this.listFormattedStringToWidth(line.getPlainText(), this.width - RIGHT_SPACE)) {
-          this.textLines.add(line.setPlainText(formattedLine));
+          this.textLines.add(TextLine.line(formattedLine, line.isCentered(), this.getFontRenderer()));
         }
       }
     }
