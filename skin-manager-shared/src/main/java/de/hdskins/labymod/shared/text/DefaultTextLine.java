@@ -23,8 +23,7 @@ import net.minecraft.client.gui.FontRenderer;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@ParametersAreNonnullByDefault
-final class DefaultTextLine implements TextLine {
+@ParametersAreNonnullByDefault final class DefaultTextLine implements TextLine {
 
   private final FontRenderer fontRenderer;
   private String plain;

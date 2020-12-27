@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.FileDialog;
 import java.io.File;
 import java.io.FilenameFilter;
 

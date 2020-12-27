@@ -15,37 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.concurrent;
+package de.hdskins.labymod.shared.utils;
 
+import de.hdskins.labymod.shared.concurrent.SilentCallable;
 import net.minecraft.client.Minecraft;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public final class ConcurrentUtil {
-
-  private static final Minecraft THE_MINECRAFT = Minecraft.getMinecraft();
 
   private ConcurrentUtil() {
     throw new UnsupportedOperationException();
   }
 
-  public static <T> T call(SilentCallable<T> callable) {
-    if (THE_MINECRAFT.isCallingFromMinecraftThread()) {
+  @Nullable
+  public static <T> T callOnClientThread(@Nonnull SilentCallable<T> callable) {
+    if (Minecraft.getMinecraft().isCallingFromMinecraftThread()) {
       return callable.call();
     } else {
-      return ConcurrentUtil.waitedGet(THE_MINECRAFT.addScheduledTask(callable));
+      return ConcurrentUtil.getUninterruptedly(Minecraft.getMinecraft().addScheduledTask(callable));
     }
   }
 
-  public static <T> T waitedGet(Future<T> future) {
+  @Nullable
+  public static <T> T getUninterruptedly(@Nonnull Future<T> future) {
     try {
-      return future.get();
+      return future.get(15, TimeUnit.SECONDS);
     } catch (Throwable throwable) {
       return null;
     }
   }
 
-  public static SilentCallable<Void> fromRunnable(Runnable runnable) {
+  @Nonnull
+  public static SilentCallable<Void> runnableToCallable(@Nonnull Runnable runnable) {
     return () -> {
       runnable.run();
       return null;
