@@ -153,7 +153,7 @@ public final class SkullRenderer {
       } else if (profile.getProperties().isEmpty() || (!profile.getProperties().containsKey("textures") && !profile.getProperties().containsKey(EMPTY_PLACEHOLDER_PROPERTY_NAME))) {
         profile.getProperties().put(EMPTY_PLACEHOLDER_PROPERTY_NAME, PLACEHOLDER_PROPERTY); // Set to prevent duplicate lookups
         EXECUTOR_SERVICE.execute(() -> {
-          Minecraft.getMinecraft().getSessionService().fillProfileProperties(profile, false);
+          profile.getProperties().putAll(Minecraft.getMinecraft().getSessionService().fillProfileProperties(profile, false).getProperties());
           profile.getProperties().removeAll(EMPTY_PLACEHOLDER_PROPERTY_NAME);
         });
       } else {
