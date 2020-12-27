@@ -37,7 +37,7 @@ import de.hdskins.labymod.shared.listener.NetworkListeners;
 import de.hdskins.labymod.shared.resource.HDResourceLocation;
 import de.hdskins.labymod.shared.texture.HDMinecraftProfileTexture;
 import de.hdskins.labymod.shared.texture.HDSkinTexture;
-import de.hdskins.labymod.shared.utils.ConcurrentUtil;
+import de.hdskins.labymod.shared.utils.ConcurrentUtils;
 import de.hdskins.labymod.shared.utils.GameProfileUtils;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
@@ -148,7 +148,7 @@ public class HDSkinManager extends SkinManager {
     if (textureObject != null) {
       // If a callback is provided by the method we should post the result to it
       if (callback != null) {
-        ConcurrentUtil.callOnClientThread(ConcurrentUtil.runnableToCallable(() -> callback.skinAvailable(type, location, texture)));
+        ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(() -> callback.skinAvailable(type, location, texture)));
       }
       return location;
     }
@@ -162,13 +162,13 @@ public class HDSkinManager extends SkinManager {
         if (maxResolution != Resolution.RESOLUTION_ALL
           && skinTexture.getBufferedImage().getHeight() > maxResolution.getHeight() && skinTexture.getBufferedImage().getWidth() > maxResolution.getWidth()) {
           LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", localSkinPath, maxResolution);
-          return ConcurrentUtil.callOnClientThread(() -> super.loadSkin(texture, type, callback));
+          return ConcurrentUtils.callOnClientThread(() -> super.loadSkin(texture, type, callback));
         }
         // Now we can load the texture
         if (this.textureManager.loadTexture(location, skinTexture)) {
           // If a callback is provided by the method we should post the result to it
           if (callback != null) {
-            ConcurrentUtil.callOnClientThread(ConcurrentUtil.runnableToCallable(() -> callback.skinAvailable(type, location, texture)));
+            ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(() -> callback.skinAvailable(type, location, texture)));
           }
           return location;
         } else {
@@ -342,7 +342,7 @@ public class HDSkinManager extends SkinManager {
       texture,
       type,
       callback
-    ), () -> ConcurrentUtil.callOnClientThread(ConcurrentUtil.runnableToCallable(() -> HDSkinManager.super.loadSkin(texture, type, callback))));
+    ), () -> ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(() -> HDSkinManager.super.loadSkin(texture, type, callback))));
   }
 
   public void pushSkinDelete(String skinHash) {

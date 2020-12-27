@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.settings.slim;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
@@ -42,7 +42,7 @@ public class SlimFutureListener implements FutureListener<PacketBase>, Constants
 
   @Override
   public void nullResult() {
-    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+    LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
     this.addonContext.getAddonConfig().setSlim(!this.target);
     this.future.complete(!this.target);
   }
@@ -53,15 +53,15 @@ public class SlimFutureListener implements FutureListener<PacketBase>, Constants
       PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
       if (response.isSuccess()) {
         String targetResult = this.target ? "slim" : "default";
-        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("slim-successfully-toggled", new Object[]{targetResult}));
+        LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("slim-successfully-toggled", new Object[]{targetResult}));
         this.future.complete(this.target);
       } else {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
+        LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
         this.addonContext.getAddonConfig().setSlim(!this.target);
         this.future.complete(!this.target);
       }
     } else {
-      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+      LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
       this.addonContext.getAddonConfig().setSlim(!this.target);
       this.future.complete(!this.target);
     }
@@ -69,7 +69,7 @@ public class SlimFutureListener implements FutureListener<PacketBase>, Constants
 
   @Override
   public void cancelled() {
-    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+    LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
     this.addonContext.getAddonConfig().setSlim(!this.target);
     this.future.complete(!this.target);
   }

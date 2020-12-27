@@ -20,7 +20,7 @@ package de.hdskins.labymod.shared.actions.report;
 import de.hdskins.labymod.shared.actions.ActionConstants;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import net.labymod.user.User;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
@@ -48,7 +48,7 @@ public class ReportUserActionEntry extends MarkedUserActionEntry implements Acti
   @Override
   public void execute(User user, EntityPlayer entityPlayer, NetworkPlayerInfo networkPlayerInfo) {
     if (this.nextEnableTime.get() >= System.currentTimeMillis()) {
-      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(
+      LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(
         "user-skin-report-rate-limited",
         TimeUnit.MILLISECONDS.toSeconds(this.nextEnableTime.get() - System.currentTimeMillis())
       ));
@@ -60,7 +60,7 @@ public class ReportUserActionEntry extends MarkedUserActionEntry implements Acti
     AddonContext.ServerResult serverResult = this.addonContext.reportSkin(entityPlayer.getGameProfile().getId());
     if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
       LOGGER.debug("Unable to report hd skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
-      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
+      LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("user-skin-report-failed-unknown"));
     } else {
       serverResult.getFuture().addListener(new ReportActionFutureListener(this.addonContext, entityPlayer));
     }

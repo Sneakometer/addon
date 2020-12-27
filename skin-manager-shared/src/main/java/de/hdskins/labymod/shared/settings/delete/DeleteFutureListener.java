@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.settings.delete;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketServerQueryResponse;
@@ -40,7 +40,7 @@ public class DeleteFutureListener implements FutureListener<PacketBase>, Constan
 
   @Override
   public void nullResult() {
-    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
+    LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
     this.stateListener.set(false);
   }
 
@@ -49,12 +49,12 @@ public class DeleteFutureListener implements FutureListener<PacketBase>, Constan
     if (packetBase instanceof PacketServerQueryResponse) {
       PacketServerQueryResponse response = (PacketServerQueryResponse) packetBase;
       if (response.isSuccess()) {
-        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-success"));
+        LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-success"));
       } else {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
+        LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage(response.getReason(), response.getReason()));
       }
     } else {
-      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
+      LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
     }
 
     this.stateListener.set(false);
@@ -62,7 +62,7 @@ public class DeleteFutureListener implements FutureListener<PacketBase>, Constan
 
   @Override
   public void cancelled() {
-    NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
+    LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-failed-unknown"));
     this.stateListener.set(false);
   }
 }

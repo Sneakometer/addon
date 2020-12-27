@@ -20,7 +20,7 @@ package de.hdskins.labymod.shared.actions.delete;
 import de.hdskins.labymod.shared.actions.ActionConstants;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import net.labymod.user.User;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
@@ -47,7 +47,7 @@ public class DeleteUserActionEntry extends MarkedUserActionEntry implements Acti
     AddonContext.ServerResult serverResult = this.addonContext.deleteSkin(entityPlayer.getGameProfile().getId());
     if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
       LOGGER.debug("Unable to delete skin of {}:{} with server result {}", entityPlayer.getName(), entityPlayer.getGameProfile().getId(), serverResult.getExecutionStage());
-      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
+      LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("team-delete-skin-error"));
     } else {
       serverResult.getFuture().addListener(new DeleteActionFutureListener(this.addonContext, entityPlayer));
     }

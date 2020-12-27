@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.settings.toggle;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -40,10 +40,10 @@ public class SkinToggleButtonClickHandler implements BiFunction<ChangeableBoolea
     this.addonContext.getAddonConfig().setShowSkinsOfOtherPlayers(showSkins);
     if (showSkins) {
       this.addonContext.getSkinManager().invalidateAllSkins();
-      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-enabled"));
+      LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-enabled"));
     } else {
       this.addonContext.getSkinManager().invalidateAll();
-      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-disabled"));
+      LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-disabled"));
     }
 
     return CompletableFuture.completedFuture(showSkins);

@@ -21,17 +21,24 @@ import net.labymod.addon.About;
 import net.labymod.addon.AddonLoader;
 import net.labymod.addon.online.AddonInfoManager;
 import net.labymod.addon.online.info.AddonInfo;
+import net.labymod.main.LabyMod;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@ParametersAreNonnullByDefault
 public final class LabyModUtils {
 
   private LabyModUtils() {
     throw new UnsupportedOperationException();
   }
 
+  public static void displayAchievement(String title, String description) {
+    LabyMod.getInstance().getGuiCustomAchievement().displayAchievement(title, description);
+  }
+
   @Nonnull
-  public static AddonInfo getAddonInfo(@Nonnull About about) {
+  public static AddonInfo getAddonInfo(About about) {
     // Try to find the addons in the online addons (where it should be normally)
     final AddonInfoManager addonInfoManager = AddonInfoManager.getInstance();
     // By default the manager isn't initialized right now so hack us in

@@ -20,7 +20,7 @@ package de.hdskins.labymod.shared.actions.toggle;
 import de.hdskins.labymod.shared.actions.ActionConstants;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import net.labymod.user.User;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
@@ -48,11 +48,11 @@ public class ToggleSkinUserActionEntry extends MarkedUserActionEntry implements 
     if (blacklisted) {
       this.addonContext.getAddonConfig().enableSkin(entityPlayer.getGameProfile().getId());
       this.addonContext.getSkinManager().updateSkin(entityPlayer.getGameProfile().getId(), null);
-      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-shown"));
+      LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-shown"));
     } else {
       this.addonContext.getAddonConfig().disableSkin(entityPlayer.getGameProfile().getId());
       this.addonContext.getSkinManager().pushSkinDelete(entityPlayer.getGameProfile().getId());
-      NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-hidden"));
+      LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("toggle-skin-hidden"));
     }
   }
 }

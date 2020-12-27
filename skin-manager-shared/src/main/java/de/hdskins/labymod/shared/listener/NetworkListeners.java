@@ -24,7 +24,7 @@ import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
 import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import de.hdskins.labymod.shared.manager.HDSkinManager;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
@@ -149,7 +149,7 @@ public final class NetworkListeners {
         message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getReason(), EMPTY_OBJECT_ARRAY);
       }
 
-      NotificationUtil.notify((packet.isBanned() ? Constants.FAILURE : Constants.SUCCESS) + "BAN UPDATE", message);
+      LabyModUtils.displayAchievement((packet.isBanned() ? Constants.FAILURE : Constants.SUCCESS) + "BAN UPDATE", message);
     }
   }
 

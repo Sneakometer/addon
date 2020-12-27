@@ -17,7 +17,7 @@
  */
 package de.hdskins.labymod.shared.texture;
 
-import de.hdskins.labymod.shared.utils.ConcurrentUtil;
+import de.hdskins.labymod.shared.utils.ConcurrentUtils;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -66,7 +66,7 @@ public class HDSkinTexture extends SimpleTexture {
     this.mipmap = mipmap;
     // Ensure that we call this on the main thread because it is the only thread in
     // the client which has a opengl context
-    ConcurrentUtil.callOnClientThread(ConcurrentUtil.runnableToCallable(() -> {
+    ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(() -> {
       GL11.glTexParameteri(3553, 10241, blur ? mipmap ? 9987 : 9729 : mipmap ? 9986 : 9728);
       GL11.glTexParameteri(3553, 10240, blur ? 9729 : 9728);
     }));
@@ -93,7 +93,7 @@ public class HDSkinTexture extends SimpleTexture {
       // We lazily set this up to spare the resources we don't need for later. We have to
       // ensure that we call this on the main thread because it is the only thread in
       // the client which has a opengl context
-      this.glTextureId = ConcurrentUtil.callOnClientThread(() -> TextureUtil.uploadTextureImage(GL11.glGenTextures(), this.bufferedImage));
+      this.glTextureId = ConcurrentUtils.callOnClientThread(() -> TextureUtil.uploadTextureImage(GL11.glGenTextures(), this.bufferedImage));
     }
 
     return this.glTextureId;
@@ -105,7 +105,7 @@ public class HDSkinTexture extends SimpleTexture {
     if (this.glTextureId != -1) {
       // Ensure that we call this on the main thread because it is the only thread in
       // the client which has a opengl context
-      ConcurrentUtil.callOnClientThread(ConcurrentUtil.runnableToCallable(() -> GlStateManager.deleteTexture(this.glTextureId)));
+      ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(() -> GlStateManager.deleteTexture(this.glTextureId)));
       // Reset the texture id to indicate that we have to recalculate it
       this.glTextureId = -1;
     }

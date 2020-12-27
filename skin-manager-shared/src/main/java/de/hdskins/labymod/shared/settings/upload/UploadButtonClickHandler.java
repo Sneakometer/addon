@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.gui.AcceptRejectGuiScreen;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
@@ -72,7 +72,7 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
         final File result = AwtUtils.openFileChooser(CHOOSER, FILTER);
         CHOOSER.dispose(); // free native screen resources
         if (result == null || !result.exists() || result.isDirectory()) {
-          NotificationUtil.notify(Constants.FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-not-file"));
+          LabyModUtils.displayAchievement(Constants.FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-not-file"));
           return;
         }
         this.handleApprove(buttonElement, result);
@@ -108,7 +108,7 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
 
       AddonContext.ServerResult serverResult = this.addonContext.uploadSkin(file);
       if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
+        LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-upload-failed-unknown"));
       } else {
         serverResult.getFuture().addListener(this.uploadFutureListener);
       }
@@ -118,16 +118,16 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
 
     switch (result) {
       case NOT_PNG:
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-png"));
+        LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-png"));
         break;
       case WRONG_PROPORTIONS:
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-wrong-proportions"));
+        LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-wrong-proportions"));
         break;
       case NOT_HD:
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-hd"));
+        LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-not-hd"));
         break;
       case TOO_BIG:
-        NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-too-large"));
+        LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("change-skin-file-too-large"));
         break;
       default:
         break;

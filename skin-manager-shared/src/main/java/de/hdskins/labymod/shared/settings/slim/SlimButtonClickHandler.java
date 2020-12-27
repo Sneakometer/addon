@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.settings.slim;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.settings.countdown.DefaultCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
@@ -41,7 +41,7 @@ public class SlimButtonClickHandler implements BiFunction<ChangeableBooleanEleme
   public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean slim) {
     AddonContext.ServerResult serverResult = this.addonContext.updateSlim(slim);
     if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
-      NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
+      LabyModUtils.displayAchievement(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
       this.addonContext.getAddonConfig().setSlim(!slim);
       return CompletableFuture.completedFuture(!slim);
     }

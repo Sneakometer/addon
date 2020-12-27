@@ -19,7 +19,7 @@ package de.hdskins.labymod.shared.settings.delete;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.notify.NotificationUtil;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
@@ -43,7 +43,7 @@ public class DeleteButtonClickHandler implements Consumer<ButtonElement>, Consta
     if (!this.actionRunning.getAndSet(true)) {
       AddonContext.ServerResult serverResult = this.addonContext.deleteSkin();
       if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
-        NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-success"));
+        LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("delete-skin-success"));
       } else {
         serverResult.getFuture().addListener(this.deleteFutureListener);
       }
