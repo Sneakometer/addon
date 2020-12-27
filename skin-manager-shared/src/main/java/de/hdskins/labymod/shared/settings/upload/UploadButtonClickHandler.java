@@ -45,8 +45,7 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
 
   private static final int MAX_FILE_SIZE = 4 * 1024 * 1024;
 
-  private static final Frame PARENT = new Frame();
-  private static final FileDialog CHOOSER = new FileDialog(PARENT, "Select file");
+  private static final FileDialog CHOOSER = new FileDialog((Frame) null, "Select file");
   private static final Set<String> ACCEPTED_EXTENSIONS = ImmutableSet.of("jpeg", "jpg", "png", "bmp", "webmp");
   private static final FilenameFilter FILTER = new SimpleFilenameFilter(ACCEPTED_EXTENSIONS);
 
@@ -61,6 +60,7 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
   @Override
   public void accept(ButtonElement buttonElement) {
     if (CHOOSER.isVisible()) {
+      CHOOSER.toFront();
       CHOOSER.requestFocus();
     } else {
       EXECUTOR.execute(() -> {
