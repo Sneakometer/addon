@@ -1,6 +1,6 @@
 /*
  * The HD-Skins LabyMod addon.
- * Copyright (C) 2020 HD-Skins <https://github.com/HDSkins>
+ * Copyright (C) 2020 - 2021 HD-Skins <https://github.com/HDSkins>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public abstract class LabyModAddonBase extends LabyModAddon {
       + "     / __  / /_/ /___/ / ,< / / / / (__  )\n"
       + "    /_/ /_/_____//____/_/|_/_/_/ /_/____/\n"
       + "\n"
-      + "          Copyright (c) 2020 HDSkins\n"
+      + "          Copyright (c) 2020 - 2021 HDSkins\n"
       + "   Support Discord: https://discord.gg/KN8rDZJ");
   }
 
