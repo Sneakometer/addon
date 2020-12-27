@@ -29,14 +29,14 @@ public abstract class LabyModAddonBase extends LabyModAddon {
 
   @Override
   public void onEnable() {
-    System.out.println("\n        __  ______  _____ __   _\n" +
-      "       / / / / __ \\/ ___// /__(_)___  _____\n" +
-      "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n" +
-      "     / __  / /_/ /___/ / ,< / / / / (__  )\n" +
-      "    /_/ /_/_____//____/_/|_/_/_/ /_/____/\n" +
-      "\n" +
-      "          Copyright (c) 2020 HDSkins\n" +
-      "   Support Discord: https://discord.gg/KN8rDZJ");
+    System.out.println("\n        __  ______  _____ __   _\n"
+      + "       / / / / __ \\/ ___// /__(_)___  _____\n"
+      + "      / /_/ / / / /\\__ \\/ //_/ / __ \\/ ___/\n"
+      + "     / __  / /_/ /___/ / ,< / / / / (__  )\n"
+      + "    /_/ /_/_____//____/_/|_/_/_/ /_/____/\n"
+      + "\n"
+      + "          Copyright (c) 2020 HDSkins\n"
+      + "   Support Discord: https://discord.gg/KN8rDZJ");
   }
 
   @Override

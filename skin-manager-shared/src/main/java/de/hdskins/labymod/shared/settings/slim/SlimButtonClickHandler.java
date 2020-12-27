@@ -38,12 +38,12 @@ public class SlimButtonClickHandler implements BiFunction<ChangeableBooleanEleme
   }
 
   @Override
-  public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean aBoolean) {
-    AddonContext.ServerResult serverResult = this.addonContext.updateSlim(aBoolean);
+  public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean slim) {
+    AddonContext.ServerResult serverResult = this.addonContext.updateSlim(slim);
     if (serverResult.getExecutionStage() != AddonContext.ExecutionStage.EXECUTING) {
       NotificationUtil.notify(FAILURE, this.addonContext.getTranslationRegistry().translateMessage("slim-toggle-failed-unknown"));
-      this.addonContext.getAddonConfig().setSlim(!aBoolean);
-      return CompletableFuture.completedFuture(!aBoolean);
+      this.addonContext.getAddonConfig().setSlim(!slim);
+      return CompletableFuture.completedFuture(!slim);
     }
 
     if (this.addonContext.getRateLimits().getSetSlimRateLimit() > 0) {
@@ -54,7 +54,7 @@ public class SlimButtonClickHandler implements BiFunction<ChangeableBooleanEleme
     }
 
     CompletableFuture<Boolean> future = new CompletableFuture<>();
-    serverResult.getFuture().addListener(new SlimFutureListener(aBoolean, this.addonContext, future));
+    serverResult.getFuture().addListener(new SlimFutureListener(slim, this.addonContext, future));
     return future;
   }
 }

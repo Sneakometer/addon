@@ -72,9 +72,9 @@ public class DefaultEventBus implements EventBus {
     }
   }
 
+  @Nonnull
   @Override
-  public @Nonnull
-  PostResult post(Object event) {
+  public PostResult post(Object event) {
     synchronized (this.lock) {
       // get the listener subscribed to the event
       Collection<EventBusEntry> eventBusEntries = this.entries.get(event.getClass());

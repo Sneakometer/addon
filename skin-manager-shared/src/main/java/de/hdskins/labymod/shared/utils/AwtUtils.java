@@ -29,8 +29,8 @@ public final class AwtUtils {
     throw new UnsupportedOperationException();
   }
 
-  public static @Nullable
-  File openFileChooser(@Nonnull FileDialog fileDialog, @Nullable FilenameFilter filter) {
+  @Nullable
+  public static File openFileChooser(@Nonnull FileDialog fileDialog, @Nullable FilenameFilter filter) {
     fileDialog.setMultipleMode(false);
     fileDialog.setFilenameFilter(filter);
     fileDialog.setMode(FileDialog.LOAD);

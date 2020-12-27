@@ -36,9 +36,9 @@ public class SkinToggleButtonClickHandler implements BiFunction<ChangeableBoolea
   }
 
   @Override
-  public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean aBoolean) {
-    this.addonContext.getAddonConfig().setShowSkinsOfOtherPlayers(aBoolean);
-    if (aBoolean) {
+  public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean showSkins) {
+    this.addonContext.getAddonConfig().setShowSkinsOfOtherPlayers(showSkins);
+    if (showSkins) {
       this.addonContext.getSkinManager().invalidateAllSkins();
       NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-enabled"));
     } else {
@@ -46,6 +46,6 @@ public class SkinToggleButtonClickHandler implements BiFunction<ChangeableBoolea
       NotificationUtil.notify(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-disabled"));
     }
 
-    return CompletableFuture.completedFuture(aBoolean);
+    return CompletableFuture.completedFuture(showSkins);
   }
 }
