@@ -31,7 +31,7 @@ public final class LabyModUtils {
   }
 
   @Nonnull
-  public static AddonInfo getCurrentAddonInfo(@Nonnull About about) {
+  public static AddonInfo getAddonInfo(@Nonnull About about) {
     // Try to find the addons in the online addons (where it should be normally)
     final AddonInfoManager addonInfoManager = AddonInfoManager.getInstance();
     // By default the manager isn't initialized right now so hack us in

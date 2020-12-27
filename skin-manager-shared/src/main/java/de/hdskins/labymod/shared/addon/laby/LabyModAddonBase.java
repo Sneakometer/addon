@@ -54,7 +54,7 @@ public abstract class LabyModAddonBase extends LabyModAddon {
     this.about = new About(uuid, addonName);
     this.about.loaded = true;
 
-    Constants.ADDON_INFO.set(LabyModUtils.getCurrentAddonInfo(this.about));
+    Constants.ADDON_INFO.set(LabyModUtils.getAddonInfo(this.about));
     this.createAddonContext();
   }
 
