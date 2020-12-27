@@ -38,7 +38,15 @@ public final class AwtUtils {
     fileDialog.toFront();
     fileDialog.requestFocus();
 
-    final String result = fileDialog.getFile();
-    return result == null ? null : new File(result);
+    final String file = fileDialog.getFile();
+    final String directory = fileDialog.getDirectory();
+
+    if (file != null) {
+      if (directory != null) {
+        return new File(directory, file);
+      }
+      return new File(file);
+    }
+    return null;
   }
 }
