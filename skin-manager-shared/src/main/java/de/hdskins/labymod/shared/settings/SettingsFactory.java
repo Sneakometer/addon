@@ -21,6 +21,7 @@ import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.settings.delete.DeleteButtonClickHandler;
 import de.hdskins.labymod.shared.settings.element.ElementFactory;
+import de.hdskins.labymod.shared.settings.eula.EulaButtonElement;
 import de.hdskins.labymod.shared.settings.slim.SlimButtonClickHandler;
 import de.hdskins.labymod.shared.settings.toggle.SkinToggleButtonClickHandler;
 import de.hdskins.labymod.shared.settings.upload.UploadButtonClickHandler;
@@ -96,6 +97,7 @@ public final class SettingsFactory {
     SettingsElement skinRenderElement = ElementFactory.defaultFactory().brewRenderElement(element -> {
     });
 
-    return Arrays.asList(setSlimElement, uploadSkinElement, deleteSkinElement, toggleSkinVisibilityElement, maxResolutionLoadOption, skinRenderElement);
+    EulaButtonElement eulaButtonElement = new EulaButtonElement(null, null);
+    return Arrays.asList(setSlimElement, uploadSkinElement, deleteSkinElement, toggleSkinVisibilityElement, maxResolutionLoadOption, skinRenderElement, eulaButtonElement);
   }
 }
