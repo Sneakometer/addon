@@ -20,13 +20,14 @@ package de.hdskins.labymod.shared.listener;
 import de.hdskins.labymod.shared.actions.ActionFactory;
 import de.hdskins.labymod.shared.actions.ActionInvoker;
 import de.hdskins.labymod.shared.actions.MarkedUserActionEntry;
-import de.hdskins.labymod.shared.backend.BackendUtils;
+import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
 import de.hdskins.labymod.shared.event.TranslationLanguageCodeChangeEvent;
 import de.hdskins.labymod.shared.eventbus.EventListener;
 import de.hdskins.labymod.shared.manager.HDSkinManager;
 import de.hdskins.labymod.shared.settings.SettingInvoker;
 import de.hdskins.labymod.shared.settings.SettingsFactory;
+import io.netty.channel.Channel;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -58,26 +59,21 @@ public final class ClientListeners {
       }
       // Sync client language with internal translation registry language code
       // every second is enough for the language
+      final AddonContext addonContext = this.hdSkinManager.getAddonContext();
       if (fullTick) {
-        this.hdSkinManager.getAddonContext().getTranslationRegistry().reSyncLanguageCode();
+        addonContext.getTranslationRegistry().reSyncLanguageCode();
       }
       // Check if the player changed his
       final UUID currentlyUsedUniqueId = LabyMod.getInstance().getPlayerUUID();
       if (currentlyUsedUniqueId != null && (this.currentUniqueId == null || !this.currentUniqueId.equals(currentlyUsedUniqueId))) {
         this.currentUniqueId = currentlyUsedUniqueId;
         // We need to reconnect to the server as the client changed his unique id
-        if (!this.hdSkinManager.getAddonContext().getReconnecting().getAndSet(true)) {
-          // Disable the skin manager for now
-          this.hdSkinManager.getAddonContext().getActive().set(false);
-          // We prevent now close the connection to the server
-          this.hdSkinManager.getAddonContext().getNetworkClient().getChannel().close();
-          // And now we can reconnect to the server
-          BackendUtils.reconnect(this.hdSkinManager.getAddonContext()).thenRunAsync(() -> {
-            // We are now connected to the server again so we can re-enable the skin manager
-            this.hdSkinManager.getAddonContext().getActive().set(true);
-            this.hdSkinManager.getAddonContext().getReconnecting().set(false);
-          });
-        }
+        addonContext.reconnect();
+      }
+      final Channel channel = this.hdSkinManager.getAddonContext().getNetworkClient().getChannel();
+      if (!channel.isActive() && !channel.isWritable() && !channel.isOpen()) {
+        // The server connection was lost
+        addonContext.reconnect();
       }
     }
   }

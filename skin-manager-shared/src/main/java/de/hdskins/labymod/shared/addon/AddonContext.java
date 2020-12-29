@@ -19,6 +19,7 @@ package de.hdskins.labymod.shared.addon;
 
 import com.google.common.base.Preconditions;
 import de.hdskins.labymod.shared.Constants;
+import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
@@ -195,6 +196,21 @@ public class AddonContext {
 
   public void setRateLimits(PacketServerUpdateRateLimits.RateLimits rateLimits) {
     this.rateLimits = rateLimits;
+  }
+
+  public void reconnect() {
+    if (!this.reconnecting.getAndSet(true)) {
+      // Disable the skin manager for now
+      this.active.set(false);
+      // We prevent now close the connection to the server
+      this.networkClient.getChannel().close();
+      // And now we can reconnect to the server
+      BackendUtils.reconnect(this).thenRunAsync(() -> {
+        // We are now connected to the server again so we can re-enable the skin manager
+        this.active.set(true);
+        this.reconnecting.set(false);
+      });
+    }
   }
 
   public enum ExecutionStage {
