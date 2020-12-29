@@ -29,10 +29,13 @@ import net.minecraft.util.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@ParametersAreNonnullByDefault
 public final class BackendUtils {
 
   private static final Logger LOGGER = LogManager.getLogger(BackendUtils.class);
@@ -56,6 +59,7 @@ public final class BackendUtils {
     throw new UnsupportedOperationException();
   }
 
+  @Nonnull
   public static CompletableFuture<NetworkClient> connectToServer(AddonConfig addonConfig) {
     return CompletableFuture.supplyAsync(() -> {
       NetworkClient networkClient = NetworkClient.create(addonConfig.getServerAddress().getHostAddress(), addonConfig.getServerPort(), NAME_SUPPLIER, SERVER_JOINER);
@@ -71,6 +75,7 @@ public final class BackendUtils {
     });
   }
 
+  @Nonnull
   public static CompletableFuture<Void> reconnect(AddonContext addonContext) {
     return CompletableFuture.supplyAsync(() -> {
       connect0(addonContext.getNetworkClient(), addonContext.getAddonConfig()).sendPacket(new PacketClientSkinSettings(new ClientSettings(
@@ -81,6 +86,7 @@ public final class BackendUtils {
     });
   }
 
+  @Nonnull
   private static NetworkClient connect0(NetworkClient networkClient, AddonConfig addonConfig) {
     if (networkClient.connect()) {
       LOGGER.debug("Successfully connected to network server {}:{} after the first attempt", addonConfig.getServerHost(), addonConfig.getServerPort());
