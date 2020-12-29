@@ -44,9 +44,10 @@ public final class AwtUtils {
 
     if (file != null) {
       if (directory != null) {
-        return new File(directory, file);
+        final File dir = new File(directory);
+        return filter == null || filter.accept(dir, file) ? new File(dir, file) : null;
       }
-      return new File(file);
+      return filter == null || filter.accept(null, file) ? new File(file) : null;
     }
     return null;
   }

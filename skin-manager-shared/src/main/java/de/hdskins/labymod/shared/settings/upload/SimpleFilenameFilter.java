@@ -18,6 +18,7 @@
 package de.hdskins.labymod.shared.settings.upload;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class SimpleFilenameFilter implements FilenameFilter {
   }
 
   @Override
-  public boolean accept(@Nonnull File dir, @Nonnull String name) {
+  public boolean accept(@Nullable File dir, @Nonnull String name) {
     final int index = name.lastIndexOf('.');
     if (index == -1) {
       // Include files without an extension

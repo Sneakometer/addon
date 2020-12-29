@@ -21,12 +21,12 @@ import com.google.common.collect.ImmutableSet;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.gui.AcceptRejectGuiScreen;
-import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.utils.AwtUtils;
 import de.hdskins.labymod.shared.utils.GuidelineUtils;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import net.labymod.utils.Consumer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -147,10 +147,6 @@ public class UploadButtonClickHandler implements Consumer<ButtonElement>, Consta
 
       ImageReader imageReader = imageReaderIterator.next();
       imageReader.setInput(stream);
-      if (!imageReader.getFormatName().equals("png")) {
-        return ImageCheckResult.NOT_PNG;
-      }
-
       BufferedImage bufferedImage = imageReader.read(0);
       if (bufferedImage == null) {
         return ImageCheckResult.NOT_PNG;
