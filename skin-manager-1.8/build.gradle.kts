@@ -74,8 +74,8 @@ compileJava.doFirst {
   }
   // Copy the license into the resources folder
   copy {
-    from("./../LICENSE")
-    into("./build/resources/main/LICENSE")
+    from("./../license.txt")
+    into("./build/resources/main")
   }
 }
 
