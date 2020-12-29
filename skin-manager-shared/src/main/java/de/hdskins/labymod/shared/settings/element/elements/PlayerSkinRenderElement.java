@@ -17,12 +17,13 @@
  */
 package de.hdskins.labymod.shared.settings.element.elements;
 
+import de.hdskins.labymod.shared.utils.ClientUtils;
 import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.SettingsElement;
 import net.labymod.utils.DrawUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.renderer.GlStateManager;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -45,9 +46,17 @@ public class PlayerSkinRenderElement extends SettingsElement {
       final int locationX = maxX + maxX / 5;
       final int locationY = ((windowHeight / 4) * 3) + 40;
       // We have to reset the color before we can render the color because it leads to problems if we don't
-      GlStateManager.color(1, 1, 1, 1);
-      // now we can draw the actual player
-      DrawUtils.drawEntityOnScreen(locationX, locationY, windowHeight / 5, 0, 0, (int) currentRotation, 0, 0, player);
+      ClientUtils.resetColor();
+      // We disable the name render by hiding the gui. This looks like the only
+      // way to do it without losing the cross-version compatibility.
+      final boolean prevGuiHidden = Minecraft.getMinecraft().gameSettings.hideGUI;
+      Minecraft.getMinecraft().gameSettings.hideGUI = true;
+      try {
+        // now we can draw the actual player
+        DrawUtils.drawEntityOnScreen(locationX, locationY, windowHeight / 5, 0, 0, (int) currentRotation, 0, 0, player);
+      } finally {
+        Minecraft.getMinecraft().gameSettings.hideGUI = prevGuiHidden;
+      }
     }
   }
 
