@@ -50,35 +50,34 @@ public final class ClientListeners {
 
   @SubscribeEvent
   public void handle(TickEvent.ClientTickEvent event) {
-    if (event.phase != TickEvent.Phase.END) {
-      return;
-    }
-    // Evaluate if we did a full tick (every second)
-    final boolean fullTick = this.currentTick.incrementAndGet() >= 20;
-    if (fullTick) {
-      this.currentTick.set(0);
-    }
-    // Sync client language with internal translation registry language code
-    // every second is enough for the language
-    if (fullTick) {
-      this.hdSkinManager.getAddonContext().getTranslationRegistry().reSyncLanguageCode();
-    }
-    // Check if the player changed his
-    UUID currentlyUsedUniqueId = LabyMod.getInstance().getPlayerUUID();
-    if (currentlyUsedUniqueId != null && (this.currentUniqueId == null || !this.currentUniqueId.equals(currentlyUsedUniqueId))) {
-      this.currentUniqueId = currentlyUsedUniqueId;
-      // We need to reconnect to the server as the client changed his unique id
-      if (!this.hdSkinManager.getAddonContext().getReconnecting().getAndSet(true)) {
-        // Disable the skin manager for now
-        this.hdSkinManager.getAddonContext().getActive().set(false);
-        // We prevent now close the connection to the server
-        this.hdSkinManager.getAddonContext().getNetworkClient().getChannel().close();
-        // And now we can reconnect to the server
-        BackendUtils.reconnect(this.hdSkinManager.getAddonContext()).thenRunAsync(() -> {
-          // We are now connected to the server again so we can re-enable the skin manager
-          this.hdSkinManager.getAddonContext().getActive().set(true);
-          this.hdSkinManager.getAddonContext().getReconnecting().set(false);
-        });
+    if (event.phase == TickEvent.Phase.END) {
+      // Evaluate if we did a full tick (every second)
+      final boolean fullTick = this.currentTick.incrementAndGet() >= 20;
+      if (fullTick) {
+        this.currentTick.set(0);
+      }
+      // Sync client language with internal translation registry language code
+      // every second is enough for the language
+      if (fullTick) {
+        this.hdSkinManager.getAddonContext().getTranslationRegistry().reSyncLanguageCode();
+      }
+      // Check if the player changed his
+      final UUID currentlyUsedUniqueId = LabyMod.getInstance().getPlayerUUID();
+      if (currentlyUsedUniqueId != null && (this.currentUniqueId == null || !this.currentUniqueId.equals(currentlyUsedUniqueId))) {
+        this.currentUniqueId = currentlyUsedUniqueId;
+        // We need to reconnect to the server as the client changed his unique id
+        if (!this.hdSkinManager.getAddonContext().getReconnecting().getAndSet(true)) {
+          // Disable the skin manager for now
+          this.hdSkinManager.getAddonContext().getActive().set(false);
+          // We prevent now close the connection to the server
+          this.hdSkinManager.getAddonContext().getNetworkClient().getChannel().close();
+          // And now we can reconnect to the server
+          BackendUtils.reconnect(this.hdSkinManager.getAddonContext()).thenRunAsync(() -> {
+            // We are now connected to the server again so we can re-enable the skin manager
+            this.hdSkinManager.getAddonContext().getActive().set(true);
+            this.hdSkinManager.getAddonContext().getReconnecting().set(false);
+          });
+        }
       }
     }
   }
