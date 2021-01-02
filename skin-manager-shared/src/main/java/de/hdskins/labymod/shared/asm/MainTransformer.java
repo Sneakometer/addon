@@ -18,6 +18,8 @@
 package de.hdskins.labymod.shared.asm;
 
 import com.google.common.collect.ImmutableMap;
+import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV112;
+import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV18;
 import de.hdskins.labymod.shared.asm.draw.DrawUtilsTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 
@@ -25,7 +27,15 @@ import java.util.Map;
 
 public class MainTransformer implements IClassTransformer {
 
-  private final Map<String, IClassTransformer> transformers = ImmutableMap.of("net.labymod.utils.DrawUtils", new DrawUtilsTransformer());
+  private final Map<String, IClassTransformer> transformers = ImmutableMap.of(
+    "net.labymod.utils.DrawUtils", new DrawUtilsTransformer(),
+
+    "net.minecraft.client.gui.achievement.GuiAchievement", new AchievementRenderTransformerV18(),
+    "ayd", new AchievementRenderTransformerV18(),
+
+    "net.minecraft.client.gui.toasts.GuiToast", new AchievementRenderTransformerV112(),
+    "bkc", new AchievementRenderTransformerV112()
+  );
 
   @Override
   public byte[] transform(String name, String transformedName, byte[] basicClass) {

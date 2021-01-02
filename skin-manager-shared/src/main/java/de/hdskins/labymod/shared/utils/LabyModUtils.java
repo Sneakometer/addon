@@ -37,6 +37,10 @@ public final class LabyModUtils {
     LabyMod.getInstance().getGuiCustomAchievement().displayAchievement(title, description);
   }
 
+  public static void updateAchievementWindow() {
+    LabyMod.getInstance().getGuiCustomAchievement().updateAchievementWindow();
+  }
+
   @Nonnull
   public static AddonInfo getAddonInfo(About about) {
     // Try to find the addons in the online addons (where it should be normally)
