@@ -25,8 +25,8 @@ plugins {
 
 defaultTasks("clean", "build")
 
-private val majorVersion = 2
-private val labyStoreVersion = 2
+val majorVersion = 2
+val labyStoreVersion = 2
 
 allprojects {
   version = "$majorVersion.$labyStoreVersion"
