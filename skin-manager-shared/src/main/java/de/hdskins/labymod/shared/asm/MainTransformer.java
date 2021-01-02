@@ -29,10 +29,10 @@ public class MainTransformer implements IClassTransformer {
 
   private final Map<String, IClassTransformer> transformers = ImmutableMap.of(
     "net.labymod.utils.DrawUtils", new DrawUtilsTransformer(),
-
+    // 1.8 achievement render
     "net.minecraft.client.gui.achievement.GuiAchievement", new AchievementRenderTransformerV18(),
     "ayd", new AchievementRenderTransformerV18(),
-
+    // 1.12 achievement render
     "net.minecraft.client.gui.toasts.GuiToast", new AchievementRenderTransformerV112(),
     "bkc", new AchievementRenderTransformerV112()
   );

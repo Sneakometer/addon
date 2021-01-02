@@ -22,7 +22,6 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -38,14 +37,16 @@ public class AchievementRenderTransformerV112 implements IClassTransformer {
     classReader.accept(classNode, 0);
 
     for (MethodNode method : classNode.methods) {
-      if (!method.desc.equals("(Lnet/minecraft/client/gui/ScaledResolution;)V")
-        && !method.desc.equals("(Lbit;)V")) {
-        continue;
-      }
-
-      if (method.name.equals("drawToast") || method.name.equals("func_146254_a") || method.name.equals("a")) {
-        AbstractInsnNode node = method.instructions.getFirst();
-        method.instructions.insertBefore(node, new MethodInsnNode(Opcodes.INVOKESTATIC, LABYMOD_UTILS, "updateAchievementWindow", "()V", false));
+      if (method.desc.equals("(Lnet/minecraft/client/gui/ScaledResolution;)V") || method.desc.equals("(Lbit;)V")) {
+        if (method.name.equals("drawToast") || method.name.equals("func_146254_a") || method.name.equals("a")) {
+          method.instructions.insertBefore(method.instructions.getFirst(), new MethodInsnNode(
+            Opcodes.INVOKESTATIC,
+            LABYMOD_UTILS,
+            "updateAchievementWindow",
+            "()V",
+            false
+          ));
+        }
       }
     }
 
@@ -53,5 +54,4 @@ public class AchievementRenderTransformerV112 implements IClassTransformer {
     classNode.accept(classWriter);
     return classWriter.toByteArray();
   }
-
 }
