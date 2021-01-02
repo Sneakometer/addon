@@ -25,8 +25,11 @@ plugins {
 
 defaultTasks("clean", "build")
 
+val majorVersion = 2
+val labyStoreVersion = 2
+
 allprojects {
-  version = "2"
+  version = "$majorVersion.$labyStoreVersion"
   group = "de.hdskins"
 
   tasks.withType<JavaCompile> {
