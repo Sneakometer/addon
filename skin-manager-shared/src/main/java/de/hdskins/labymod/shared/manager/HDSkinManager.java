@@ -25,6 +25,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalCause;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import de.hdskins.labymod.shared.Constants;
@@ -39,6 +40,7 @@ import de.hdskins.labymod.shared.texture.HDMinecraftProfileTexture;
 import de.hdskins.labymod.shared.texture.HDSkinTexture;
 import de.hdskins.labymod.shared.utils.ConcurrentUtils;
 import de.hdskins.labymod.shared.utils.GameProfileUtils;
+import de.hdskins.labymod.shared.utils.ReflectionUtils;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.concurrent.FutureListener;
 import de.hdskins.protocol.packets.reading.client.PacketClientReady;
@@ -48,6 +50,8 @@ import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkinId;
 import de.hdskins.protocol.packets.reading.live.PacketClientLiveSkinUnload;
 import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.SkinManager;
@@ -60,6 +64,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -69,7 +74,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @SuppressWarnings("UnstableApiUsage")
@@ -81,8 +86,8 @@ public class HDSkinManager extends SkinManager {
 
   private final Path assetsDirectory;
   private final AddonContext addonContext;
-  private final Runnable allSkinsInvalidator;
-  private final Consumer<UUID> skinInvalidator;
+  private final Field playerTexturesLoadedField;
+  private final Supplier<NetHandlerPlayClient> netHandlerPlayerClient;
   private final Queue<UUID> nonSentUnloads = new ConcurrentLinkedQueue<>();
   private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
   private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = CacheBuilder.newBuilder()
@@ -112,12 +117,12 @@ public class HDSkinManager extends SkinManager {
     .ticker(Ticker.systemTicker())
     .build();
 
-  public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Consumer<UUID> skinInvalidator, Runnable allSkinsInvalidator) {
+  public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Field playerTexturesLoadedField, Supplier<NetHandlerPlayClient> netHandlerPlayClientSupplier) {
     super(Minecraft.getMinecraft().getTextureManager(), new File(mcAssetsDir, "skins"), Minecraft.getMinecraft().getSessionService());
     this.assetsDirectory = mcAssetsDir.toPath();
     this.addonContext = addonContext;
-    this.allSkinsInvalidator = allSkinsInvalidator;
-    this.skinInvalidator = skinInvalidator;
+    this.playerTexturesLoadedField = playerTexturesLoadedField;
+    this.netHandlerPlayerClient = netHandlerPlayClientSupplier;
     // Register skin manager to addon context
     addonContext.setSkinManager(this);
     // Register listeners to this skin manager
@@ -395,16 +400,16 @@ public class HDSkinManager extends SkinManager {
 
   public void invalidateAll() {
     for (UUID uuid : this.uniqueIdToSkinHashCache.asMap().keySet()) {
-      this.skinInvalidator.accept(uuid);
+      this.invalidateSkin(uuid);
     }
     this.textureToLocationCache.invalidateAll();
     this.uniqueIdToSkinHashCache.invalidateAll();
   }
 
   public void invalidateAllSkins() {
-    this.allSkinsInvalidator.run();
     this.textureToLocationCache.invalidateAll();
     this.uniqueIdToSkinHashCache.invalidateAll();
+    this.invalidateAllSkins0();
   }
 
   public void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {
@@ -422,7 +427,29 @@ public class HDSkinManager extends SkinManager {
     } else {
       this.uniqueIdToSkinHashCache.invalidate(uniqueId);
     }
-    this.skinInvalidator.accept(uniqueId);
+    this.invalidateSkin(uniqueId);
+  }
+
+  private void invalidateSkin(UUID uuid) {
+    final NetHandlerPlayClient netHandlerPlayClient = this.netHandlerPlayerClient.get();
+    if (netHandlerPlayClient != null && !netHandlerPlayClient.getPlayerInfoMap().isEmpty()) {
+      UUID uniqueId;
+      for (NetworkPlayerInfo playerInfo : ImmutableSet.copyOf(netHandlerPlayClient.getPlayerInfoMap())) {
+        uniqueId = GameProfileUtils.getUniqueId(playerInfo.getGameProfile());
+        if (uuid.equals(uniqueId)) {
+          ReflectionUtils.set(playerInfo, Boolean.FALSE, this.playerTexturesLoadedField);
+        }
+      }
+    }
+  }
+
+  private void invalidateAllSkins0() {
+    final NetHandlerPlayClient netHandlerPlayClient = this.netHandlerPlayerClient.get();
+    if (netHandlerPlayClient != null && !netHandlerPlayClient.getPlayerInfoMap().isEmpty()) {
+      for (NetworkPlayerInfo playerInfo : ImmutableSet.copyOf(netHandlerPlayClient.getPlayerInfoMap())) {
+        ReflectionUtils.set(playerInfo, Boolean.FALSE, this.playerTexturesLoadedField);
+      }
+    }
   }
 
   public AddonContext getAddonContext() {
