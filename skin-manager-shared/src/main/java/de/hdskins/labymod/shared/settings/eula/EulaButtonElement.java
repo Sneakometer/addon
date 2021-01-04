@@ -2,22 +2,39 @@ package de.hdskins.labymod.shared.settings.eula;
 
 import de.hdskins.labymod.shared.utils.ClientUtils;
 import net.labymod.main.LabyMod;
-import net.labymod.main.ModTextures;
 import net.labymod.settings.elements.ControlElement;
+import net.labymod.utils.manager.TooltipHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 
 public class EulaButtonElement extends ControlElement {
 
-  public EulaButtonElement(String displayName, IconData iconData) {
-    super(displayName, iconData);
+  private final Runnable clickListener;
+  private static final ResourceLocation PAPER_LOCATION = new ResourceLocation("textures/items/paper.png");
+
+  public EulaButtonElement(Runnable clickListener) {
+    super(null, null);
+    this.clickListener = clickListener;
   }
 
   @Override
   public void draw(int x, int y, int maxX, int maxY, int mouseX, int mouseY) {
     final int height = LabyMod.getInstance().getDrawUtils().getHeight() - 20;
-    this.mouseOver = mouseX > 5 && mouseX < 20 && mouseY > height && mouseY < height + 15;
-    Minecraft.getMinecraft().getTextureManager().bindTexture(ModTextures.BUTTON_ACCEPT);
+    final int width = LabyMod.getInstance().getDrawUtils().getWidth();
+    this.mouseOver = mouseX <= width + 44 && mouseX >= width - 20 && mouseY <= height && mouseY >= height - 25;
+
     ClientUtils.resetColor();
-    LabyMod.getInstance().getDrawUtils().drawTexture(5, height, 255, 255, 15, 15, 1);
+    Minecraft.getMinecraft().getTextureManager().bindTexture(PAPER_LOCATION);
+    LabyMod.getInstance().getDrawUtils().drawTexture(width - 20, height - 25, 255, 255, 15, 15);
+    if (this.isMouseOver()) {
+      TooltipHelper.getHelper().pointTooltip(width - 15, height - 23, "Eula");
+    }
+  }
+
+  @Override
+  public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+    if (this.isMouseOver()) {
+      this.clickListener.run();
+    }
   }
 }

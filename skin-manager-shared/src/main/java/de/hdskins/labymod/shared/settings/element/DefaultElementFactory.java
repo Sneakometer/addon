@@ -21,6 +21,7 @@ import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
+import de.hdskins.labymod.shared.settings.eula.EulaButtonElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
 import net.labymod.utils.Consumer;
@@ -33,7 +34,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 @ParametersAreNonnullByDefault
-class DefaultElementFactory implements ElementFactory {
+final class DefaultElementFactory implements ElementFactory {
 
   protected static final ElementFactory DEFAULT = new DefaultElementFactory();
   private boolean settingsEnabledByDefault = true;
@@ -73,6 +74,14 @@ class DefaultElementFactory implements ElementFactory {
   @Override
   public PlayerSkinRenderElement brewRenderElement(Consumer<PlayerSkinRenderElement> customizer) {
     PlayerSkinRenderElement element = new PlayerSkinRenderElement();
+    customizer.accept(element);
+    return element;
+  }
+
+  @Nonnull
+  @Override
+  public EulaButtonElement brewEulaButtonElement(Runnable clickListener, Consumer<EulaButtonElement> customizer) {
+    EulaButtonElement element = new EulaButtonElement(clickListener);
     customizer.accept(element);
     return element;
   }
