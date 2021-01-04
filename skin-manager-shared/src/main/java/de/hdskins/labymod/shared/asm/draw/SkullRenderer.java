@@ -29,7 +29,6 @@ import net.labymod.main.LabyMod;
 import net.labymod.utils.UUIDFetcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelHumanoidHead;
-import net.minecraft.client.model.ModelSkeletonHead;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
@@ -49,7 +48,7 @@ public final class SkullRenderer {
 
   private static final String DEFAULT_NAME = "Steve";
   private static final String EMPTY_PLACEHOLDER_PROPERTY_NAME = "__place__holder__";
-  private static final ModelSkeletonHead MODEL_SKELETON_HEAD = new ModelHumanoidHead();
+  private static final ModelHumanoidHead MODEL_SKELETON_HEAD = new ModelHumanoidHead();
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
   private static final Property PLACEHOLDER_PROPERTY = new Property("", EMPTY_PLACEHOLDER_PROPERTY_NAME);
   private static final Cache<MinecraftProfileTexture, ResourceLocation> CACHE = CacheBuilder.newBuilder()
