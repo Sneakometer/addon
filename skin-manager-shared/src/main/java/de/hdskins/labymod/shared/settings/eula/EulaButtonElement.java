@@ -20,7 +20,6 @@ package de.hdskins.labymod.shared.settings.eula;
 import de.hdskins.labymod.shared.utils.ClientUtils;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.ControlElement;
-import net.labymod.utils.manager.TooltipHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
@@ -44,7 +43,7 @@ public class EulaButtonElement extends ControlElement {
     Minecraft.getMinecraft().getTextureManager().bindTexture(PAPER_LOCATION);
     LabyMod.getInstance().getDrawUtils().drawTexture(width - 20, height - 25, 255, 255, 15, 15);
     if (this.isMouseOver()) {
-      TooltipHelper.getHelper().pointTooltip(width - 15, height - 23, "Eula");
+      LabyMod.getInstance().getDrawUtils().drawHoveringText(width - 15, height - 23, "EULA");
     }
   }
 
