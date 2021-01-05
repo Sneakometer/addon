@@ -20,6 +20,7 @@ package de.hdskins.labymod.shared.gui;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.text.TextLine;
 import net.labymod.gui.elements.Scrollbar;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiOptionButton;
@@ -67,23 +68,30 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
     return factory.newScreen(acceptText, rejectText, messageLines, callback);
   }
 
-  public abstract void requestFocus();
+  @Nonnull
+  protected abstract FontRenderer getFontRenderer();
+
+  protected abstract void drawButtons(int mouseX, int mouseY);
+
+  public void requestFocus() {
+    final Minecraft minecraft = Minecraft.getMinecraft();
+    if (minecraft.currentScreen != this) {
+      this.before = minecraft.currentScreen;
+      minecraft.displayGuiScreen(this);
+    }
+  }
 
   public void returnBack() {
     this.returnBack(null);
   }
 
-  public abstract void returnBack(@Nullable GuiScreen target);
-
-  @Nonnull
-  protected abstract FontRenderer getFontRenderer();
-
-  @Nonnull
-  public abstract Collection<String> listFormattedStringToWidth(String line, int width);
-
-  protected abstract void checkInitialized();
-
-  protected abstract void drawButtons(int mouseX, int mouseY, float partialTicks);
+  public void returnBack(@Nullable GuiScreen target) {
+    final Minecraft minecraft = Minecraft.getMinecraft();
+    if (minecraft.currentScreen == this) {
+      minecraft.displayGuiScreen(target == null ? this.before : target);
+      this.before = null;
+    }
+  }
 
   @Override
   public void initGui() {
@@ -103,7 +111,7 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
     this.scrollbar.mouseAction(mouseX, mouseY, Scrollbar.EnumMouseAction.DRAGGING);
     this.scrollbar.draw();
     this.drawText();
-    this.drawButtons(mouseX, mouseY, partialTicks);
+    this.drawButtons(mouseX, mouseY);
   }
 
   @Override
@@ -162,7 +170,6 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
   }
 
   protected void drawText() {
-    this.checkInitialized();
     // hack:
     // we disable bidi to prevent the render of color codes correctly
     final boolean bidi = this.getFontRenderer().getBidiFlag();
@@ -182,5 +189,10 @@ public abstract class AcceptRejectGuiScreen extends GuiScreen {
     }
     // now we can reset the bidi flag of the font renderer
     this.getFontRenderer().setBidiFlag(bidi);
+  }
+
+  @Nonnull
+  private Collection<String> listFormattedStringToWidth(String line, int width) {
+    return line.trim().isEmpty() ? SINGLE_STRING_LIST : this.getFontRenderer().listFormattedStringToWidth(line, width);
   }
 }

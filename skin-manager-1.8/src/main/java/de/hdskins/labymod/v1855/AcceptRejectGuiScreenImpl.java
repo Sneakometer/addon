@@ -17,14 +17,11 @@
  */
 package de.hdskins.labymod.v1855;
 
-import com.google.common.base.Preconditions;
 import de.hdskins.labymod.shared.gui.AcceptRejectGuiScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiScreen;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
 import java.util.function.BiConsumer;
@@ -40,43 +37,14 @@ public class AcceptRejectGuiScreenImpl extends AcceptRejectGuiScreen {
     factory = (acceptText, rejectText, messageLines, callback) -> new AcceptRejectGuiScreenImpl(acceptText, rejectText, messageLines, callback);
   }
 
-  @Override
-  public synchronized void requestFocus() {
-    final Minecraft minecraft = this.mc == null ? Minecraft.getMinecraft() : this.mc;
-    if (minecraft.currentScreen != this) {
-      this.before = minecraft.currentScreen;
-      minecraft.displayGuiScreen(this);
-    }
-  }
-
-  @Override
-  public synchronized void returnBack(@Nullable GuiScreen target) {
-    // if this.mc == null this screen was never shown before
-    if (this.mc != null && this.mc.currentScreen == this) {
-      this.mc.displayGuiScreen(target == null ? this.before : target);
-      this.before = null;
-    }
-  }
-
   @Nonnull
   @Override
   protected FontRenderer getFontRenderer() {
     return Minecraft.getMinecraft().fontRendererObj;
   }
 
-  @Nonnull
   @Override
-  public Collection<String> listFormattedStringToWidth(String line, int width) {
-    return line.trim().isEmpty() ? SINGLE_STRING_LIST : this.fontRendererObj.listFormattedStringToWidth(line, width);
-  }
-
-  @Override
-  protected void checkInitialized() {
-    Preconditions.checkNotNull(this.fontRendererObj, "Illegal call to drawText() in %s", this.getClass().getName());
-  }
-
-  @Override
-  protected void drawButtons(int mouseX, int mouseY, float partialTicks) {
+  protected void drawButtons(int mouseX, int mouseY) {
     this.acceptButton.drawButton(this.mc, mouseX, mouseY);
     this.rejectButton.drawButton(this.mc, mouseX, mouseY);
   }
