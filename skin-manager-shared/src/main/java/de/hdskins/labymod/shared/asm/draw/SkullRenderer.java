@@ -21,6 +21,13 @@ import com.mojang.authlib.GameProfile;
 
 import java.util.UUID;
 
+// This class is a wrapper for the actual skull renderer, introduced for forge 1.12 support.
+// The addon is build using the notch mappings, forge has a runtime re-obf in
+// net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper
+// which transfers the code to searge, causes NoClassDefFoundErrors when a minecraft
+// class is used in a not re-obf class. To prevent this, all methods in this class are
+// called using no minecraft-internal classes but calls the methods with minecraft-internal
+// usages from here.
 public final class SkullRenderer {
 
   private SkullRenderer() {
