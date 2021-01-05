@@ -25,8 +25,8 @@ import net.minecraft.util.ResourceLocation;
 
 public class EulaButtonElement extends ControlElement {
 
-  private final Runnable clickListener;
   private static final ResourceLocation PAPER_LOCATION = new ResourceLocation("textures/items/paper.png");
+  private final Runnable clickListener;
 
   public EulaButtonElement(Runnable clickListener) {
     super(null, null);
@@ -37,13 +37,22 @@ public class EulaButtonElement extends ControlElement {
   public void draw(int x, int y, int maxX, int maxY, int mouseX, int mouseY) {
     final int height = LabyMod.getInstance().getDrawUtils().getHeight() - 20;
     final int width = LabyMod.getInstance().getDrawUtils().getWidth();
-    this.mouseOver = mouseX <= width + 44 && mouseX >= width - 20 && mouseY <= height && mouseY >= height - 25;
+
+    this.mouseOver = mouseX <= width - 5 && mouseX >= width - 30 && mouseY <= height - 17 && mouseY >= height - 40;
+    final int add = this.isMouseOver() ? 1 : 0;
 
     ClientUtils.resetColor();
     Minecraft.getMinecraft().getTextureManager().bindTexture(PAPER_LOCATION);
-    LabyMod.getInstance().getDrawUtils().drawTexture(width - 20, height - 25, 255, 255, 15, 15);
+    LabyMod.getInstance().getDrawUtils().drawTexture(
+      width - 30 - add,
+      height - 40 - add,
+      255,
+      255,
+      25 + add * 2,
+      25 + add * 2
+    );
     if (this.isMouseOver()) {
-      LabyMod.getInstance().getDrawUtils().drawHoveringText(width - 15, height - 23, "EULA");
+      LabyMod.getInstance().getDrawUtils().drawHoveringText(mouseX, mouseY, "EULA");
     }
   }
 
