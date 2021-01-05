@@ -41,7 +41,7 @@ configure<UserBaseExtension> {
 }
 
 dependencies {
-  "compileOnly"(files("../libs/lm_api.jar"))
+  "compileOnly"(files("../libs/labymod-api.jar"))
   "compileOnly"("de.hdskins.protocol:client:" + ext["dependencyNetworkClientVersion"] as String)
 }
 
