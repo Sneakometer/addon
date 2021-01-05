@@ -20,7 +20,7 @@ package de.hdskins.labymod.shared.settings.element;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
-import de.hdskins.labymod.shared.settings.eula.EulaButtonElement;
+import de.hdskins.labymod.shared.settings.element.elements.EulaButtonElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
 import net.labymod.utils.Consumer;

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package de.hdskins.labymod.shared.settings.eula;
+package de.hdskins.labymod.shared.settings.element.elements;
 
 import de.hdskins.labymod.shared.utils.ClientUtils;
 import net.labymod.main.LabyMod;
