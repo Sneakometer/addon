@@ -20,6 +20,7 @@ package de.hdskins.labymod.shared.backend;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.config.AddonConfig;
+import de.hdskins.labymod.shared.protocol.Log4jProtocolLogger;
 import de.hdskins.protocol.client.NetworkClient;
 import de.hdskins.protocol.component.ClientSettings;
 import de.hdskins.protocol.packets.reading.client.PacketClientSkinSettings;
@@ -62,7 +63,13 @@ public final class BackendUtils {
   @Nonnull
   public static CompletableFuture<NetworkClient> connectToServer(AddonConfig addonConfig) {
     return CompletableFuture.supplyAsync(() -> {
-      NetworkClient networkClient = NetworkClient.create(addonConfig.getServerAddress().getHostAddress(), addonConfig.getServerPort(), NAME_SUPPLIER, SERVER_JOINER);
+      NetworkClient networkClient = NetworkClient.create(
+        addonConfig.getServerAddress().getHostAddress(),
+        addonConfig.getServerPort(),
+        Log4jProtocolLogger.INSTANCE,
+        NAME_SUPPLIER,
+        SERVER_JOINER
+      );
       networkClient.setFirstReconnectInterval(addonConfig.getFirstReconnectInterval());
       networkClient.setReconnectInterval(addonConfig.getReconnectInterval());
       return connect0(networkClient, addonConfig);
