@@ -19,10 +19,10 @@ package de.hdskins.labymod.shared.settings.delete;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameChanger;
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 import net.labymod.utils.Consumer;
 
 import java.util.concurrent.atomic.AtomicBoolean;

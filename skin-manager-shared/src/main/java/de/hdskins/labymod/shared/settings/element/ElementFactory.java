@@ -19,8 +19,8 @@ package de.hdskins.labymod.shared.settings.element;
 
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
-import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import de.hdskins.labymod.shared.settings.element.elements.EulaButtonElement;
+import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
 import net.labymod.utils.Consumer;
@@ -43,9 +43,8 @@ public interface ElementFactory {
   ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
                                               BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer);
 
-  @Nonnull
-  <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values,
-                                             BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer);
+  @Nonnull <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values,
+                                                      BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer);
 
   @Nonnull
   ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer);

@@ -19,15 +19,13 @@ package de.hdskins.labymod.shared.manager;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.resource.HDResourceLocation;
+import de.hdskins.labymod.shared.texture.HDMinecraftProfileTexture;
 import de.hdskins.labymod.shared.texture.HDSkinTexture;
 import de.hdskins.labymod.shared.utils.ConcurrentUtils;
 import de.hdskins.protocol.PacketBase;
 import de.hdskins.protocol.packets.reading.download.PacketServerResponseSkin;
-import net.minecraft.client.renderer.IImageBuffer;
-import net.minecraft.client.renderer.ImageBufferDownload;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.SkinManager;
 import org.apache.logging.log4j.LogManager;
@@ -42,15 +40,16 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SkinLoadPacketHandler implements Consumer<PacketBase> {
 
   private static final Logger LOGGER = LogManager.getLogger(SkinLoadPacketHandler.class);
-  private static final IImageBuffer IMAGE_BUFFER = new ImageBufferDownload();
 
   private final Path targetLocalPath;
   private final AddonContext addonContext;
+  private final HDSkinManager skinManager;
   private final HDResourceLocation location;
   private final TextureManager textureManager;
   private final Runnable backingLoaderExecutor;
@@ -58,11 +57,12 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
   private final MinecraftProfileTexture.Type type;
   private final SkinManager.SkinAvailableCallback callback;
 
-  protected SkinLoadPacketHandler(Path targetLocalPath, HDResourceLocation location, TextureManager textureManager, AddonContext context,
+  protected SkinLoadPacketHandler(Path targetLocalPath, HDSkinManager manager, HDResourceLocation location, TextureManager textureManager, AddonContext context,
                                   Runnable backingLoaderExecutor, MinecraftProfileTexture texture, MinecraftProfileTexture.Type type,
                                   SkinManager.SkinAvailableCallback callback) {
     this.targetLocalPath = targetLocalPath;
     this.addonContext = context;
+    this.skinManager = manager;
     this.location = location;
     this.textureManager = textureManager;
     this.backingLoaderExecutor = backingLoaderExecutor;
@@ -93,22 +93,27 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
       }
 
       try (InputStream stream = new ByteArrayInputStream(response.getSkinData())) {
-        final BufferedImage image = ImageIO.read(stream);
-        final AddonConfig config = this.addonContext.getAddonConfig();
-        if (config.getMaxSkinResolution() != Resolution.RESOLUTION_ALL
-          && image.getHeight() > config.getMaxSkinResolution().getHeight() && image.getWidth() > config.getMaxSkinResolution().getWidth()) {
-          LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", this.texture.getHash(), config.getMaxSkinResolution());
+        final BufferedImage image = SkinLoadImageProcessor.process(stream);
+        try (OutputStream outputStream = Files.newOutputStream(this.targetLocalPath, StandardOpenOption.CREATE)) {
+          ImageIO.write(image, "png", outputStream);
+        }
+        // Update the skin resolution to the texture location
+        this.location.setImageWidth(image.getWidth());
+        this.location.setImageHeight(image.getHeight());
+        // Check if the skin exceeds the set limits
+        final Resolution max = this.addonContext.getAddonConfig().getMaxSkinResolution();
+        if (max != Resolution.RESOLUTION_ALL && image.getHeight() > max.getHeight() && image.getWidth() > max.getWidth()) {
+          LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", this.texture.getHash(), max);
+          final UUID target = this.skinManager.findAssociatedUniqueId((HDMinecraftProfileTexture) this.texture);
+          if (target != null) {
+            this.skinManager.invalidateSkin(target);
+          }
           ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(this.backingLoaderExecutor));
           return;
         }
 
-        BufferedImage bufferedImage = IMAGE_BUFFER.parseUserSkin(image);
-        try (OutputStream outputStream = Files.newOutputStream(this.targetLocalPath, StandardOpenOption.CREATE)) {
-          ImageIO.write(bufferedImage, "png", outputStream);
-        }
-
         ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(() -> {
-          this.textureManager.loadTexture(this.location, new HDSkinTexture(bufferedImage));
+          this.textureManager.loadTexture(this.location, new HDSkinTexture(image));
           if (this.callback != null) {
             this.callback.skinAvailable(this.type, this.location, this.texture);
           }

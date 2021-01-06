@@ -62,6 +62,7 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -71,6 +72,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -91,9 +93,7 @@ public class HDSkinManager extends SkinManager {
   private final Queue<UUID> nonSentUnloads = new ConcurrentLinkedQueue<>();
   private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
   private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = CacheBuilder.newBuilder()
-    .expireAfterAccess(30, TimeUnit.SECONDS)
     .concurrencyLevel(4)
-    .ticker(Ticker.systemTicker())
     .build(new CacheLoader<MinecraftProfileTexture, HDResourceLocation>() {
       @Override
       public HDResourceLocation load(@Nonnull MinecraftProfileTexture texture) {
@@ -147,6 +147,15 @@ public class HDSkinManager extends SkinManager {
     }
     // Build a resource location for the profile texture
     final HDResourceLocation location = this.textureToLocationCache.getUnchecked(texture);
+    // Check if the image was loaded but is too large to handle
+    final Resolution maxResolution = this.addonContext.getAddonConfig().getMaxSkinResolution();
+    if (this.exceedsLimits(maxResolution, location)) {
+      final UUID target = this.findAssociatedUniqueId((HDMinecraftProfileTexture) texture);
+      if (target != null) {
+        this.invalidateSkin(target);
+      }
+      return ConcurrentUtils.callOnClientThread(() -> super.loadSkin(texture, type, callback));
+    }
     // Test if the texture is already loaded and cached
     final ITextureObject textureObject = this.textureManager.getTexture(location);
     // If the texture object is non-null we can break now
@@ -163,10 +172,17 @@ public class HDSkinManager extends SkinManager {
       try {
         // We have to ensure that the texture is not exceeding the max resolution limits
         final HDSkinTexture skinTexture = new HDSkinTexture(localSkinPath);
-        final Resolution maxResolution = this.addonContext.getAddonConfig().getMaxSkinResolution();
-        if (maxResolution != Resolution.RESOLUTION_ALL
-          && skinTexture.getBufferedImage().getHeight() > maxResolution.getHeight() && skinTexture.getBufferedImage().getWidth() > maxResolution.getWidth()) {
+        // Update the resolution to the location
+        final BufferedImage image = skinTexture.getBufferedImage();
+        location.setImageWidth(image.getWidth());
+        location.setImageHeight(image.getHeight());
+        // Check if the skin exceeds the set limits
+        if (this.exceedsLimits(maxResolution, location)) {
           LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", localSkinPath, maxResolution);
+          final UUID target = this.findAssociatedUniqueId((HDMinecraftProfileTexture) texture);
+          if (target != null) {
+            this.invalidateSkin(target);
+          }
           return ConcurrentUtils.callOnClientThread(() -> super.loadSkin(texture, type, callback));
         }
         // Now we can load the texture
@@ -194,10 +210,12 @@ public class HDSkinManager extends SkinManager {
         });
       }
       // As we are not connected to the server we try a legacy lookup
-      return super.loadSkin(texture, type, callback);
+      return ConcurrentUtils.callOnClientThread(() -> super.loadSkin(texture, type, callback));
     }
     // We ensured that the skin is not available locally so try to load it from the server
-    this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkin(texture.getHash())).addListener(this.forSkinLoad(texture, type, callback, location, localSkinPath));
+    this.addonContext.getNetworkClient()
+      .sendQuery(new PacketClientRequestSkin(texture.getHash()))
+      .addListener(this.forSkinLoad(texture, type, callback, location, localSkinPath));
     return location;
   }
 
@@ -239,8 +257,15 @@ public class HDSkinManager extends SkinManager {
         .sendQuery(new PacketClientRequestSkinId(profileId))
         .addListener(this.newListenerForSkinIdLoad(profileId, profile, callback, requireSecure));
     } else if (response.hasSkin()) {
+      // Check if the skin will exceed the loading limit
+      final HDMinecraftProfileTexture texture = response.toProfileTexture();
+      final HDResourceLocation location = this.textureToLocationCache.getIfPresent(texture);
+      if (location != null && this.exceedsLimits(this.addonContext.getAddonConfig().getMaxSkinResolution(), location)) {
+        super.loadProfileTextures(profile, callback, requireSecure);
+        return;
+      }
       // We already sent a request to the server so we can now simply load the texture by the hash we already got from the server
-      this.loadSkin(response.toProfileTexture(), MinecraftProfileTexture.Type.SKIN, callback);
+      this.loadSkin(texture, MinecraftProfileTexture.Type.SKIN, callback);
     } else {
       // The player has no hd skin so we do a legacy load
       super.loadProfileTextures(profile, callback, requireSecure);
@@ -268,7 +293,13 @@ public class HDSkinManager extends SkinManager {
           return ImmutableMap.of();
         }
       }
-      return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, response.toProfileTexture());
+      // Check if the skin will exceed the loading limit
+      final HDMinecraftProfileTexture texture = response.toProfileTexture();
+      final HDResourceLocation location = this.textureToLocationCache.getIfPresent(texture);
+      if (location != null && this.exceedsLimits(this.addonContext.getAddonConfig().getMaxSkinResolution(), location)) {
+        return this.mojangProfileCache.getUnchecked(profile);
+      }
+      return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, texture);
     }
     if (this.addonContext.getActive().get()) {
       this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdCacheOnly(profileId));
@@ -340,6 +371,7 @@ public class HDSkinManager extends SkinManager {
                                                  @Nullable SkinAvailableCallback callback, HDResourceLocation location, Path targetLocalPath) {
     return FunctionalFutureListener.listener(new SkinLoadPacketHandler(
       targetLocalPath,
+      this,
       location,
       this.textureManager,
       this.addonContext,
@@ -369,11 +401,26 @@ public class HDSkinManager extends SkinManager {
     this.updateSkin(playerUniqueId, NO_SKIN);
   }
 
-  public void pushMaxResolutionUpdate() {
-    this.textureToLocationCache.invalidateAll();
-    for (UUID uuid : this.uniqueIdToSkinHashCache.asMap().keySet()) {
-      this.updateSkin(uuid, null);
+  public void pushMaxResolutionUpdate(Resolution now, Resolution before) {
+    final int index = before.compareTo(now);
+    if (index != 0) {
+      this.invalidateAllSkins0();
     }
+  }
+
+  @Nullable
+  protected UUID findAssociatedUniqueId(HDMinecraftProfileTexture texture) {
+    return this.findAssociatedUniqueId(texture, this.uniqueIdToSkinHashCache.asMap().entrySet());
+  }
+
+  @Nullable
+  private UUID findAssociatedUniqueId(HDMinecraftProfileTexture texture, Set<Map.Entry<UUID, SkinHashWrapper>> knownHolders) {
+    for (Map.Entry<UUID, SkinHashWrapper> entry : knownHolders) {
+      if (entry.getValue().hasSkin() && entry.getValue().getSkinHash().equals(texture.getHash())) {
+        return entry.getKey();
+      }
+    }
+    return null;
   }
 
   public void pushSkinUpdate(UUID playerUniqueId, String newSkinHash) {
@@ -430,7 +477,7 @@ public class HDSkinManager extends SkinManager {
     this.invalidateSkin(uniqueId);
   }
 
-  private void invalidateSkin(UUID uuid) {
+  protected void invalidateSkin(UUID uuid) {
     final NetHandlerPlayClient netHandlerPlayClient = this.netHandlerPlayerClient.get();
     if (netHandlerPlayClient != null && !netHandlerPlayClient.getPlayerInfoMap().isEmpty()) {
       UUID uniqueId;
@@ -450,6 +497,13 @@ public class HDSkinManager extends SkinManager {
         ReflectionUtils.set(playerInfo, Boolean.FALSE, this.playerTexturesLoadedField);
       }
     }
+  }
+
+  private boolean exceedsLimits(Resolution max, HDResourceLocation location) {
+    return max != Resolution.RESOLUTION_ALL
+      && location.isResolutionAvailable()
+      && location.getImageHeight() > max.getHeight()
+      && location.getImageWidth() > max.getWidth();
   }
 
   public AddonContext getAddonContext() {

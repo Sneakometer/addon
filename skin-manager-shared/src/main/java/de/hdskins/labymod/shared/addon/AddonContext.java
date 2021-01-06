@@ -183,10 +183,11 @@ public class AddonContext {
 
   public void setMaxSkinResolution(Resolution resolution) {
     if (this.addonConfig.getMaxSkinResolution() != resolution) {
+      final Resolution before = this.addonConfig.getMaxSkinResolution();
       this.addonConfig.setMaxSkinResolution(resolution);
       this.clientSettings = new ClientSettings(resolution.getWidth(), resolution.getHeight());
       this.networkClient.sendPacket(new PacketClientSkinSettings(this.clientSettings));
-      Constants.EVENT_BUS.postReported(MaxSkinResolutionChangeEvent.EVENT);
+      Constants.EVENT_BUS.postReported(new MaxSkinResolutionChangeEvent(resolution, before));
     }
   }
 

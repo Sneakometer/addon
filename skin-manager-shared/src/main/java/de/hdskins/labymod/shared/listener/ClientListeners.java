@@ -93,6 +93,6 @@ public final class ClientListeners {
 
   @EventListener
   public void handle(MaxSkinResolutionChangeEvent event) {
-    this.hdSkinManager.pushMaxResolutionUpdate();
+    this.hdSkinManager.pushMaxResolutionUpdate(event.getNow(), event.getBefore());
   }
 }

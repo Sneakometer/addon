@@ -49,11 +49,6 @@ import java.util.concurrent.TimeUnit;
   private static final ModelHumanoidHead MODEL_HUMANOID_HEAD = new ModelHumanoidHead();
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
   private static final Property PLACEHOLDER_PROPERTY = new Property("", EMPTY_PLACEHOLDER_PROPERTY_NAME);
-  private static final Cache<MinecraftProfileTexture, ResourceLocation> CACHE = CacheBuilder.newBuilder()
-    .expireAfterAccess(30, TimeUnit.SECONDS)
-    .ticker(Ticker.systemTicker())
-    .concurrencyLevel(4)
-    .build();
   private static final Cache<GameProfile, GameProfile> GAME_PROFILE_CACHE = CacheBuilder.newBuilder()
     .expireAfterAccess(30, TimeUnit.SECONDS)
     .ticker(Ticker.systemTicker())
@@ -131,16 +126,7 @@ import java.util.concurrent.TimeUnit;
       }
 
       if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-        final ResourceLocation cachedLocation = CACHE.getIfPresent(map.get(MinecraftProfileTexture.Type.SKIN));
-        if (cachedLocation != null) {
-          return cachedLocation;
-        } else {
-          resourceLocation = skinManager.loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN, (type, location, texture) -> {
-            if (type == MinecraftProfileTexture.Type.SKIN) {
-              CACHE.put(texture, location);
-            }
-          });
-        }
+        resourceLocation = skinManager.loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
       } else if (profile.getProperties().isEmpty() || (!profile.getProperties().containsKey("textures") && !profile.getProperties().containsKey(EMPTY_PLACEHOLDER_PROPERTY_NAME))) {
         profile.getProperties().put(EMPTY_PLACEHOLDER_PROPERTY_NAME, PLACEHOLDER_PROPERTY); // Set to prevent duplicate lookups
         EXECUTOR_SERVICE.execute(() -> {

@@ -17,9 +17,23 @@
  */
 package de.hdskins.labymod.shared.event;
 
-public final class MaxSkinResolutionChangeEvent {
-  public static final MaxSkinResolutionChangeEvent EVENT = new MaxSkinResolutionChangeEvent();
+import de.hdskins.labymod.shared.config.resolution.Resolution;
 
-  private MaxSkinResolutionChangeEvent() {
+public class MaxSkinResolutionChangeEvent {
+
+  private final Resolution now;
+  private final Resolution before;
+
+  public MaxSkinResolutionChangeEvent(Resolution now, Resolution before) {
+    this.now = now;
+    this.before = before;
+  }
+
+  public Resolution getNow() {
+    return this.now;
+  }
+
+  public Resolution getBefore() {
+    return this.before;
   }
 }

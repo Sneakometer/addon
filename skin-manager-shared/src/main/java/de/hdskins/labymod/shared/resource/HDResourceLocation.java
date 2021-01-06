@@ -33,6 +33,9 @@ public class HDResourceLocation extends ResourceLocation {
   private final String path;
   private final String resourcePath;
 
+  private int imageWidth;
+  private int imageHeight;
+
   public HDResourceLocation(String hashPrefix, String hash) {
     super(0, EMPTY);
     this.path = "skins/" + hashPrefix + "/" + hash;
@@ -64,6 +67,26 @@ public class HDResourceLocation extends ResourceLocation {
   @Override
   public String toString() {
     return MINECRAFT_DOMAIN + ':' + this.resourcePath;
+  }
+
+  public boolean isResolutionAvailable() {
+    return this.imageWidth != 0 && this.imageHeight != 0;
+  }
+
+  public int getImageWidth() {
+    return this.imageWidth;
+  }
+
+  public void setImageWidth(int imageWidth) {
+    this.imageWidth = imageWidth;
+  }
+
+  public int getImageHeight() {
+    return this.imageHeight;
+  }
+
+  public void setImageHeight(int imageHeight) {
+    this.imageHeight = imageHeight;
   }
 
   @Override

@@ -19,8 +19,8 @@ package de.hdskins.labymod.shared.settings.toggle;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
-import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
+import de.hdskins.labymod.shared.utils.LabyModUtils;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
