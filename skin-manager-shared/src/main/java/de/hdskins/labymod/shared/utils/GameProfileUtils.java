@@ -34,7 +34,7 @@ import java.util.UUID;
 
 public final class GameProfileUtils {
 
-  private static final Gson GSON = new GsonBuilder()
+  protected static final Gson GSON = new GsonBuilder()
     .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
     .create();
 

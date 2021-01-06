@@ -24,9 +24,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.properties.Property;
 import de.hdskins.labymod.shared.manager.HDSkinManager;
-import de.hdskins.labymod.shared.utils.ConcurrentUtils;
+import de.hdskins.labymod.shared.utils.UniqueIdUtils;
 import net.labymod.main.LabyMod;
-import net.labymod.utils.UUIDFetcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelHumanoidHead;
 import net.minecraft.client.renderer.GlStateManager;
@@ -94,19 +93,13 @@ import java.util.concurrent.TimeUnit;
 
   public static void drawPlayerHead(String username, int x, int y, int size) {
     if (username != null) {
-      UUIDFetcher.getUUID(username, uniqueId -> {
-        ConcurrentUtils.callOnClientThread(() -> {
-          if (uniqueId != null) {
-            drawPlayerHead(new GameProfile(uniqueId, username), x, y, size);
-          } else {
-            LabyMod.getInstance().getDrawUtils().drawPlayerHead(DefaultPlayerSkin.getDefaultSkinLegacy(), x, y, size);
-          }
-          return null;
-        });
-      });
-    } else {
-      LabyMod.getInstance().getDrawUtils().drawPlayerHead(DefaultPlayerSkin.getDefaultSkinLegacy(), x, y, size);
+      final UUID uniqueId = UniqueIdUtils.getOrLookupAndCache(username);
+      if (uniqueId != null) {
+        drawPlayerHead(uniqueId, x, y, size);
+        return;
+      }
     }
+    LabyMod.getInstance().getDrawUtils().drawPlayerHead(DefaultPlayerSkin.getDefaultSkinLegacy(), x, y, size);
   }
 
   private static ResourceLocation loadTextureResourceLocation(GameProfile profile) {
