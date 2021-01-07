@@ -29,9 +29,12 @@ buildscript {
     }
   }
 
-  dependencies.classpath("net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT")
+  dependencies {
+    classpath("net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT")
+  }
 }
 
+apply(plugin = "checkstyle")
 apply(plugin = "net.minecraftforge.gradle.forge")
 
 configure<UserBaseExtension> {
