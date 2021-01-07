@@ -58,7 +58,7 @@ public class JsonAddonConfig implements AddonConfig {
   // these values aren't in the config as they may change between releases and
   // are only useful for development reasons (normally)
   private static final int DEFAULT_PORT = 2007;
-  private static final String DEFAULT_HOST = "api.hdskins.de";
+  private static final String DEFAULT_HOST = "bridge.hdskins.de";
   private static final ServerConfig DEFAULT_SERVER_CONFIG = new ServerConfig(DEFAULT_HOST, DEFAULT_PORT, "http://dl.hdskins.de/guidelines.txt");
   private static final InetAddress DEFAULT_SERVER_ADDRESS = new InetSocketAddress(DEFAULT_HOST, DEFAULT_PORT).getAddress();
   // networking magic
