@@ -1,5 +1,5 @@
-HDSkins ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/HDSkins/addon/Gradle%20Github%20Actions/master)
-===========
+HDSkins ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/HDSkins/addon/Gradle%20Github%20Actions/master) ![License](https://img.shields.io/github/license/HDSkins/addon) ![LabyMod](https://img.shields.io/badge/LabyMod-3.7.7-blue)
+----
 
 A high performance [LabyMod](https://www.labymod.net/) addon which adds HDSkin support to your
 minecraft client.
@@ -44,3 +44,6 @@ License
 
 This project is licensed under the conditions of the GPL-3.0 license. See [license.txt](https://github.com/HDSkins/addon/license.txt)
 for more information.
+
+--------
+NOT OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG.
