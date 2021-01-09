@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.sun.istack.internal.NotNull;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.backend.BackendUtils;
@@ -409,12 +408,12 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
-  @NotNull
+  @Nonnull
   protected Set<UUID> findAssociatedUniqueIds(HDMinecraftProfileTexture texture) {
     return this.findAssociatedUniqueIds(texture, this.uniqueIdToSkinHashCache.asMap().entrySet());
   }
 
-  @NotNull
+  @Nonnull
   private Set<UUID> findAssociatedUniqueIds(HDMinecraftProfileTexture texture, Set<Map.Entry<UUID, SkinHashWrapper>> knownHolders) {
     return knownHolders
       .stream()
