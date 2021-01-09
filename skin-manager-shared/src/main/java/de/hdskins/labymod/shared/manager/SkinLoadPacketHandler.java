@@ -40,7 +40,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SkinLoadPacketHandler implements Consumer<PacketBase> {
@@ -104,10 +103,7 @@ public class SkinLoadPacketHandler implements Consumer<PacketBase> {
         final Resolution max = this.addonContext.getAddonConfig().getMaxSkinResolution();
         if (max != Resolution.RESOLUTION_ALL && image.getHeight() > max.getHeight() && image.getWidth() > max.getWidth()) {
           LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", this.texture.getHash(), max);
-          final UUID target = this.skinManager.findAssociatedUniqueId((HDMinecraftProfileTexture) this.texture);
-          if (target != null) {
-            this.skinManager.invalidateSkin(target);
-          }
+          this.skinManager.invalidateSkins(this.skinManager.findAssociatedUniqueIds((HDMinecraftProfileTexture) this.texture));
           ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(this.backingLoaderExecutor));
           return;
         }

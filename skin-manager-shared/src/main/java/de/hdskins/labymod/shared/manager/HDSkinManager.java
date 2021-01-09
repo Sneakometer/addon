@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.sun.istack.internal.NotNull;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.backend.BackendUtils;
@@ -77,6 +78,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
 @SuppressWarnings("UnstableApiUsage")
@@ -150,10 +152,7 @@ public class HDSkinManager extends SkinManager {
     // Check if the image was loaded but is too large to handle
     final Resolution maxResolution = this.addonContext.getAddonConfig().getMaxSkinResolution();
     if (this.exceedsLimits(maxResolution, location)) {
-      final UUID target = this.findAssociatedUniqueId((HDMinecraftProfileTexture) texture);
-      if (target != null) {
-        this.invalidateSkin(target);
-      }
+      this.invalidateSkins(this.findAssociatedUniqueIds((HDMinecraftProfileTexture) texture));
       return ConcurrentUtils.callOnClientThread(() -> super.loadSkin(texture, type, callback));
     }
     // Test if the texture is already loaded and cached
@@ -179,10 +178,7 @@ public class HDSkinManager extends SkinManager {
         // Check if the skin exceeds the set limits
         if (this.exceedsLimits(maxResolution, location)) {
           LOGGER.debug("Not loading skin {} because it exceeds configured resolution limits: {}", localSkinPath, maxResolution);
-          final UUID target = this.findAssociatedUniqueId((HDMinecraftProfileTexture) texture);
-          if (target != null) {
-            this.invalidateSkin(target);
-          }
+          this.invalidateSkins(this.findAssociatedUniqueIds((HDMinecraftProfileTexture) texture));
           return ConcurrentUtils.callOnClientThread(() -> super.loadSkin(texture, type, callback));
         }
         // Now we can load the texture
@@ -413,19 +409,19 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
-  @Nullable
-  protected UUID findAssociatedUniqueId(HDMinecraftProfileTexture texture) {
-    return this.findAssociatedUniqueId(texture, this.uniqueIdToSkinHashCache.asMap().entrySet());
+  @NotNull
+  protected Set<UUID> findAssociatedUniqueIds(HDMinecraftProfileTexture texture) {
+    return this.findAssociatedUniqueIds(texture, this.uniqueIdToSkinHashCache.asMap().entrySet());
   }
 
-  @Nullable
-  private UUID findAssociatedUniqueId(HDMinecraftProfileTexture texture, Set<Map.Entry<UUID, SkinHashWrapper>> knownHolders) {
-    for (Map.Entry<UUID, SkinHashWrapper> entry : knownHolders) {
-      if (entry.getValue().hasSkin() && entry.getValue().getSkinHash().equals(texture.getHash())) {
-        return entry.getKey();
-      }
-    }
-    return null;
+  @NotNull
+  private Set<UUID> findAssociatedUniqueIds(HDMinecraftProfileTexture texture, Set<Map.Entry<UUID, SkinHashWrapper>> knownHolders) {
+    return knownHolders
+      .stream()
+      .filter(entry -> entry.getValue().hasSkin())
+      .filter(entry -> entry.getValue().getSkinHash().equals(texture.getHash()))
+      .map(Map.Entry::getKey)
+      .collect(Collectors.toSet());
   }
 
   public void pushSkinUpdate(UUID playerUniqueId, String newSkinHash) {
@@ -480,6 +476,12 @@ public class HDSkinManager extends SkinManager {
       this.uniqueIdToSkinHashCache.invalidate(uniqueId);
     }
     this.invalidateSkin(uniqueId);
+  }
+
+  protected void invalidateSkins(Set<UUID> uniqueIds) {
+    for (UUID uniqueId : uniqueIds) {
+      this.invalidateSkin(uniqueId);
+    }
   }
 
   protected void invalidateSkin(UUID uuid) {
