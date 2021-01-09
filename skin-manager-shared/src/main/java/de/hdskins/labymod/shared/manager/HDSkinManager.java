@@ -128,11 +128,16 @@ public class HDSkinManager extends SkinManager {
     // Register listeners to this skin manager
     addonContext.getNetworkClient().getPacketListenerRegistry().registerListeners(new NetworkListeners(this, addonContext.getTranslationRegistry()));
     // We are ready
-    addonContext.getNetworkClient().sendPacket(new PacketClientReady());
+    this.initConnection();
     // Register client listeners to forge & internal event bus
     final ClientListeners clientListeners = new ClientListeners(this);
     LabyMod.getInstance().getLabyModAPI().registerForgeListener(clientListeners);
     Constants.EVENT_BUS.registerListener(clientListeners);
+  }
+
+  public void initConnection() {
+    this.addonContext.getNetworkClient().sendPacket(new PacketClientReady());
+    this.invalidateAll();
   }
 
   @Override

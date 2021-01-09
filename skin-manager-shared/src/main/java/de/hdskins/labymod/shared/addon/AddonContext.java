@@ -210,6 +210,7 @@ public class AddonContext {
         // We are now connected to the server again so we can re-enable the skin manager
         this.active.set(true);
         this.reconnecting.set(false);
+        this.skinManager.initConnection();
       });
     }
   }
