@@ -143,14 +143,12 @@ public final class NetworkListeners {
       ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext());
     }
 
-    if (packet.getReason().trim().isEmpty()) {
-      String message = packet.getReason();
-      if (packet.isTranslate()) {
-        message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getReason(), EMPTY_OBJECT_ARRAY);
-      }
-
-      LabyModUtils.displayAchievement((packet.isBanned() ? Constants.FAILURE : Constants.SUCCESS) + "BAN UPDATE", message);
+    String message = packet.getReason();
+    if (packet.isTranslate()) {
+      message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getReason(), EMPTY_OBJECT_ARRAY);
     }
+
+    LabyModUtils.displayAchievement((packet.isBanned() ? Constants.FAILURE : Constants.SUCCESS) + " BAN UPDATE", message);
   }
 
   @PacketListener
