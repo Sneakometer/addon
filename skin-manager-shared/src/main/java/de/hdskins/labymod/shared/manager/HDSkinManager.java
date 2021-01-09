@@ -135,11 +135,6 @@ public class HDSkinManager extends SkinManager {
     Constants.EVENT_BUS.registerListener(clientListeners);
   }
 
-  public void initConnection() {
-    this.addonContext.getNetworkClient().sendPacket(new PacketClientReady());
-    this.invalidateAll();
-  }
-
   @Override
   public ResourceLocation loadSkin(MinecraftProfileTexture texture, MinecraftProfileTexture.Type type) {
     return this.loadSkin(texture, type, null);
@@ -385,6 +380,11 @@ public class HDSkinManager extends SkinManager {
       type,
       callback
     ), () -> ConcurrentUtils.callOnClientThread(ConcurrentUtils.runnableToCallable(() -> HDSkinManager.super.loadSkin(texture, type, callback))));
+  }
+
+  public void initConnection() {
+    this.addonContext.getNetworkClient().sendPacket(new PacketClientReady());
+    this.invalidateAll();
   }
 
   public void pushSkinDelete(String skinHash) {
