@@ -306,28 +306,6 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
-  private void handleUniqueIdRemove(RemovalNotification<Object, ?> notification) {
-    if (notification.getKey() instanceof UUID && HANDLED_CAUSES.contains(notification.getCause())) {
-      if (this.addonContext.getActive().get()) {
-        this.sentAllQueuedUnloads();
-        this.addonContext.getNetworkClient().sendPacket(new PacketClientLiveSkinUnload((UUID) notification.getKey()));
-      } else {
-        this.nonSentUnloads.add((UUID) notification.getKey());
-      }
-    }
-  }
-
-  private void sentAllQueuedUnloads() {
-    if (!this.nonSentUnloads.isEmpty()) {
-      UUID uniqueId;
-      while ((uniqueId = this.nonSentUnloads.poll()) != null) {
-        if (this.uniqueIdToSkinHashCache.getIfPresent(uniqueId) == null) {
-          this.addonContext.getNetworkClient().sendPacket(new PacketClientLiveSkinUnload(uniqueId));
-        }
-      }
-    }
-  }
-
   @Nonnull
   private FutureListener<PacketBase> newListenerForSkinIdLoad(UUID uniqueId, GameProfile profile, @Nullable SkinAvailableCallback callback, boolean requireSecure) {
     return FunctionalFutureListener.listener(packetBase -> {
@@ -483,6 +461,19 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
+  private void handleUniqueIdRemove(RemovalNotification<Object, Object> notification) {
+    if (notification.getKey() instanceof UUID && HANDLED_CAUSES.contains(notification.getCause())) {
+      final UUID removed = (UUID) notification.getKey();
+      final UUID self = LabyMod.getInstance().getPlayerUUID();
+      final NetHandlerPlayClient netHandlerPlayClient = this.netHandlerPlayerClient.get();
+      if ((self == null || !self.equals(removed)) && (netHandlerPlayClient == null || netHandlerPlayClient.getPlayerInfo(removed) == null)) {
+        this.handleUniqueIdRemove(removed);
+      } else if (notification.getValue() != null) {
+        this.uniqueIdToSkinHashCache.put(removed, (SkinHashWrapper) notification.getValue());
+      }
+    }
+  }
+
   protected void invalidateSkin(UUID uuid) {
     final NetHandlerPlayClient netHandlerPlayClient = this.netHandlerPlayerClient.get();
     if (netHandlerPlayClient != null && !netHandlerPlayClient.getPlayerInfoMap().isEmpty()) {
@@ -510,6 +501,26 @@ public class HDSkinManager extends SkinManager {
       && location.isResolutionAvailable()
       && location.getImageHeight() > max.getHeight()
       && location.getImageWidth() > max.getWidth();
+  }
+
+  private void handleUniqueIdRemove(UUID uniqueId) {
+    if (this.addonContext.getActive().get()) {
+      this.sentAllQueuedUnloads();
+      this.addonContext.getNetworkClient().sendPacket(new PacketClientLiveSkinUnload(uniqueId));
+    } else {
+      this.nonSentUnloads.add(uniqueId);
+    }
+  }
+
+  private void sentAllQueuedUnloads() {
+    if (!this.nonSentUnloads.isEmpty()) {
+      UUID uniqueId;
+      while ((uniqueId = this.nonSentUnloads.poll()) != null) {
+        if (this.uniqueIdToSkinHashCache.getIfPresent(uniqueId) == null) {
+          this.addonContext.getNetworkClient().sendPacket(new PacketClientLiveSkinUnload(uniqueId));
+        }
+      }
+    }
   }
 
   public AddonContext getAddonContext() {
