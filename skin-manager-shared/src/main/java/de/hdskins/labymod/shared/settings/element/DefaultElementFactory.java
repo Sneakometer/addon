@@ -23,7 +23,6 @@ import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement
 import de.hdskins.labymod.shared.settings.element.elements.EulaButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import net.labymod.settings.elements.ControlElement;
-import net.labymod.settings.elements.DropDownElement;
 import net.labymod.utils.Consumer;
 
 import javax.annotation.Nonnull;
@@ -46,16 +45,16 @@ import java.util.function.BiFunction;
   public ChangeableBooleanElement brewBooleanElement(String displayName, ControlElement.IconData iconData, String on, String off, boolean currentValue,
                                                      BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener, Consumer<ChangeableBooleanElement> customizer) {
     ChangeableBooleanElement element = new ChangeableBooleanElement(displayName, iconData, on, off, currentValue, toggleListener);
-    element.setSettingEnabled(this.settingsEnabledByDefault);
+    element.setSettingEnabled(this.shouldBeEnabled(element));
     customizer.accept(element);
     return element;
   }
 
   @Nonnull
   @Override
-  public <T> DropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener, Consumer<DropDownElement<T>> customizer) {
-    DropDownElement<T> dropDownElement = CustomDropDownElement.of(displayName, iconData, initialValue, values, changeListener);
-    dropDownElement.setSettingEnabled(this.settingsEnabledByDefault);
+  public <T> CustomDropDownElement<T> brewDropDownElement(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<CustomDropDownElement<T>, T> changeListener, Consumer<CustomDropDownElement<T>> customizer) {
+    CustomDropDownElement<T> dropDownElement = CustomDropDownElement.of(displayName, iconData, initialValue, values, changeListener);
+    dropDownElement.setSettingEnabled(this.shouldBeEnabled(dropDownElement));
     customizer.accept(dropDownElement);
     return dropDownElement;
   }
@@ -64,7 +63,7 @@ import java.util.function.BiFunction;
   @Override
   public ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer) {
     ButtonElement element = new ButtonElement(displayName, iconData, inButtonName, clickListener);
-    element.setSettingEnabled(this.settingsEnabledByDefault);
+    element.setSettingEnabled(this.shouldBeEnabled(element));
     customizer.accept(element);
     return element;
   }
@@ -93,5 +92,9 @@ import java.util.function.BiFunction;
   @Override
   public void setSettingsEnabledByDefault(boolean settingsEnabledByDefault) {
     this.settingsEnabledByDefault = settingsEnabledByDefault;
+  }
+
+  private boolean shouldBeEnabled(@Nonnull ControlElement element) {
+    return element instanceof PermanentElement && ((PermanentElement) element).isPermanent() || this.settingsEnabledByDefault;
   }
 }

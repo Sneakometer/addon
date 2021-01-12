@@ -26,6 +26,7 @@ import de.hdskins.labymod.shared.role.UserRole;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
@@ -37,13 +38,22 @@ public final class ActionFactory {
 
   @Nonnull
   public static List<MarkedUserActionEntry> bakeUserActionEntries(AddonContext addonContext) {
+    return bakeUserActionEntries(addonContext, false);
+  }
+
+  @Nonnull
+  public static List<MarkedUserActionEntry> bakeUserActionEntries(AddonContext addonContext, boolean banned) {
     MarkedUserActionEntry toggleSkinUserActionEntry = new ToggleSkinUserActionEntry(addonContext);
-    if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
-      MarkedUserActionEntry deleteSkinUserActionEntry = new DeleteUserActionEntry(addonContext);
-      return Arrays.asList(toggleSkinUserActionEntry, deleteSkinUserActionEntry);
+    if (banned) {
+      return Collections.singletonList(toggleSkinUserActionEntry);
     } else {
-      MarkedUserActionEntry reportSkinUserActionEntry = new ReportUserActionEntry(addonContext);
-      return Arrays.asList(reportSkinUserActionEntry, toggleSkinUserActionEntry);
+      if (addonContext.getRole().isHigherOrEqualThan(UserRole.STAFF)) {
+        MarkedUserActionEntry deleteSkinUserActionEntry = new DeleteUserActionEntry(addonContext);
+        return Arrays.asList(toggleSkinUserActionEntry, deleteSkinUserActionEntry);
+      } else {
+        MarkedUserActionEntry reportSkinUserActionEntry = new ReportUserActionEntry(addonContext);
+        return Arrays.asList(reportSkinUserActionEntry, toggleSkinUserActionEntry);
+      }
     }
   }
 }

@@ -17,6 +17,7 @@
  */
 package de.hdskins.labymod.shared.settings.element.elements;
 
+import de.hdskins.labymod.shared.settings.element.PermanentElement;
 import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.BooleanElement;
@@ -28,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
-public class ChangeableBooleanElement extends BooleanElement {
+public class ChangeableBooleanElement extends BooleanElement implements PermanentElement {
 
   private final BiFunction<ChangeableBooleanElement, Boolean, CompletableFuture<Boolean>> toggleListener;
   private final AtomicBoolean currentValue;
@@ -37,6 +38,7 @@ public class ChangeableBooleanElement extends BooleanElement {
   private String stringDisabled;
   private GuiButton buttonToggle;
 
+  private boolean permanent;
   private boolean enabled = true;
   private boolean pressable = true;
 
@@ -139,5 +141,15 @@ public class ChangeableBooleanElement extends BooleanElement {
     }
 
     return this;
+  }
+
+  @Override
+  public boolean isPermanent() {
+    return this.permanent;
+  }
+
+  @Override
+  public void setPermanent(boolean permanent) {
+    this.permanent = permanent;
   }
 }

@@ -136,11 +136,11 @@ public final class NetworkListeners {
 
   @PacketListener
   public void handleBanUpdate(PacketServerLiveUpdateBan packet) {
-    SettingInvoker.pushSettingStateUpdate(!packet.isBanned());
-    if (packet.isBanned()) {
-      ActionInvoker.unregisterMarkedEntries();
-    } else {
-      ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext());
+    SettingInvoker.pushBanStateUpdate(packet.isBanned());
+    // Update actions
+    ActionInvoker.unregisterMarkedEntries();
+    for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext(), packet.isBanned())) {
+      ActionInvoker.addUserActionEntry(entry);
     }
 
     String message = packet.getReason();

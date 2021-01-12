@@ -79,6 +79,7 @@ public final class SettingsFactory {
       addonContext.getAddonConfig().showSkinsOfOtherPlayers(),
       new SkinToggleButtonClickHandler(addonContext),
       element -> {
+        element.setPermanent(true);
         element.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("show-all-skins-description"));
       }
     );
@@ -89,13 +90,14 @@ public final class SettingsFactory {
       Arrays.stream(Resolution.VALUES).map(Resolution::getName).collect(Collectors.toList()),
       (ignored, newValue) -> Resolution.byName(newValue).ifPresent(addonContext::setMaxSkinResolution),
       dropDownElement -> {
+        dropDownElement.setPermanent(true);
         dropDownElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("set-max-resolution-option-description"));
       }
     );
     SettingsElement eulaReadElement = ElementFactory.defaultFactory().brewEulaButtonElement(
       new EulaButtonClickListener(addonContext),
-      element -> {
-      });
+      element -> element.setPermanent(true)
+    );
     SettingsElement skinRenderElement = ElementFactory.defaultFactory().brewRenderElement(element -> {
     });
 

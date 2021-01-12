@@ -17,6 +17,7 @@
  */
 package de.hdskins.labymod.shared.settings.element.elements;
 
+import de.hdskins.labymod.shared.settings.element.PermanentElement;
 import net.labymod.gui.elements.DropDownMenu;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.DropDownElement;
@@ -27,20 +28,22 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 @ParametersAreNonnullByDefault
-public final class CustomDropDownElement<T> extends DropDownElement<T> {
+public final class CustomDropDownElement<T> extends DropDownElement<T> implements PermanentElement {
 
   private final DropDownMenu<T> dropDownMenu;
-  private final BiConsumer<DropDownElement<T>, T> changeListener;
+  private final BiConsumer<CustomDropDownElement<T>, T> changeListener;
+
+  private boolean permanent;
   private boolean enabled = false;
 
-  private CustomDropDownElement(String displayName, ControlElement.IconData iconData, DropDownMenu<T> dropDownMenu, BiConsumer<DropDownElement<T>, T> changeListener) {
+  private CustomDropDownElement(String displayName, ControlElement.IconData iconData, DropDownMenu<T> dropDownMenu, BiConsumer<CustomDropDownElement<T>, T> changeListener) {
     super(displayName, "", dropDownMenu, iconData, null);
     this.changeListener = changeListener;
     this.dropDownMenu = dropDownMenu;
   }
 
   @Nonnull
-  public static <T> DropDownElement<T> of(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<DropDownElement<T>, T> changeListener) {
+  public static <T> CustomDropDownElement<T> of(String displayName, ControlElement.IconData iconData, T initialValue, List<T> values, BiConsumer<CustomDropDownElement<T>, T> changeListener) {
     DropDownMenu<T> dropDownMenu = buildDropDownMenu(initialValue, values);
     return new CustomDropDownElement<>(displayName, iconData, dropDownMenu, changeListener);
   }
@@ -67,5 +70,15 @@ public final class CustomDropDownElement<T> extends DropDownElement<T> {
   @Override
   public void setSettingEnabled(boolean settingEnabled) {
     this.enabled = settingEnabled;
+  }
+
+  @Override
+  public boolean isPermanent() {
+    return this.permanent;
+  }
+
+  @Override
+  public void setPermanent(boolean permanent) {
+    this.permanent = permanent;
   }
 }

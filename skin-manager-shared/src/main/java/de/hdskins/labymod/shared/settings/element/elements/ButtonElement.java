@@ -17,6 +17,7 @@
  */
 package de.hdskins.labymod.shared.settings.element.elements;
 
+import de.hdskins.labymod.shared.settings.element.PermanentElement;
 import net.labymod.core.LabyModCore;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.ControlElement;
@@ -25,11 +26,12 @@ import net.minecraft.client.gui.GuiButton;
 
 import java.awt.Color;
 
-public class ButtonElement extends ControlElement {
+public class ButtonElement extends ControlElement implements PermanentElement {
 
   private final GuiButton button = new GuiButton(-2, 0, 0, 0, 20, "");
   private final Consumer<ButtonElement> clickListener;
   private boolean enabled;
+  private boolean permanent;
   private int overriddenStringWidth = -1;
 
   public ButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener) {
@@ -93,5 +95,15 @@ public class ButtonElement extends ControlElement {
 
   public boolean isEnabled() {
     return this.enabled;
+  }
+
+  @Override
+  public boolean isPermanent() {
+    return this.permanent;
+  }
+
+  @Override
+  public void setPermanent(boolean permanent) {
+    this.permanent = permanent;
   }
 }

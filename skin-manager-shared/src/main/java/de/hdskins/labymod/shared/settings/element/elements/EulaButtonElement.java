@@ -17,16 +17,18 @@
  */
 package de.hdskins.labymod.shared.settings.element.elements;
 
+import de.hdskins.labymod.shared.settings.element.PermanentElement;
 import de.hdskins.labymod.shared.utils.ClientUtils;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.ControlElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
-public class EulaButtonElement extends ControlElement {
+public class EulaButtonElement extends ControlElement implements PermanentElement {
 
   private static final ResourceLocation PAPER_LOCATION = new ResourceLocation("textures/items/paper.png");
   private final Runnable clickListener;
+  private boolean permanent;
 
   public EulaButtonElement(Runnable clickListener) {
     super(null, null);
@@ -61,5 +63,15 @@ public class EulaButtonElement extends ControlElement {
     if (this.isMouseOver()) {
       this.clickListener.run();
     }
+  }
+
+  @Override
+  public boolean isPermanent() {
+    return this.permanent;
+  }
+
+  @Override
+  public void setPermanent(boolean permanent) {
+    this.permanent = permanent;
   }
 }

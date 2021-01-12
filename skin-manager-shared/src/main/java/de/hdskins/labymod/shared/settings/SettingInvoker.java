@@ -19,6 +19,7 @@ package de.hdskins.labymod.shared.settings;
 
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.settings.element.ElementFactory;
+import de.hdskins.labymod.shared.settings.element.PermanentElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.SettingsElement;
 
@@ -40,7 +41,6 @@ public final class SettingInvoker {
     if (loadedSettings == null) {
       loadedSettings = Constants.getAddonInfo().getAddonElement().getSubSettings();
     }
-
     return loadedSettings;
   }
 
@@ -48,16 +48,20 @@ public final class SettingInvoker {
     getLoadedSettings().add(settingsElement);
   }
 
-  public static void pushSettingStateUpdate(boolean settingsEnabled) {
-    ElementFactory.defaultFactory().setSettingsEnabledByDefault(settingsEnabled);
+  public static void pushBanStateUpdate(boolean banned) {
+    ElementFactory.defaultFactory().setSettingsEnabledByDefault(!banned);
     for (SettingsElement loadedSetting : loadedSettings) {
-      if (loadedSetting instanceof ControlElement) {
-        ((ControlElement) loadedSetting).setSettingEnabled(settingsEnabled);
+      if (shouldToggle(loadedSetting)) {
+        ((ControlElement) loadedSetting).setSettingEnabled(!banned);
       }
     }
   }
 
   public static void unloadSettingElements() {
     getLoadedSettings().clear();
+  }
+
+  private static boolean shouldToggle(@Nonnull SettingsElement element) {
+    return element instanceof ControlElement && (!(element instanceof PermanentElement) || !((PermanentElement) element).isPermanent());
   }
 }
