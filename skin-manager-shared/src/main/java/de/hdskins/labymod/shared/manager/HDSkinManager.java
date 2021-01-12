@@ -88,6 +88,7 @@ public class HDSkinManager extends SkinManager {
   private static final Collection<RemovalCause> HANDLED_CAUSES = EnumSet.range(RemovalCause.COLLECTED, RemovalCause.SIZE);
 
   private final Path assetsDirectory;
+  private final Field locationSkinField;
   private final AddonContext addonContext;
   private final Field playerTexturesLoadedField;
   private final Supplier<NetHandlerPlayClient> netHandlerPlayerClient;
@@ -118,10 +119,11 @@ public class HDSkinManager extends SkinManager {
     .ticker(Ticker.systemTicker())
     .build();
 
-  public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Field playerTexturesLoadedField, Supplier<NetHandlerPlayClient> netHandlerPlayClientSupplier) {
+  public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Field playerTexturesLoadedField, @Nullable Field locationSkinField, Supplier<NetHandlerPlayClient> netHandlerPlayClientSupplier) {
     super(Minecraft.getMinecraft().getTextureManager(), new File(mcAssetsDir, "skins"), Minecraft.getMinecraft().getSessionService());
     this.assetsDirectory = mcAssetsDir.toPath();
     this.addonContext = addonContext;
+    this.locationSkinField = locationSkinField;
     this.playerTexturesLoadedField = playerTexturesLoadedField;
     this.netHandlerPlayerClient = netHandlerPlayClientSupplier;
     // Register skin manager to addon context
@@ -482,6 +484,9 @@ public class HDSkinManager extends SkinManager {
         uniqueId = GameProfileUtils.getUniqueId(playerInfo.getGameProfile());
         if (uuid.equals(uniqueId)) {
           ReflectionUtils.set(playerInfo, Boolean.FALSE, this.playerTexturesLoadedField);
+          if (this.locationSkinField != null) {
+            ReflectionUtils.set(playerInfo, null, this.locationSkinField);
+          }
         }
       }
     }
@@ -492,6 +497,9 @@ public class HDSkinManager extends SkinManager {
     if (netHandlerPlayClient != null && !netHandlerPlayClient.getPlayerInfoMap().isEmpty()) {
       for (NetworkPlayerInfo playerInfo : ImmutableSet.copyOf(netHandlerPlayClient.getPlayerInfoMap())) {
         ReflectionUtils.set(playerInfo, Boolean.FALSE, this.playerTexturesLoadedField);
+        if (this.locationSkinField != null) {
+          ReflectionUtils.set(playerInfo, null, this.locationSkinField);
+        }
       }
     }
   }

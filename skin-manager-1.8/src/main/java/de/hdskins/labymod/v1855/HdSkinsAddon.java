@@ -39,13 +39,17 @@ public class HdSkinsAddon extends LabyModAddonBase {
       File assetsDir = ReflectionUtils.get(File.class, Minecraft.class, Minecraft.getMinecraft(), "fileAssets", "field_110446_Y", "ak");
       Objects.requireNonNull(assetsDir, "Unable to assets dir correctly!");
       // Network player info bridge
+      // location skin is only needed for 1.8 in 1.12 the check was removed
+      Field locationSkin = ReflectionUtils.getFieldByNames(NetworkPlayerInfo.class, "locationSkin", "field_178865_e", "e");
       Field playerTexturesLoaded = ReflectionUtils.getFieldByNames(NetworkPlayerInfo.class, "playerTexturesLoaded", "field_178864_d", "d");
+      Objects.requireNonNull(locationSkin, "Unable to find locationSkin field");
       Objects.requireNonNull(playerTexturesLoaded, "Unable to find playerTexturesLoaded boolean");
 
       ReflectionUtils.set(Minecraft.class, Minecraft.getMinecraft(), new HDSkinManager(
         context,
         assetsDir,
         playerTexturesLoaded,
+        locationSkin,
         Minecraft.getMinecraft()::getNetHandler
       ), "skinManager", "field_152350_aA", "aL");
     });

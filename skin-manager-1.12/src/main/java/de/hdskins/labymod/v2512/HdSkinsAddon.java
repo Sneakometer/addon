@@ -46,6 +46,7 @@ public class HdSkinsAddon extends LabyModAddonBase {
         context,
         assetsDir,
         playerTexturesLoaded,
+        null,
         Minecraft.getMinecraft()::getConnection
       ), "skinManager", "field_152350_aA", "aP");
     });
