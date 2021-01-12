@@ -142,6 +142,12 @@ public final class NetworkListeners {
     for (MarkedUserActionEntry entry : ActionFactory.bakeUserActionEntries(this.hdSkinManager.getAddonContext(), packet.isBanned())) {
       ActionInvoker.addUserActionEntry(entry);
     }
+    // update ban to addon context
+    if (packet.isBanned()) {
+      this.hdSkinManager.getAddonContext().setCurrentBan(packet);
+    } else {
+      this.hdSkinManager.getAddonContext().setCurrentBan(null);
+    }
 
     String message = packet.getReason();
     if (packet.isTranslate()) {

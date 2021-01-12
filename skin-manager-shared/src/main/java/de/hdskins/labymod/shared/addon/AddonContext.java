@@ -35,6 +35,7 @@ import de.hdskins.protocol.packets.reading.client.PacketClientReportSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientSetSlim;
 import de.hdskins.protocol.packets.reading.client.PacketClientSkinSettings;
 import de.hdskins.protocol.packets.reading.client.PacketClientUploadSkin;
+import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import de.hdskins.protocol.packets.reading.ratelimit.PacketServerUpdateRateLimits;
 import net.labymod.api.LabyModAddon;
 import net.labymod.main.LabyMod;
@@ -68,6 +69,7 @@ public class AddonContext {
   private HDSkinManager skinManager;
   private ClientSettings clientSettings;
   private UserRole userRole = UserRole.USER;
+  private PacketServerLiveUpdateBan currentBan;
   private PacketServerUpdateRateLimits.RateLimits rateLimits = EMPTY;
 
   public AddonContext(AddonConfig addonConfig, LabyModAddon labyModAddon, NetworkClient networkClient, TranslationRegistry translationRegistry) {
@@ -189,6 +191,15 @@ public class AddonContext {
       this.networkClient.sendPacket(new PacketClientSkinSettings(this.clientSettings));
       Constants.EVENT_BUS.postReported(new MaxSkinResolutionChangeEvent(resolution, before));
     }
+  }
+
+  @Nullable
+  public PacketServerLiveUpdateBan getCurrentBan() {
+    return this.currentBan;
+  }
+
+  public void setCurrentBan(@Nullable PacketServerLiveUpdateBan currentBan) {
+    this.currentBan = currentBan;
   }
 
   public PacketServerUpdateRateLimits.RateLimits getRateLimits() {

@@ -17,6 +17,8 @@
  */
 package de.hdskins.labymod.shared.settings.element;
 
+import de.hdskins.labymod.shared.addon.AddonContext;
+import de.hdskins.labymod.shared.settings.element.elements.BanDisplayElement;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
@@ -80,6 +82,14 @@ import java.util.function.BiFunction;
   @Override
   public EulaButtonElement brewEulaButtonElement(Runnable clickListener, Consumer<EulaButtonElement> customizer) {
     EulaButtonElement element = new EulaButtonElement(clickListener);
+    customizer.accept(element);
+    return element;
+  }
+
+  @Nonnull
+  @Override
+  public BanDisplayElement brewBanDisplayElement(AddonContext context, Consumer<BanDisplayElement> customizer) {
+    BanDisplayElement element = new BanDisplayElement(context);
     customizer.accept(element);
     return element;
   }

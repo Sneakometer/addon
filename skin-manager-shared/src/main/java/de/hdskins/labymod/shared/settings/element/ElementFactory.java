@@ -17,6 +17,8 @@
  */
 package de.hdskins.labymod.shared.settings.element;
 
+import de.hdskins.labymod.shared.addon.AddonContext;
+import de.hdskins.labymod.shared.settings.element.elements.BanDisplayElement;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
@@ -54,6 +56,9 @@ public interface ElementFactory {
 
   @Nonnull
   EulaButtonElement brewEulaButtonElement(Runnable clickListener, Consumer<EulaButtonElement> customizer);
+
+  @Nonnull
+  BanDisplayElement brewBanDisplayElement(AddonContext context, Consumer<BanDisplayElement> customizer);
 
   boolean areSettingsEnabledByDefault();
 

@@ -100,12 +100,16 @@ public final class SettingsFactory {
     );
     SettingsElement skinRenderElement = ElementFactory.defaultFactory().brewRenderElement(element -> {
     });
+    SettingsElement banDisplayElement = ElementFactory.defaultFactory().brewBanDisplayElement(
+      addonContext,
+      element -> element.setPermanent(true)
+    );
 
     return Arrays.asList(
       setSlimElement, uploadSkinElement,
       deleteSkinElement, toggleSkinVisibilityElement,
       maxResolutionLoadOption, skinRenderElement,
-      eulaReadElement
+      banDisplayElement, eulaReadElement
     );
   }
 }
