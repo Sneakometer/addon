@@ -17,6 +17,7 @@
  */
 package de.hdskins.labymod.shared.utils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.UUID;
 
 public final class GameProfileUtils {
@@ -44,17 +46,19 @@ public final class GameProfileUtils {
 
   @Nullable
   public static UUID getUniqueId(@Nonnull GameProfile profile) {
-    final Property textureProperty = Iterables.getFirst(profile.getProperties().get("textures"), null);
-    if (textureProperty == null) {
-      return profile.getId();
+    final Collection<Property> properties = profile.getProperties().get("textures");
+    if (!properties.isEmpty()) {
+      final Property textureProperty = Iterables.getFirst(ImmutableList.copyOf(properties), null);
+      if (textureProperty != null) {
+        try {
+          final String json = new String(Base64.getDecoder().decode(textureProperty.getValue()), StandardCharsets.UTF_8);
+          final MinecraftTexturesPayload result = GSON.fromJson(json, MinecraftTexturesPayload.class);
+          return result == null || result.getProfileId() == null ? profile.getId() : result.getProfileId();
+        } catch (JsonParseException exception) {
+          return profile.getId();
+        }
+      }
     }
-
-    try {
-      final String json = new String(Base64.getDecoder().decode(textureProperty.getValue()), StandardCharsets.UTF_8);
-      final MinecraftTexturesPayload result = GSON.fromJson(json, MinecraftTexturesPayload.class);
-      return result == null || result.getProfileId() == null ? profile.getId() : result.getProfileId();
-    } catch (JsonParseException exception) {
-      return profile.getId();
-    }
+    return profile.getId();
   }
 }
