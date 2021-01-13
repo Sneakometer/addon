@@ -31,7 +31,7 @@ import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
 import de.hdskins.protocol.packets.general.PacketDisconnect;
-import de.hdskins.protocol.packets.reading.live.PacketServerDisplayChatMessage;
+import de.hdskins.protocol.packets.reading.live.PacketServerDisplayAchievement;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeletePlayer;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeleteSkin;
@@ -118,7 +118,7 @@ public final class NetworkListeners {
   }
 
   @PacketListener
-  public void handleDisplayMessage(PacketServerDisplayChatMessage packet) {
+  public void handleDisplayMessage(PacketServerDisplayAchievement packet) {
     final String message;
     if (packet.isTranslationKey()) {
       message = this.hdSkinManager.getAddonContext().getTranslationRegistry().translateMessage(packet.getMessage(), EMPTY_OBJECT_ARRAY);
@@ -126,7 +126,7 @@ public final class NetworkListeners {
       message = packet.getMessage();
     }
 
-    LabyMod.getInstance().displayMessageInChat(message);
+    LabyMod.getInstance().getGuiCustomAchievement().displayAchievement(packet.getTitle(), message);
   }
 
   @PacketListener
