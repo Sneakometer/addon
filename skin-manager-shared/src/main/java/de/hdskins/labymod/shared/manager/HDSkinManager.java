@@ -75,6 +75,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -93,6 +95,7 @@ public class HDSkinManager extends SkinManager {
   private final Field playerTexturesLoadedField;
   private final Supplier<NetHandlerPlayClient> netHandlerPlayerClient;
   private final Queue<UUID> nonSentUnloads = new ConcurrentLinkedQueue<>();
+  private final Executor requestTimeoutBacker = Executors.newCachedThreadPool();
   private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
   private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = CacheBuilder.newBuilder()
     .concurrencyLevel(4)
@@ -252,7 +255,8 @@ public class HDSkinManager extends SkinManager {
       // We send a query to the server to get the skin hash from the uuid given
       this.addonContext.getNetworkClient()
         .sendQuery(new PacketClientRequestSkinId(profileId))
-        .addListener(this.newListenerForSkinIdLoad(profileId, profile, callback, requireSecure));
+        .addListener(this.newListenerForSkinIdLoad(profileId, profile, callback, requireSecure))
+        .await(this.addonContext.getAddonConfig().getSkinIdRequestTimeoutMillis(), TimeUnit.MILLISECONDS, this.requestTimeoutBacker);
     } else if (response.hasSkin()) {
       // Check if the skin will exceed the loading limit
       final HDMinecraftProfileTexture texture = response.toProfileTexture();
@@ -309,7 +313,9 @@ public class HDSkinManager extends SkinManager {
       return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, texture);
     }
     if (this.addonContext.getActive().get()) {
-      this.addonContext.getNetworkClient().sendQuery(new PacketClientRequestSkinId(profileId)).addListener(this.forSkinIdCacheOnly(profileId));
+      this.addonContext.getNetworkClient()
+        .sendQuery(new PacketClientRequestSkinId(profileId))
+        .addListener(this.forSkinIdCacheOnly(profileId));
     }
     if (profile.getProperties().containsKey("textures")) {
       return this.mojangProfileCache.getUnchecked(profile);

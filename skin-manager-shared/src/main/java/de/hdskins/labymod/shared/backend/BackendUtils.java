@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -74,6 +75,7 @@ public final class BackendUtils {
       networkClient.setReconnectInterval(addonConfig.getReconnectInterval());
       return connect0(networkClient, addonConfig);
     }).thenApply(networkClient -> {
+      networkClient.setDefaultQueryTimeout(addonConfig.getQueryTimeoutMillis(), TimeUnit.MILLISECONDS);
       networkClient.sendPacket(new PacketClientSkinSettings(new ClientSettings(
         addonConfig.getMaxSkinResolution().getWidth(),
         addonConfig.getMaxSkinResolution().getHeight()

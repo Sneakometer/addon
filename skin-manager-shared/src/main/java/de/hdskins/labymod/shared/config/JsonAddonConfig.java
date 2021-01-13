@@ -87,6 +87,9 @@ public class JsonAddonConfig implements AddonConfig {
   // connection settings
   private long firstReconnectInterval;
   private long reconnectInterval;
+  // communication timeouts
+  private long queryTimeoutMillis;
+  private long skinIdRequestMillis;
   // client settings
   private boolean slim;
   private Resolution maxSkinResolution;
@@ -98,6 +101,8 @@ public class JsonAddonConfig implements AddonConfig {
     this.serverConfig = DEFAULT_SERVER_CONFIG;
     this.firstReconnectInterval = TimeUnit.SECONDS.toMillis(10);
     this.reconnectInterval = TimeUnit.SECONDS.toMillis(5);
+    this.queryTimeoutMillis = TimeUnit.SECONDS.toMillis(10);
+    this.skinIdRequestMillis = TimeUnit.SECONDS.toMillis(5);
     this.slim = false;
     this.disabledSkins = new ArrayList<>();
     this.maxSkinResolution = Resolution.RESOLUTION_ALL;
@@ -194,13 +199,39 @@ public class JsonAddonConfig implements AddonConfig {
 
   @Override
   public long getReconnectInterval() {
-    return Math.min(1000, this.reconnectInterval);
+    return Math.max(1000, this.reconnectInterval);
   }
 
   @Override
   public void setReconnectInterval(long reconnectInterval) {
     if (this.reconnectInterval != reconnectInterval && reconnectInterval >= MIN_RECONNECT_TIME) {
       this.reconnectInterval = reconnectInterval;
+      this.save();
+    }
+  }
+
+  @Override
+  public long getQueryTimeoutMillis() {
+    return Math.max(1000, this.queryTimeoutMillis);
+  }
+
+  @Override
+  public void setQueryTimeoutMillis(long queryTimeoutMillis) {
+    if (this.queryTimeoutMillis != queryTimeoutMillis && queryTimeoutMillis >= MIN_RECONNECT_TIME) {
+      this.queryTimeoutMillis = queryTimeoutMillis;
+      this.save();
+    }
+  }
+
+  @Override
+  public long getSkinIdRequestTimeoutMillis() {
+    return Math.max(1000, this.skinIdRequestMillis);
+  }
+
+  @Override
+  public void setSkinIdRequestTimeoutMillis(long skinIdRequestTimeoutMillis) {
+    if (this.skinIdRequestMillis != skinIdRequestTimeoutMillis && skinIdRequestTimeoutMillis >= MIN_RECONNECT_TIME) {
+      this.skinIdRequestMillis = skinIdRequestTimeoutMillis;
       this.save();
     }
   }

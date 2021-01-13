@@ -52,6 +52,14 @@ public interface AddonConfig extends Serializable {
 
   void setReconnectInterval(long reconnectInterval);
 
+  long getQueryTimeoutMillis();
+
+  void setQueryTimeoutMillis(long queryTimeoutMillis);
+
+  long getSkinIdRequestTimeoutMillis();
+
+  void setSkinIdRequestTimeoutMillis(long skinIdRequestTimeoutMillis);
+
   boolean showSkinsOfOtherPlayers();
 
   void setShowSkinsOfOtherPlayers(boolean showSkinsOfOtherPlayers);
