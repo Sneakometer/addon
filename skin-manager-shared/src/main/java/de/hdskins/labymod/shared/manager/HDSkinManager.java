@@ -281,6 +281,16 @@ public class HDSkinManager extends SkinManager {
       }
     }
 
+    final UUID self = LabyMod.getInstance().getPlayerUUID();
+    if (profileId.version() != 4 || (!profileId.equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profileId)) {
+      LOGGER.debug("Not loading skin for profile: {} because the unique id is blocked locally.", profile);
+      if (profile.getProperties().containsKey("textures")) {
+        return this.mojangProfileCache.getUnchecked(profile);
+      } else {
+        return ImmutableMap.of();
+      }
+    }
+
     final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profileId);
     if (response != null) {
       if (!response.hasSkin()) {
