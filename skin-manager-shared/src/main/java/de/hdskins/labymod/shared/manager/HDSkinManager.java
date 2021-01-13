@@ -86,6 +86,7 @@ import java.util.stream.Collectors;
 public class HDSkinManager extends SkinManager {
 
   private static final SkinHashWrapper NO_SKIN = SkinHashWrapper.newEmpty();
+  private static final SkinHashWrapper REQUESTING = SkinHashWrapper.newEmpty();
   private static final Logger LOGGER = LogManager.getLogger(HDSkinManager.class);
   private static final Collection<RemovalCause> HANDLED_CAUSES = EnumSet.range(RemovalCause.COLLECTED, RemovalCause.SIZE);
 
@@ -253,6 +254,7 @@ public class HDSkinManager extends SkinManager {
         return;
       }
       // We send a query to the server to get the skin hash from the uuid given
+      this.uniqueIdToSkinHashCache.put(profileId, REQUESTING);
       this.addonContext.getNetworkClient()
         .sendQuery(new PacketClientRequestSkinId(profileId))
         .addListener(this.newListenerForSkinIdLoad(profileId, profile, callback, requireSecure))
@@ -313,6 +315,7 @@ public class HDSkinManager extends SkinManager {
       return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, texture);
     }
     if (this.addonContext.getActive().get()) {
+      this.uniqueIdToSkinHashCache.put(profileId, REQUESTING);
       this.addonContext.getNetworkClient()
         .sendQuery(new PacketClientRequestSkinId(profileId))
         .addListener(this.forSkinIdCacheOnly(profileId));
