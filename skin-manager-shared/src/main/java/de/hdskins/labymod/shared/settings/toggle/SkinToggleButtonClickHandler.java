@@ -39,10 +39,10 @@ public class SkinToggleButtonClickHandler implements BiFunction<ChangeableBoolea
   public CompletableFuture<Boolean> apply(ChangeableBooleanElement element, Boolean showSkins) {
     this.addonContext.getAddonConfig().setShowSkinsOfOtherPlayers(showSkins);
     if (showSkins) {
-      this.addonContext.getSkinManager().invalidateAllSkins();
+      this.addonContext.getSkinManager().invalidateAllMinecraftSkinCaches();
       LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-enabled"));
     } else {
-      this.addonContext.getSkinManager().invalidateAll();
+      this.addonContext.getSkinManager().invalidateAllMinecraftSkinCaches();
       LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("show-all-skins-disabled"));
     }
 

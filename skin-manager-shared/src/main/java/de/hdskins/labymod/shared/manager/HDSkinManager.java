@@ -378,7 +378,7 @@ public class HDSkinManager extends SkinManager {
 
   public void initConnection() {
     this.addonContext.getNetworkClient().sendPacket(new PacketClientReady());
-    this.invalidateAll();
+    this.invalidateAllSkins();
   }
 
   public void pushSkinDelete(String skinHash) {
@@ -403,7 +403,7 @@ public class HDSkinManager extends SkinManager {
   public void pushMaxResolutionUpdate(Resolution now, Resolution before) {
     final int index = before.compareTo(now);
     if (index != 0) {
-      this.invalidateAllSkins0();
+      this.invalidateAllMinecraftSkinCaches();
     }
   }
 
@@ -444,18 +444,10 @@ public class HDSkinManager extends SkinManager {
     this.updateSkin(playerUniqueId, wrapper);
   }
 
-  public void invalidateAll() {
-    for (UUID uuid : this.uniqueIdToSkinHashCache.asMap().keySet()) {
-      this.invalidateSkin(uuid);
-    }
-    this.textureToLocationCache.invalidateAll();
-    this.uniqueIdToSkinHashCache.invalidateAll();
-  }
-
   public void invalidateAllSkins() {
     this.textureToLocationCache.invalidateAll();
     this.uniqueIdToSkinHashCache.invalidateAll();
-    this.invalidateAllSkins0();
+    this.invalidateAllMinecraftSkinCaches();
   }
 
   public void updateSkin(UUID uniqueId, @Nullable SkinHashWrapper wrapper) {
@@ -511,7 +503,7 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
-  private void invalidateAllSkins0() {
+  public void invalidateAllMinecraftSkinCaches() {
     final NetHandlerPlayClient netHandlerPlayClient = this.netHandlerPlayerClient.get();
     if (netHandlerPlayClient != null && !netHandlerPlayClient.getPlayerInfoMap().isEmpty()) {
       for (NetworkPlayerInfo playerInfo : ImmutableSet.copyOf(netHandlerPlayClient.getPlayerInfoMap())) {
