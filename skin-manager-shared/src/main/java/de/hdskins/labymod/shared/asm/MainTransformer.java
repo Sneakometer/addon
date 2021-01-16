@@ -20,26 +20,54 @@ package de.hdskins.labymod.shared.asm;
 import com.google.common.collect.ImmutableMap;
 import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV112;
 import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV18;
+import de.hdskins.labymod.shared.asm.debug.DebugScreenTransformerV112;
+import de.hdskins.labymod.shared.asm.debug.DebugScreenTransformerV18;
 import de.hdskins.labymod.shared.asm.draw.DrawUtilsTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class MainTransformer implements IClassTransformer {
 
-  private final Map<String, IClassTransformer> transformers = ImmutableMap.of(
-    "net.labymod.utils.DrawUtils", new DrawUtilsTransformer(),
+  private final Map<String, IClassTransformer> transformers = TransformerMapper.mapper()
+    .putEntry(new DrawUtilsTransformer(), "net.labymod.utils.DrawUtils")
     // 1.8 achievement render
-    "net.minecraft.client.gui.achievement.GuiAchievement", new AchievementRenderTransformerV18(),
-    "ayd", new AchievementRenderTransformerV18(),
+    .putEntry(new AchievementRenderTransformerV18(), "net.minecraft.client.gui.achievement.GuiAchievement", "ayd")
     // 1.12 achievement render
-    "net.minecraft.client.gui.toasts.GuiToast", new AchievementRenderTransformerV112(),
-    "bkc", new AchievementRenderTransformerV112()
-  );
+    .putEntry(new AchievementRenderTransformerV112(), "net.minecraft.client.gui.toasts.GuiToast", "bkc")
+    // 1.8 debug screen renderer
+    .putEntry(new DebugScreenTransformerV18(), "net.minecraft.client.gui.GuiOverlayDebug", "avv")
+    // 1.12 debug screen renderer
+    .putEntry(new DebugScreenTransformerV112(), "net.minecraft.client.gui.GuiOverlayDebug")
+    .build();
 
   @Override
   public byte[] transform(String name, String transformedName, byte[] basicClass) {
     IClassTransformer transformer = this.transformers.get(name);
     return transformer == null ? basicClass : transformer.transform(name, transformedName, basicClass);
+  }
+
+  private static final class TransformerMapper {
+
+    private final ImmutableMap.Builder<String, IClassTransformer> transformers = ImmutableMap.builder();
+
+    @Nonnull
+    public static TransformerMapper mapper() {
+      return new TransformerMapper();
+    }
+
+    @Nonnull
+    public TransformerMapper putEntry(@Nonnull IClassTransformer transformer, @Nonnull String... classes) {
+      for (String aClass : classes) {
+        this.transformers.put(aClass, transformer);
+      }
+      return this;
+    }
+
+    @Nonnull
+    public Map<String, IClassTransformer> build() {
+      return this.transformers.build();
+    }
   }
 }
