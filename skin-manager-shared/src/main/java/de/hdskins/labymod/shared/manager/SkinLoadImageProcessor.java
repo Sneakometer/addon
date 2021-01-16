@@ -37,7 +37,7 @@ public final class SkinLoadImageProcessor {
   @Nonnull
   public static BufferedImage process(@Nonnull InputStream stream) throws IOException {
     BufferedImage in = ImageIO.read(stream);
-    BufferedImage transform = new BufferedImage(in.getHeight(), in.getWidth(), BufferedImage.TYPE_INT_ARGB);
+    BufferedImage transform = new BufferedImage(in.getWidth(), in.getWidth(), BufferedImage.TYPE_INT_ARGB);
     process(in, transform);
     return transform;
   }
@@ -45,19 +45,20 @@ public final class SkinLoadImageProcessor {
   private static void process(@Nonnull BufferedImage in, @Nonnull BufferedImage i) {
     final Graphics graphics = i.getGraphics();
     graphics.drawImage(in, 0, 0, null);
-    if (i.getWidth() != i.getHeight()) {
-      graphics.drawImage(i, x(i, 24), y(i, 48), x(i, 20), y(i, 52), x(i, 4), y(i, 16), x(i, 8), y(i, 20), null);
-      graphics.drawImage(i, x(i, 28), y(i, 48), x(i, 24), y(i, 52), x(i, 8), y(i, 16), x(i, 12), y(i, 20), null);
-      graphics.drawImage(i, x(i, 20), y(i, 52), x(i, 16), y(i, 64), x(i, 8), y(i, 20), x(i, 12), y(i, 32), null);
-      graphics.drawImage(i, x(i, 24), y(i, 52), x(i, 20), y(i, 64), x(i, 4), y(i, 20), x(i, 8), y(i, 32), null);
-      graphics.drawImage(i, x(i, 28), y(i, 52), x(i, 24), y(i, 64), x(i, 0), y(i, 20), x(i, 4), y(i, 32), null);
-      graphics.drawImage(i, x(i, 32), y(i, 52), x(i, 28), y(i, 64), x(i, 12), y(i, 20), x(i, 16), y(i, 32), null);
-      graphics.drawImage(i, x(i, 40), y(i, 48), x(i, 36), y(i, 52), x(i, 44), y(i, 16), x(i, 48), y(i, 20), null);
-      graphics.drawImage(i, x(i, 44), y(i, 48), x(i, 40), y(i, 52), x(i, 48), y(i, 16), x(i, 52), y(i, 20), null);
-      graphics.drawImage(i, x(i, 36), y(i, 52), x(i, 32), y(i, 64), x(i, 48), y(i, 20), x(i, 52), y(i, 32), null);
-      graphics.drawImage(i, x(i, 40), y(i, 52), x(i, 36), y(i, 64), x(i, 44), y(i, 20), x(i, 48), y(i, 32), null);
-      graphics.drawImage(i, x(i, 44), y(i, 52), x(i, 40), y(i, 64), x(i, 40), y(i, 20), x(i, 44), y(i, 32), null);
-      graphics.drawImage(i, x(i, 48), y(i, 52), x(i, 44), y(i, 64), x(i, 52), y(i, 20), x(i, 56), y(i, 32), null);
+    if (in.getWidth() != in.getHeight()) {
+      // convert from legacy format (width * width / 2) to modern format (width * width)
+      graphics.drawImage(i, x(in, 24), y(in, 48), x(in, 20), y(in, 52), x(in, 4), y(in, 16), x(in, 8), y(in, 20), null);
+      graphics.drawImage(i, x(in, 28), y(in, 48), x(in, 24), y(in, 52), x(in, 8), y(in, 16), x(in, 12), y(in, 20), null);
+      graphics.drawImage(i, x(in, 20), y(in, 52), x(in, 16), y(in, 64), x(in, 8), y(in, 20), x(in, 12), y(in, 32), null);
+      graphics.drawImage(i, x(in, 24), y(in, 52), x(in, 20), y(in, 64), x(in, 4), y(in, 20), x(in, 8), y(in, 32), null);
+      graphics.drawImage(i, x(in, 28), y(in, 52), x(in, 24), y(in, 64), x(in, 0), y(in, 20), x(in, 4), y(in, 32), null);
+      graphics.drawImage(i, x(in, 32), y(in, 52), x(in, 28), y(in, 64), x(in, 12), y(in, 20), x(in, 16), y(in, 32), null);
+      graphics.drawImage(i, x(in, 40), y(in, 48), x(in, 36), y(in, 52), x(in, 44), y(in, 16), x(in, 48), y(in, 20), null);
+      graphics.drawImage(i, x(in, 44), y(in, 48), x(in, 40), y(in, 52), x(in, 48), y(in, 16), x(in, 52), y(in, 20), null);
+      graphics.drawImage(i, x(in, 36), y(in, 52), x(in, 32), y(in, 64), x(in, 48), y(in, 20), x(in, 52), y(in, 32), null);
+      graphics.drawImage(i, x(in, 40), y(in, 52), x(in, 36), y(in, 64), x(in, 44), y(in, 20), x(in, 48), y(in, 32), null);
+      graphics.drawImage(i, x(in, 44), y(in, 52), x(in, 40), y(in, 64), x(in, 40), y(in, 20), x(in, 44), y(in, 32), null);
+      graphics.drawImage(i, x(in, 48), y(in, 52), x(in, 44), y(in, 64), x(in, 52), y(in, 20), x(in, 56), y(in, 32), null);
     }
     graphics.dispose();
     processDataBuffer(i, ((DataBufferInt) i.getRaster().getDataBuffer()).getData());
@@ -80,7 +81,7 @@ public final class SkinLoadImageProcessor {
   }
 
   private static int y(@Nonnull BufferedImage image, int in) {
-    return in * (image.getHeight() / 64);
+    return in * (image.getHeight() / (image.getHeight() != image.getWidth() ? 32 : 64));
   }
 
   private static void setAreaTransparent(int[] data, int width, int x, int y, int maxX, int maxY) {
