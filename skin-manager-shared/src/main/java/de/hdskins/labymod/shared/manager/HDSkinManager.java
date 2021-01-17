@@ -523,6 +523,22 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
+  public long mojangSkinCacheSize() {
+    return this.mojangProfileCache.size();
+  }
+
+  public long textureToLocationCacheSize() {
+    return this.mojangProfileCache.size();
+  }
+
+  public long uuidToWrapperCache() {
+    return this.mojangProfileCache.size();
+  }
+
+  public int queuedUnloads() {
+    return this.nonSentUnloads.size();
+  }
+
   private boolean exceedsLimits(Resolution max, HDResourceLocation location) {
     return max != Resolution.RESOLUTION_ALL
       && location.isResolutionAvailable()
