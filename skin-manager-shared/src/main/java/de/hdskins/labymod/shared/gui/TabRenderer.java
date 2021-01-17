@@ -6,10 +6,8 @@ import de.hdskins.labymod.shared.manager.SkinHashWrapper;
 import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.resources.SkinManager;
-
-import java.util.Map;
-import java.util.UUID;
 
 public class TabRenderer {
 
@@ -44,8 +42,9 @@ public class TabRenderer {
   private static int countHDSkinUsers(HDSkinManager manager, NetHandlerPlayClient connection) {
     int amount = 0;
 
-    for (Map.Entry<UUID, SkinHashWrapper> entry : manager.getCachedSkins().entrySet()) {
-      if (entry.getValue().hasSkin() && connection.getPlayerInfo(entry.getKey()) != null) {
+    for (NetworkPlayerInfo info : connection.getPlayerInfoMap()) {
+      SkinHashWrapper wrapper = manager.getCachedSkins().getIfPresent(info.getGameProfile().getId());
+      if (wrapper != null && wrapper.hasSkin()) {
         ++amount;
       }
     }

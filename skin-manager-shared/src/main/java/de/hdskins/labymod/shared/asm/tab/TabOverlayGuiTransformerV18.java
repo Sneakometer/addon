@@ -48,29 +48,6 @@ public class TabOverlayGuiTransformerV18 implements IClassTransformer {
 
         method.instructions.insertBefore(last, list);
 
-      } else if (method.name.equals("oldTabOverlay")) {
-        AbstractInsnNode last = this.findInvokeVirtual(method, "drawRightString");
-        if (last == null) {
-          continue;
-        }
-
-        // invoke TabRenderer.renderTabOverlay after the one by LabyMod has been rendered
-        InsnList list = new InsnList();
-
-        list.add(new VarInsnNode(Opcodes.ILOAD, 19)); // load center
-
-        // calculate xOffset: (var46 / 2) * (var17 / 2)
-        list.add(new VarInsnNode(Opcodes.ILOAD, 18)); // load var46
-        list.add(new InsnNode(Opcodes.ICONST_2)); // load 2
-        list.add(new InsnNode(Opcodes.IDIV)); // var17 / 2
-        list.add(new VarInsnNode(Opcodes.ILOAD, 13)); // load var13
-        list.add(new InsnNode(Opcodes.ICONST_2)); // load 2
-        list.add(new InsnNode(Opcodes.IDIV)); // var17 / 2
-        list.add(new InsnNode(Opcodes.IMUL)); // var46 * var17
-
-        list.add(this.invokeRenderMethod()); // invoke renderTabOverlay
-
-        method.instructions.insert(last, list);
       }
     }
 
