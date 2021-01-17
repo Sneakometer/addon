@@ -46,10 +46,21 @@ public class BanDisplayElement extends ControlElement implements PermanentElemen
           reason = this.addonContext.getTranslationRegistry().translateMessage(currentBan.getReason());
         }
         final DrawUtils drawUtils = LabyMod.getInstance().getDrawUtils();
-        final String text = this.addonContext.getTranslationRegistry().translateMessage("currently-banned", reason, remainingTime);
-        drawUtils.drawCenteredString(text, drawUtils.getWidth() / 2d, y + 5);
+        final String[] text = this.addonContext.getTranslationRegistry().translateMessage("currently-banned", reason, remainingTime).split("\n");
+
+        int times = 0;
+        for (String s : text) {
+          drawUtils.drawCenteredString(s, drawUtils.getWidth() / 2d, y + 5 + (times > 0 ? 1 : 0) + (times++ * drawUtils.getFontRenderer().FONT_HEIGHT));
+        }
       }
     }
+  }
+
+  @Override
+  public int getEntryHeight() {
+    final DrawUtils drawUtils = LabyMod.getInstance().getDrawUtils();
+    final String[] text = this.addonContext.getTranslationRegistry().translateMessage("currently-banned", "", "").split("\n");
+    return 5 + (text.length * drawUtils.getFontRenderer().FONT_HEIGHT) + (text.length - 1);
   }
 
   @Override
