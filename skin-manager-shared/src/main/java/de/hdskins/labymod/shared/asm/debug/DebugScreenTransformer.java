@@ -43,7 +43,7 @@ public class DebugScreenTransformer implements IClassTransformer {
   private static final Set<String> V1_8_CLASSES = ImmutableSet.of("avv", "net.minecraft.client.gui.GuiOverlayDebug");
   private static final Set<String> V1_12_CLASSES = ImmutableSet.of("bjd", "net.minecraft.client.gui.GuiOverlayDebug");
 
-  private static final Set<String> METHODS = ImmutableSet.of("renderDebugInfoLeft()V", "a()V");
+  private static final Set<String> METHODS = ImmutableSet.of("renderDebugInfoLeft()V", "a()V", "func_180798_a()V");
 
   @Override
   public byte[] transform(String name, String transformedName, byte[] basicClass) {
