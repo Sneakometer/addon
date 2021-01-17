@@ -75,6 +75,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -140,6 +141,14 @@ public class HDSkinManager extends SkinManager {
     final ClientListeners clientListeners = new ClientListeners(this);
     LabyMod.getInstance().getLabyModAPI().registerForgeListener(clientListeners);
     Constants.EVENT_BUS.registerListener(clientListeners);
+  }
+
+  public ConcurrentMap<UUID, SkinHashWrapper> getCachedSkins() {
+    return this.uniqueIdToSkinHashCache.asMap();
+  }
+
+  public NetHandlerPlayClient getClientConnection() {
+    return this.netHandlerPlayerClient.get();
   }
 
   @Override

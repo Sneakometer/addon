@@ -20,9 +20,8 @@ package de.hdskins.labymod.shared.asm;
 import com.google.common.collect.ImmutableMap;
 import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV112;
 import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV18;
-import de.hdskins.labymod.shared.asm.debug.DebugScreenTransformerV112;
-import de.hdskins.labymod.shared.asm.debug.DebugScreenTransformerV18;
 import de.hdskins.labymod.shared.asm.draw.DrawUtilsTransformer;
+import de.hdskins.labymod.shared.asm.tab.TabOverlayGuiTransformerV18;
 import net.minecraft.launchwrapper.IClassTransformer;
 
 import javax.annotation.Nonnull;
@@ -36,10 +35,8 @@ public class MainTransformer implements IClassTransformer {
     .putEntry(new AchievementRenderTransformerV18(), "net.minecraft.client.gui.achievement.GuiAchievement", "ayd")
     // 1.12 achievement render
     .putEntry(new AchievementRenderTransformerV112(), "net.minecraft.client.gui.toasts.GuiToast", "bkc")
-    // 1.8 debug screen renderer
-    .putEntry(new DebugScreenTransformerV18(), "net.minecraft.client.gui.GuiOverlayDebug", "avv")
-    // 1.12 debug screen renderer
-    .putEntry(new DebugScreenTransformerV112(), "net.minecraft.client.gui.GuiOverlayDebug")
+    // tab overlay
+    .putEntry(new TabOverlayGuiTransformerV18(), "net.labymod.core_implementation.mc18.gui.ModPlayerTabOverlay")
     .build();
 
   @Override
