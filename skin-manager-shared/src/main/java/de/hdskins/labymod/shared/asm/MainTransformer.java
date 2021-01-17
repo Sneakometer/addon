@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV112;
 import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV18;
 import de.hdskins.labymod.shared.asm.draw.DrawUtilsTransformer;
-import de.hdskins.labymod.shared.asm.tab.TabOverlayGuiTransformerV18;
+import de.hdskins.labymod.shared.asm.tab.TabOverlayGuiTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 
 import javax.annotation.Nonnull;
@@ -36,7 +36,7 @@ public class MainTransformer implements IClassTransformer {
     // 1.12 achievement render
     .putEntry(new AchievementRenderTransformerV112(), "net.minecraft.client.gui.toasts.GuiToast", "bkc")
     // tab overlay
-    .putEntry(new TabOverlayGuiTransformerV18(), "net.labymod.core_implementation.mc18.gui.ModPlayerTabOverlay")
+    .putEntry(new TabOverlayGuiTransformer(), "net.labymod.core_implementation.mc18.gui.ModPlayerTabOverlay", "net.labymod.core_implementation.mc112.gui.ModPlayerTabOverlay")
     .build();
 
   @Override

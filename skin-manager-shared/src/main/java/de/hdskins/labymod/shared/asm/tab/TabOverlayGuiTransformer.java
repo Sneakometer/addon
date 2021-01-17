@@ -12,7 +12,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-public class TabOverlayGuiTransformerV18 implements IClassTransformer {
+public class TabOverlayGuiTransformer implements IClassTransformer {
 
   private static final String RENDERER_NAME = "de/hdskins/labymod/shared/gui/TabRenderer";
 
