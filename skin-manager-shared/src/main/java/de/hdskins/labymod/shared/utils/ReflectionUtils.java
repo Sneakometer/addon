@@ -17,6 +17,8 @@
  */
 package de.hdskins.labymod.shared.utils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -38,7 +40,8 @@ public final class ReflectionUtils {
     throw new UnsupportedOperationException();
   }
 
-  public static Field getFieldByNames(Class<?> clazz, String... fieldNames) {
+  @Nullable
+  public static Field getFieldByNames(@Nonnull Class<?> clazz, @Nonnull String... fieldNames) {
     for (String fieldName : fieldNames) {
       Field field = getFieldByName(clazz, fieldName);
       if (field != null) {
@@ -49,7 +52,8 @@ public final class ReflectionUtils {
     return null;
   }
 
-  public static Field getFieldByName(Class<?> clazz, String fieldName) {
+  @Nullable
+  public static Field getFieldByName(@Nonnull Class<?> clazz, @Nonnull String fieldName) {
     try {
       Field field = clazz.getDeclaredField(fieldName);
       if (!field.isAccessible()) {
@@ -61,14 +65,14 @@ public final class ReflectionUtils {
     }
   }
 
-  public static void set(Class<?> source, Object instance, Object newValue, String... fieldNames) {
+  public static void set(@Nonnull Class<?> source, @Nonnull Object instance, @Nullable Object newValue, @Nonnull String... fieldNames) {
     Field field = getFieldByNames(source, fieldNames);
     if (field != null) {
       set(instance, newValue, field);
     }
   }
 
-  public static void set(Object instance, Object newValue, Field field) {
+  public static void set(@Nonnull Object instance, @Nullable Object newValue, @Nonnull Field field) {
     try {
       if (MODIFIERS_FIELD != null && Modifier.isFinal(field.getModifiers())) {
         MODIFIERS_FIELD.setInt(field, field.getModifiers() & ~Modifier.FINAL);
@@ -84,19 +88,20 @@ public final class ReflectionUtils {
     }
   }
 
-  public static <T> T get(Class<T> unused, Class<?> source, Object instance, String... fieldNames) {
+  @Nullable
+  public static <T> T get(@Nonnull Class<T> unused, @Nonnull Class<?> source, @Nonnull Object instance, @Nonnull String... fieldNames) {
     for (String fieldName : fieldNames) {
       Field field = getFieldByName(source, fieldName);
       if (field != null) {
         return get(unused, field, instance);
       }
     }
-
     return null;
   }
 
+  @Nullable
   @SuppressWarnings({"unchecked", "unused"})
-  public static <T> T get(Class<T> unused, Field field, Object instance) {
+  public static <T> T get(@Nonnull Class<T> unused, @Nonnull Field field, @Nonnull Object instance) {
     try {
       if (!field.isAccessible()) {
         field.setAccessible(true);

@@ -24,6 +24,7 @@ import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElem
 import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
 import de.hdskins.labymod.shared.settings.element.elements.EulaButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
+import de.hdskins.labymod.shared.settings.element.elements.UnbanRequestButtonElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.utils.Consumer;
 
@@ -50,6 +51,10 @@ public interface ElementFactory {
 
   @Nonnull
   ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer);
+
+  @Nonnull
+  UnbanRequestButtonElement brewUnbanRequestButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName,
+                                                          Consumer<ButtonElement> clickListener, Consumer<UnbanRequestButtonElement> customizer, AddonContext addonContext);
 
   @Nonnull
   PlayerSkinRenderElement brewRenderElement(Consumer<PlayerSkinRenderElement> customizer);

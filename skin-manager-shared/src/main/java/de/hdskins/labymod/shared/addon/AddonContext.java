@@ -23,6 +23,7 @@ import de.hdskins.labymod.shared.backend.BackendUtils;
 import de.hdskins.labymod.shared.config.AddonConfig;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.event.MaxSkinResolutionChangeEvent;
+import de.hdskins.labymod.shared.event.UserBanUpdateEvent;
 import de.hdskins.labymod.shared.manager.HDSkinManager;
 import de.hdskins.labymod.shared.role.UserRole;
 import de.hdskins.labymod.shared.translation.TranslationRegistry;
@@ -200,6 +201,7 @@ public class AddonContext {
 
   public void setCurrentBan(@Nullable PacketServerLiveUpdateBan currentBan) {
     this.currentBan = currentBan;
+    Constants.EVENT_BUS.postReported(new UserBanUpdateEvent(currentBan != null));
   }
 
   public PacketServerUpdateRateLimits.RateLimits getRateLimits() {

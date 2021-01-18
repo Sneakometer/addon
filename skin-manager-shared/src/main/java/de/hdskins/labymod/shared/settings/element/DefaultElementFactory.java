@@ -24,6 +24,7 @@ import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElem
 import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
 import de.hdskins.labymod.shared.settings.element.elements.EulaButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
+import de.hdskins.labymod.shared.settings.element.elements.UnbanRequestButtonElement;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.utils.Consumer;
 
@@ -66,6 +67,15 @@ import java.util.function.BiFunction;
   public ButtonElement brewButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName, Consumer<ButtonElement> clickListener, Consumer<ButtonElement> customizer) {
     ButtonElement element = new ButtonElement(displayName, iconData, inButtonName, clickListener);
     element.setSettingEnabled(this.shouldBeEnabled(element));
+    customizer.accept(element);
+    return element;
+  }
+
+  @Nonnull
+  @Override
+  public UnbanRequestButtonElement brewUnbanRequestButtonElement(String displayName, ControlElement.IconData iconData, String inButtonName,
+                                                                 Consumer<ButtonElement> clickListener, Consumer<UnbanRequestButtonElement> customizer, AddonContext addonContext) {
+    UnbanRequestButtonElement element = new UnbanRequestButtonElement(displayName, iconData, inButtonName, clickListener, addonContext);
     customizer.accept(element);
     return element;
   }

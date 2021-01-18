@@ -24,6 +24,7 @@ import de.hdskins.labymod.shared.settings.element.ElementFactory;
 import de.hdskins.labymod.shared.settings.eula.EulaButtonClickListener;
 import de.hdskins.labymod.shared.settings.slim.SlimButtonClickHandler;
 import de.hdskins.labymod.shared.settings.toggle.SkinToggleButtonClickHandler;
+import de.hdskins.labymod.shared.settings.unban.UnbanRequestButtonClickHandler;
 import de.hdskins.labymod.shared.settings.upload.UploadButtonClickHandler;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.settings.elements.SettingsElement;
@@ -104,12 +105,20 @@ public final class SettingsFactory {
       addonContext,
       element -> element.setPermanent(true)
     );
+    SettingsElement unbanRequestElement = ElementFactory.defaultFactory().brewUnbanRequestButtonElement(
+      addonContext.getTranslationRegistry().translateMessage("laby-connect-unban-request-button-name"),
+      new ControlElement.IconData(Material.BOOK_AND_QUILL),
+      addonContext.getTranslationRegistry().translateMessage("button-click-here"),
+      new UnbanRequestButtonClickHandler(addonContext),
+      element -> element.setSettingEnabled(false),
+      addonContext
+    );
 
     return Arrays.asList(
       setSlimElement, uploadSkinElement,
       deleteSkinElement, toggleSkinVisibilityElement,
       maxResolutionLoadOption, skinRenderElement,
-      banDisplayElement, eulaReadElement
+      banDisplayElement, unbanRequestElement, eulaReadElement
     );
   }
 }
