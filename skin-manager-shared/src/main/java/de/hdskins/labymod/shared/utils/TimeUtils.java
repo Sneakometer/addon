@@ -49,7 +49,7 @@ public final class TimeUtils {
         result += " " + month + " month" + (month > 1 ? "s" : "");
       }
       if (week > 0) {
-        result += " " + week + " weeks" + (week > 1 ? "s" : "");
+        result += " " + week + " week" + (week > 1 ? "s" : "");
       }
       if (day > 0 && hour >= 0) {
         result += " " + day + " day" + (day > 1 ? "s" : "");
