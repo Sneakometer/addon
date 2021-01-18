@@ -19,6 +19,7 @@ package de.hdskins.labymod.shared.utils;
 
 import javax.annotation.Nullable;
 import java.util.Calendar;
+import java.util.Locale;
 
 public final class TimeUtils {
 
@@ -28,10 +29,9 @@ public final class TimeUtils {
 
   @Nullable
   public static String formatRemainingTime(long end) {
-    final long current = System.currentTimeMillis();
-    if (current < end) {
-      final Calendar calendar = Calendar.getInstance();
-      calendar.setTimeInMillis(end - current);
+    if (end > 0) {
+      final Calendar calendar = Calendar.getInstance(Locale.US);
+      calendar.setTimeInMillis(end);
 
       final int year = calendar.get(Calendar.YEAR) - 1970;
       final int month = calendar.get(Calendar.MONTH);
@@ -51,16 +51,16 @@ public final class TimeUtils {
       if (week > 0) {
         result += " " + week + " weeks" + (week > 1 ? "s" : "");
       }
-      if (day > 0) {
+      if (day > 0 && hour >= 0) {
         result += " " + day + " day" + (day > 1 ? "s" : "");
       }
       // hour:minutes:seconds
       result += " "
-        + (hour <= 0 ? "00" : hour < 10 ? "0" + hour : hour)
+        + (hour == -1 ? "23" : hour < 10 ? "0" + hour : hour)
         + ":" + (minute < 10 ? "0" + minute : minute)
         + ":" + (second < 10 ? "0" + second : second);
       return result;
     }
-    return current == end ? "00" : null;
+    return end == 0 ? "00:00:00" : null;
   }
 }
