@@ -20,7 +20,6 @@ package de.hdskins.labymod.shared.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.config.gson.ServerConfigSerializer;
@@ -67,7 +66,6 @@ public class JsonAddonConfig implements AddonConfig {
   // time magic
   private static final long MIN_RECONNECT_TIME = TimeUnit.SECONDS.toMillis(1);
   // json utils
-  private static final JsonParser PARSER = new JsonParser();
   private static final Gson GSON = new GsonBuilder()
     .serializeNulls()
     .setPrettyPrinting()
@@ -123,7 +121,7 @@ public class JsonAddonConfig implements AddonConfig {
 
     try (InputStream inputStream = Files.newInputStream(configPath);
          Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-      JsonObject config = PARSER.parse(reader).getAsJsonObject();
+      JsonObject config = Constants.JSON_PARSER.parse(reader).getAsJsonObject();
 
       if (!config.has("configuration") || config.get("configuration").isJsonNull()) {
         JsonAddonConfig addonConfig = new JsonAddonConfig();

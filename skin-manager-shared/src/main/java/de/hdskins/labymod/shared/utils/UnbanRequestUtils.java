@@ -19,6 +19,8 @@ package de.hdskins.labymod.shared.utils;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import net.labymod.labyconnect.LabyConnect;
@@ -30,16 +32,22 @@ import net.labymod.labyconnect.packets.PacketPlayRequestAddFriend;
 import net.labymod.labyconnect.user.ChatUser;
 import net.labymod.main.LabyMod;
 import net.minecraft.client.Minecraft;
+import org.apache.http.HttpStatus;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public final class UnbanRequestUtils {
 
-  private static final Set<String> EA_REQUEST_NAMES = ImmutableSet.of("HDSkinsDE");
+  private static final String USER_LOOKUP_URL = "https://api.hdskins.de/labymod/chat/users";
+  private static final Set<LabyChatUser> EA_REQUEST_BOTS = loadUnbanRequestBotProfiles();
 
   private UnbanRequestUtils() {
     throw new UnsupportedOperationException();
@@ -55,12 +63,12 @@ public final class UnbanRequestUtils {
     if (hdSkins != null) {
       return CompletableFuture.completedFuture(redirectToChat(context, hdSkins));
     }
-    final String target = Iterables.getFirst(EA_REQUEST_NAMES, null);
+    final LabyChatUser target = Iterables.get(EA_REQUEST_BOTS, ThreadLocalRandom.current().nextInt(EA_REQUEST_BOTS.size()), null);
     if (target == null) {
-      throw new RuntimeException("No player selected for ua request target");
+      return CompletableFuture.completedFuture(RequestResult.failure(context.getTranslationRegistry().translateMessage("laby-connect-no-bots-available")));
     }
-    return sendRequest(labyConnect, target).thenApplyAsync(v -> {
-      final ChatUser user = awaitAdd(labyConnect, target, TimeUnit.SECONDS.toMillis(10));
+    return sendRequest(labyConnect, target.getName()).thenApplyAsync(v -> {
+      final ChatUser user = awaitAdd(labyConnect, target.getUniqueId(), TimeUnit.SECONDS.toMillis(10));
       if (user != null) {
         return ConcurrentUtils.callOnClientThread(() -> redirectToChat(context, user));
       }
@@ -71,7 +79,7 @@ public final class UnbanRequestUtils {
   @Nullable
   private static ChatUser getFriendByDefaultNames(@Nonnull LabyConnect connect) {
     for (ChatUser friend : connect.getFriends()) {
-      if (friend.getGameProfile().getName() != null && EA_REQUEST_NAMES.contains(friend.getGameProfile().getName())) {
+      if (friend.getGameProfile().getId() != null && isOurBot(friend.getGameProfile().getId())) {
         return friend;
       }
     }
@@ -79,21 +87,11 @@ public final class UnbanRequestUtils {
   }
 
   @Nullable
-  private static ChatUser getFriendByName(@Nonnull LabyConnect connect, @Nonnull String name) {
-    for (ChatUser friend : connect.getFriends()) {
-      if (friend.getGameProfile().getName() != null && friend.getGameProfile().getName().equals(name)) {
-        return friend;
-      }
-    }
-    return null;
-  }
-
-  @Nullable
-  private static ChatUser awaitAdd(@Nonnull LabyConnect connect, @Nonnull String name, long timeoutMillis) {
+  private static ChatUser awaitAdd(@Nonnull LabyConnect connect, @Nonnull UUID uniqueId, long timeoutMillis) {
     final long timeout = System.currentTimeMillis() + timeoutMillis;
 
     ChatUser result = null;
-    while (timeout >= System.currentTimeMillis() && (result = getFriendByName(connect, name)) == null) {
+    while (timeout >= System.currentTimeMillis() && (result = connect.getChatUserByUUID(uniqueId)) == null) {
       sleep();
     }
     return result;
@@ -123,11 +121,43 @@ public final class UnbanRequestUtils {
 
   public static void handleFriendRemove(@Nonnull PacketPlayFriendRemove packet) {
     final ChatlogManager chatlogManager = LabyMod.getInstance().getLabyConnect().getChatlogManager();
-    if (EA_REQUEST_NAMES.contains(packet.getToRemove().getGameProfile().getName())) {
+    if (isOurBot(packet.getToRemove().getGameProfile().getName())) {
       final SingleChat chat = chatlogManager.getChat(packet.getToRemove());
       chat.getMessages().clear();
       chatlogManager.saveChatlogs(LabyMod.getInstance().getPlayerUUID());
     }
+  }
+
+  @Nonnull
+  private static Set<LabyChatUser> loadUnbanRequestBotProfiles() {
+    return HttpUtils.doGet(USER_LOOKUP_URL, HttpStatus.SC_OK, httpResponse -> {
+      final ImmutableSet.Builder<LabyChatUser> out = ImmutableSet.builder();
+      try (InputStreamReader reader = new InputStreamReader(httpResponse.getEntity().getContent(), StandardCharsets.UTF_8)) {
+        final JsonArray array = Constants.JSON_PARSER.parse(reader).getAsJsonArray();
+        for (JsonElement jsonElement : array) {
+          out.add(Constants.GSON.fromJson(jsonElement, LabyChatUser.class));
+        }
+      }
+      return out.build();
+    }, ImmutableSet.of());
+  }
+
+  private static boolean isOurBot(@Nonnull String name) {
+    for (LabyChatUser user : EA_REQUEST_BOTS) {
+      if (user.getName().equalsIgnoreCase(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean isOurBot(@Nonnull UUID uniqueId) {
+    for (LabyChatUser user : EA_REQUEST_BOTS) {
+      if (user.getUniqueId().equals(uniqueId)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void sleep() {
@@ -164,6 +194,25 @@ public final class UnbanRequestUtils {
 
     public String getMessage() {
       return this.message;
+    }
+  }
+
+  public static final class LabyChatUser {
+
+    private final String name;
+    private final UUID uniqueId;
+
+    public LabyChatUser(String name, UUID uniqueId) {
+      this.name = name;
+      this.uniqueId = uniqueId;
+    }
+
+    public String getName() {
+      return this.name;
+    }
+
+    public UUID getUniqueId() {
+      return this.uniqueId;
     }
   }
 }

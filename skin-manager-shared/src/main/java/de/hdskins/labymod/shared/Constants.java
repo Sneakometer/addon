@@ -17,6 +17,8 @@
  */
 package de.hdskins.labymod.shared;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import de.hdskins.labymod.shared.eventbus.EventBus;
 import de.hdskins.labymod.shared.eventbus.defaults.DefaultEventBus;
 import de.hdskins.labymod.shared.utils.LabyModUtils;
@@ -33,6 +35,8 @@ public interface Constants {
   String SUCCESS = "§a§l✔";
   String FAILURE = "§c§l✖";
   String SPACE = " ";
+  Gson GSON = new Gson();
+  JsonParser JSON_PARSER = new JsonParser();
   EventBus EVENT_BUS = new DefaultEventBus();
   ExecutorService EXECUTOR = Executors.newCachedThreadPool();
   AtomicReference<About> ABOUT = new AtomicReference<>();
