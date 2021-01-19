@@ -23,6 +23,9 @@ import de.hdskins.labymod.shared.Constants;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import net.labymod.labyconnect.LabyConnect;
 import net.labymod.labyconnect.gui.GuiFriendsLayout;
+import net.labymod.labyconnect.log.ChatlogManager;
+import net.labymod.labyconnect.log.SingleChat;
+import net.labymod.labyconnect.packets.PacketPlayFriendRemove;
 import net.labymod.labyconnect.packets.PacketPlayRequestAddFriend;
 import net.labymod.labyconnect.user.ChatUser;
 import net.labymod.main.LabyMod;
@@ -34,11 +37,11 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public final class UnbanRequestUtil {
+public final class UnbanRequestUtils {
 
   private static final Set<String> EA_REQUEST_NAMES = ImmutableSet.of("HDSkinsDE");
 
-  private UnbanRequestUtil() {
+  private UnbanRequestUtils() {
     throw new UnsupportedOperationException();
   }
 
@@ -115,6 +118,15 @@ public final class UnbanRequestUtil {
     } catch (Throwable throwable) {
       throwable.printStackTrace();
       return RequestResult.failure(context.getTranslationRegistry().translateMessage("laby-connect-internal-error"));
+    }
+  }
+
+  public static void handleFriendRemove(@Nonnull PacketPlayFriendRemove packet) {
+    final ChatlogManager chatlogManager = LabyMod.getInstance().getLabyConnect().getChatlogManager();
+    if (EA_REQUEST_NAMES.contains(packet.getToRemove().getGameProfile().getName())) {
+      final SingleChat chat = chatlogManager.getChat(packet.getToRemove());
+      chat.getMessages().clear();
+      chatlogManager.saveChatlogs(LabyMod.getInstance().getPlayerUUID());
     }
   }
 

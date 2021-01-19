@@ -22,6 +22,7 @@ import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV11
 import de.hdskins.labymod.shared.asm.achievement.AchievementRenderTransformerV18;
 import de.hdskins.labymod.shared.asm.debug.DebugScreenTransformer;
 import de.hdskins.labymod.shared.asm.draw.DrawUtilsTransformer;
+import de.hdskins.labymod.shared.asm.labyconnect.LabyConnectPacketHandlerTransformer;
 import de.hdskins.labymod.shared.asm.tab.TabOverlayGuiTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 
@@ -40,6 +41,8 @@ public class MainTransformer implements IClassTransformer {
     .putEntry(new TabOverlayGuiTransformer(), "net.labymod.core_implementation.mc18.gui.ModPlayerTabOverlay", "net.labymod.core_implementation.mc112.gui.ModPlayerTabOverlay")
     // debug screen renderer
     .putEntry(new DebugScreenTransformer(), "net.minecraft.client.gui.GuiOverlayDebug", "avv", "bjd")
+    // laby connect packet listener
+    .putEntry(new LabyConnectPacketHandlerTransformer(), "net.labymod.labyconnect.ClientConnection")
     .build();
 
   @Override

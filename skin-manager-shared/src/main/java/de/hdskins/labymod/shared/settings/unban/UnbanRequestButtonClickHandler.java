@@ -24,7 +24,7 @@ import de.hdskins.labymod.shared.settings.countdown.ButtonCountdownElementNameCh
 import de.hdskins.labymod.shared.settings.countdown.SettingsCountdownRegistry;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.utils.LabyModUtils;
-import de.hdskins.labymod.shared.utils.UnbanRequestUtil;
+import de.hdskins.labymod.shared.utils.UnbanRequestUtils;
 import net.labymod.utils.Consumer;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,7 +41,7 @@ public class UnbanRequestButtonClickHandler implements Consumer<ButtonElement>, 
   @Override
   public void accept(ButtonElement buttonElement) {
     if (!this.actionRunning.getAndSet(true)) {
-      UnbanRequestUtil.tryOpenRequest(this.addonContext).thenAccept(result -> {
+      UnbanRequestUtils.tryOpenRequest(this.addonContext).thenAccept(result -> {
         LabyModUtils.displayAchievement(result.isSuccess() ? SUCCESS : FAILURE, result.getMessage());
         this.actionRunning.set(false);
       });
