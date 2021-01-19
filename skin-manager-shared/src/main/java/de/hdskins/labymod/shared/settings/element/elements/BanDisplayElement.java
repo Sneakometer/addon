@@ -20,7 +20,6 @@ package de.hdskins.labymod.shared.settings.element.elements;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.settings.element.PermanentElement;
 import de.hdskins.labymod.shared.utils.TimeUtils;
-import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.ControlElement;
 import net.labymod.utils.DrawUtils;
@@ -37,13 +36,13 @@ public class BanDisplayElement extends ControlElement implements PermanentElemen
 
   @Override
   public void draw(int x, int y, int maxX, int maxY, int mouseX, int mouseY) {
-    final PacketServerLiveUpdateBan currentBan = this.addonContext.getCurrentBan();
+    final AddonContext.BanInfo currentBan = this.addonContext.getCurrentBan();
     if (currentBan != null) {
-      final String remainingTime = currentBan.isPermanentlyBanned() ? " permanent" : TimeUtils.formatRemainingTime(currentBan.getTimeout());
+      final String remainingTime = currentBan.getInfo().isPermanentlyBanned() ? " permanent" : TimeUtils.formatRemainingTime(currentBan.getTimoutMillis());
       if (remainingTime != null) {
-        String reason = currentBan.getReason();
-        if (currentBan.isTranslate()) {
-          reason = this.addonContext.getTranslationRegistry().translateMessage(currentBan.getReason());
+        String reason = currentBan.getInfo().getReason();
+        if (currentBan.getInfo().isTranslate()) {
+          reason = this.addonContext.getTranslationRegistry().translateMessage(reason);
         }
         final DrawUtils drawUtils = LabyMod.getInstance().getDrawUtils();
         final String[] text = this.addonContext.getTranslationRegistry().translateMessage("currently-banned", reason, remainingTime).split("\n");

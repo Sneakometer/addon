@@ -67,10 +67,10 @@ public class AddonContext {
   private final AtomicBoolean active = new AtomicBoolean(true);
   private final AtomicBoolean reconnecting = new AtomicBoolean(false);
   // changeable
+  private BanInfo currentBan;
   private HDSkinManager skinManager;
   private ClientSettings clientSettings;
   private UserRole userRole = UserRole.USER;
-  private PacketServerLiveUpdateBan currentBan;
   private PacketServerUpdateRateLimits.RateLimits rateLimits = EMPTY;
 
   public AddonContext(AddonConfig addonConfig, LabyModAddon labyModAddon, NetworkClient networkClient, TranslationRegistry translationRegistry) {
@@ -195,12 +195,12 @@ public class AddonContext {
   }
 
   @Nullable
-  public PacketServerLiveUpdateBan getCurrentBan() {
+  public BanInfo getCurrentBan() {
     return this.currentBan;
   }
 
   public void setCurrentBan(@Nullable PacketServerLiveUpdateBan currentBan) {
-    this.currentBan = currentBan;
+    this.currentBan = currentBan == null ? null : new BanInfo(currentBan);
     Constants.EVENT_BUS.postReported(new UserBanUpdateEvent(currentBan != null));
   }
 
@@ -249,6 +249,25 @@ public class AddonContext {
 
     public ListeningFuture<PacketBase> getFuture() {
       return this.future;
+    }
+  }
+
+  public static final class BanInfo {
+
+    private final long timoutMillis;
+    private final PacketServerLiveUpdateBan info;
+
+    public BanInfo(PacketServerLiveUpdateBan ban) {
+      this.info = ban;
+      this.timoutMillis = System.currentTimeMillis() + ban.getTimeout();
+    }
+
+    public long getTimoutMillis() {
+      return this.timoutMillis;
+    }
+
+    public PacketServerLiveUpdateBan getInfo() {
+      return this.info;
     }
   }
 }

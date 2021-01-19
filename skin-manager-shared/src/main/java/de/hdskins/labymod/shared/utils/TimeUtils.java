@@ -29,9 +29,10 @@ public final class TimeUtils {
 
   @Nullable
   public static String formatRemainingTime(long end) {
-    if (end > 0) {
+    final long current = System.currentTimeMillis();
+    if (end > current) {
       final Calendar calendar = Calendar.getInstance(Locale.US);
-      calendar.setTimeInMillis(end);
+      calendar.setTimeInMillis(end - current);
 
       final int year = calendar.get(Calendar.YEAR) - 1970;
       final int month = calendar.get(Calendar.MONTH);
