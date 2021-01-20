@@ -46,7 +46,7 @@ public final class DebugScreenUtils {
   private static void appendScreenInfo(@Nonnull List<String> list, @Nonnull HDSkinManager manager) {
     final AddonContext addonContext = manager.getAddonContext();
 
-    list.add(" ");
+    list.add("");
     list.add(String.format(FORMAT_LINE_1, Constants.getAddonInfo().getVersion(), addonContext.getActive().get(), addonContext.getReconnecting().get()));
     list.add(String.format(FORMAT_LINE_2, manager.mojangSkinCacheSize(), manager.textureToLocationCacheSize()));
     list.add(String.format(FORMAT_LINE_3, manager.uuidToWrapperCache(), manager.queuedUnloads()));
