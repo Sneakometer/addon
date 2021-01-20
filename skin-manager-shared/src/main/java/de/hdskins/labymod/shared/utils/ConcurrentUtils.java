@@ -31,7 +31,6 @@ public final class ConcurrentUtils {
     throw new UnsupportedOperationException();
   }
 
-  @Nullable
   public static <T> T callOnClientThread(@Nonnull SilentCallable<T> callable) {
     if (Minecraft.getMinecraft().isCallingFromMinecraftThread()) {
       return callable.call();

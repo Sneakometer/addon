@@ -18,13 +18,13 @@
 package de.hdskins.labymod.shared.texture;
 
 import de.hdskins.labymod.shared.utils.ConcurrentUtils;
+import de.hdskins.labymod.shared.utils.ImageUtils;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
 import org.lwjgl.opengl.GL11;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ public class HDSkinTexture extends SimpleTexture {
   public HDSkinTexture(Path skinPath) throws IOException {
     super(null); // we override all methods so no need to actually hand it over
     try (InputStream inputStream = Files.newInputStream(skinPath)) {
-      this.bufferedImage = ImageIO.read(inputStream);
+      this.bufferedImage = ImageUtils.readPngImage(inputStream);
     }
   }
 
