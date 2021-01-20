@@ -17,9 +17,8 @@
  */
 package de.hdskins.labymod.shared.asm.draw;
 
-import com.google.common.base.Ticker;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.properties.Property;
@@ -42,17 +41,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("UnstableApiUsage") final class InternalSkullRenderer {
+final class InternalSkullRenderer {
 
   private static final String DEFAULT_NAME = "Steve";
   private static final String EMPTY_PLACEHOLDER_PROPERTY_NAME = "__place__holder__";
   private static final ModelHumanoidHead MODEL_HUMANOID_HEAD = new ModelHumanoidHead();
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
   private static final Property PLACEHOLDER_PROPERTY = new Property("", EMPTY_PLACEHOLDER_PROPERTY_NAME);
-  private static final Cache<GameProfile, GameProfile> GAME_PROFILE_CACHE = CacheBuilder.newBuilder()
+  private static final Cache<GameProfile, GameProfile> GAME_PROFILE_CACHE = Caffeine.newBuilder()
+    .executor(EXECUTOR_SERVICE)
     .expireAfterAccess(30, TimeUnit.SECONDS)
-    .ticker(Ticker.systemTicker())
-    .concurrencyLevel(4)
     .build();
 
   private InternalSkullRenderer() {

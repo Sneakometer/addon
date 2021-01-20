@@ -17,15 +17,15 @@
  */
 package de.hdskins.labymod.shared.manager;
 
-import com.google.common.base.Ticker;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalCause;
-import com.google.common.cache.RemovalNotification;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import de.hdskins.labymod.shared.Constants;
@@ -82,13 +82,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
-@SuppressWarnings("UnstableApiUsage")
 public class HDSkinManager extends SkinManager {
 
   private static final SkinHashWrapper NO_SKIN = SkinHashWrapper.newEmpty();
   private static final SkinHashWrapper REQUESTING = SkinHashWrapper.newEmpty();
   private static final Logger LOGGER = LogManager.getLogger(HDSkinManager.class);
   private static final Collection<RemovalCause> HANDLED_CAUSES = EnumSet.range(RemovalCause.COLLECTED, RemovalCause.SIZE);
+  private static final Executor CACHE_REMOVAL_EXECUTOR = Executors.newFixedThreadPool(5, new ThreadFactoryBuilder().setNameFormat("hd-cache-removal-%d").build());
 
   private final Path assetsDirectory;
   private final Field locationSkinField;
@@ -98,29 +98,33 @@ public class HDSkinManager extends SkinManager {
   private final Queue<UUID> nonSentUnloads = new ConcurrentLinkedQueue<>();
   private final Executor requestTimeoutBacker = Executors.newCachedThreadPool();
   private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
-  private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = CacheBuilder.newBuilder()
-    .concurrencyLevel(4)
+  private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = Caffeine.newBuilder()
     .build(new CacheLoader<MinecraftProfileTexture, HDResourceLocation>() {
       @Override
       public HDResourceLocation load(@Nonnull MinecraftProfileTexture texture) {
         return HDResourceLocation.forProfileTexture(texture);
       }
     });
-  private final LoadingCache<GameProfile, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> mojangProfileCache = CacheBuilder.newBuilder()
+  private final LoadingCache<GameProfile, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> mojangProfileCache = Caffeine.newBuilder()
+    .executor(CACHE_REMOVAL_EXECUTOR)
     .expireAfterAccess(30, TimeUnit.SECONDS)
-    .concurrencyLevel(4)
-    .ticker(Ticker.systemTicker())
     .build(new CacheLoader<GameProfile, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>>() {
       @Override
       public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> load(@Nonnull GameProfile gameProfile) {
         return Minecraft.getMinecraft().getSessionService().getTextures(gameProfile, false);
       }
     });
-  private final Cache<UUID, SkinHashWrapper> uniqueIdToSkinHashCache = CacheBuilder.newBuilder()
+  private final Cache<UUID, SkinHashWrapper> uniqueIdToSkinHashCache = Caffeine.newBuilder()
+    .executor(CACHE_REMOVAL_EXECUTOR)
+    .removalListener(new RemovalListener<UUID, SkinHashWrapper>() {
+      @Override
+      public void onRemoval(@Nullable UUID key, @Nullable SkinHashWrapper value, @Nonnull RemovalCause cause) {
+        if (key != null) {
+          HDSkinManager.this.handleWrapperCacheRemove(key, value, cause);
+        }
+      }
+    })
     .expireAfterAccess(30, TimeUnit.SECONDS)
-    .removalListener(this::handleUniqueIdRemove)
-    .concurrencyLevel(4)
-    .ticker(Ticker.systemTicker())
     .build();
 
   public HDSkinManager(AddonContext addonContext, File mcAssetsDir, Field playerTexturesLoadedField, @Nullable Field locationSkinField, Supplier<NetHandlerPlayClient> netHandlerPlayClientSupplier) {
@@ -161,10 +165,10 @@ public class HDSkinManager extends SkinManager {
       return super.loadSkin(texture, type, callback);
     }
     // Build a resource location for the profile texture
-    final HDResourceLocation location = this.textureToLocationCache.getUnchecked(texture);
+    final HDResourceLocation location = this.textureToLocationCache.get(texture);
     // Check if the image was loaded but is too large to handle
     final Resolution maxResolution = this.addonContext.getAddonConfig().getMaxSkinResolution();
-    if (this.exceedsLimits(maxResolution, location)) {
+    if (location == null || this.exceedsLimits(maxResolution, location)) {
       this.invalidateSkins(this.findAssociatedUniqueIds((HDMinecraftProfileTexture) texture));
       return ConcurrentUtils.callOnClientThread(() -> super.loadSkin(texture, type, callback));
     }
@@ -289,7 +293,7 @@ public class HDSkinManager extends SkinManager {
     if (profileId == null) {
       LOGGER.debug("Unable to load skin {} from cache because skin unique id is null", profile);
       if (profile.getProperties().containsKey("textures")) {
-        return this.mojangProfileCache.getUnchecked(profile);
+        return this.mojangProfileCache.get(profile);
       } else {
         return ImmutableMap.of();
       }
@@ -299,7 +303,7 @@ public class HDSkinManager extends SkinManager {
     if (profileId.version() != 4 || (!profileId.equals(self) && !this.addonContext.getAddonConfig().showSkinsOfOtherPlayers()) || this.addonContext.getAddonConfig().isSkinDisabled(profileId)) {
       LOGGER.debug("Not loading skin for profile: {} because the unique id is blocked locally.", profile);
       if (profile.getProperties().containsKey("textures")) {
-        return this.mojangProfileCache.getUnchecked(profile);
+        return this.mojangProfileCache.get(profile);
       } else {
         return ImmutableMap.of();
       }
@@ -309,7 +313,7 @@ public class HDSkinManager extends SkinManager {
     if (response != null) {
       if (!response.hasSkin()) {
         if (profile.getProperties().containsKey("textures")) {
-          return this.mojangProfileCache.getUnchecked(profile);
+          return this.mojangProfileCache.get(profile);
         } else {
           return ImmutableMap.of();
         }
@@ -318,7 +322,7 @@ public class HDSkinManager extends SkinManager {
       final HDMinecraftProfileTexture texture = response.toProfileTexture();
       final HDResourceLocation location = this.textureToLocationCache.getIfPresent(texture);
       if (location != null && this.exceedsLimits(this.addonContext.getAddonConfig().getMaxSkinResolution(), location)) {
-        return this.mojangProfileCache.getUnchecked(profile);
+        return this.mojangProfileCache.get(profile);
       }
       return ImmutableMap.of(MinecraftProfileTexture.Type.SKIN, texture);
     }
@@ -329,7 +333,7 @@ public class HDSkinManager extends SkinManager {
         .addListener(this.forSkinIdCacheOnly(profileId));
     }
     if (profile.getProperties().containsKey("textures")) {
-      return this.mojangProfileCache.getUnchecked(profile);
+      return this.mojangProfileCache.get(profile);
     } else {
       return ImmutableMap.of();
     }
@@ -482,15 +486,14 @@ public class HDSkinManager extends SkinManager {
     }
   }
 
-  private void handleUniqueIdRemove(RemovalNotification<Object, Object> notification) {
-    if (notification.getKey() instanceof UUID && HANDLED_CAUSES.contains(notification.getCause())) {
-      final UUID removed = (UUID) notification.getKey();
+  private void handleWrapperCacheRemove(@Nonnull UUID uuid, @Nullable SkinHashWrapper wrapper, @Nonnull RemovalCause cause) {
+    if (HANDLED_CAUSES.contains(cause)) {
       final UUID self = LabyMod.getInstance().getPlayerUUID();
       final NetHandlerPlayClient netHandlerPlayClient = this.netHandlerPlayerClient.get();
-      if ((self == null || !self.equals(removed)) && (netHandlerPlayClient == null || netHandlerPlayClient.getPlayerInfo(removed) == null)) {
-        this.handleUniqueIdRemove(removed);
-      } else if (notification.getValue() != null) {
-        this.uniqueIdToSkinHashCache.put(removed, (SkinHashWrapper) notification.getValue());
+      if ((self == null || !self.equals(uuid)) && (netHandlerPlayClient == null || netHandlerPlayClient.getPlayerInfo(uuid) == null)) {
+        this.handleUniqueIdRemove(uuid);
+      } else if (wrapper != null) {
+        this.uniqueIdToSkinHashCache.put(uuid, wrapper);
       }
     }
   }
@@ -524,15 +527,15 @@ public class HDSkinManager extends SkinManager {
   }
 
   public long mojangSkinCacheSize() {
-    return this.mojangProfileCache.size();
+    return this.mojangProfileCache.estimatedSize();
   }
 
   public long textureToLocationCacheSize() {
-    return this.mojangProfileCache.size();
+    return this.mojangProfileCache.estimatedSize();
   }
 
   public long uuidToWrapperCache() {
-    return this.mojangProfileCache.size();
+    return this.mojangProfileCache.estimatedSize();
   }
 
   public int queuedUnloads() {

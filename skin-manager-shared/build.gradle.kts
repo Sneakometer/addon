@@ -45,6 +45,7 @@ configure<UserBaseExtension> {
 
 dependencies {
   "compileOnly"(files("../libs/labymod-api.jar"))
+  "compileOnly"("com.github.ben-manes.caffeine", "caffeine", "2.8.8")
   "compileOnly"("de.hdskins.protocol:client:" + ext["dependencyNetworkClientVersion"] as String)
 }
 

@@ -93,6 +93,7 @@ tasks.withType<ShadowJar> {
 dependencies {
   "compileOnly"(project(":skin-manager-shared"))
   "compileOnly"(files("../libs/labymod-api.jar"))
+  "implementation"("com.github.ben-manes.caffeine", "caffeine", "2.8.8")
   "implementation"("de.hdskins.protocol:client:" + ext["dependencyNetworkClientVersion"] as String)
 }
 
