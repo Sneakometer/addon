@@ -17,6 +17,8 @@
  */
 package de.hdskins.labymod.shared.utils;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import de.hdskins.labymod.shared.Constants;
 import org.apache.http.HttpStatus;
 
@@ -24,15 +26,18 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public final class UniqueIdUtils {
 
   private static final UUID RUNNING = new UUID(0, 0);
-  private static final Map<String, UUID> CACHE = new ConcurrentHashMap<>();
   private static final String LOOKUP_URL = "https://api.mojang.com/users/profiles/minecraft/%s";
+  private static final Cache<String, UUID> CACHE = Caffeine.newBuilder()
+    .executor(Executors.newFixedThreadPool(1))
+    .expireAfterAccess(15, TimeUnit.MINUTES)
+    .build();
 
   private UniqueIdUtils() {
     throw new UnsupportedOperationException();
@@ -40,7 +45,7 @@ public final class UniqueIdUtils {
 
   @Nullable
   public static UUID getOrLookupAndCache(@Nonnull String name) {
-    final UUID result = CACHE.putIfAbsent(name, RUNNING);
+    final UUID result = CACHE.getIfPresent(name);
     if (result == null) {
       doLookup(name);
     }
@@ -57,8 +62,6 @@ public final class UniqueIdUtils {
 
       if (response != null && response.id != null) {
         CACHE.put(name, response.id);
-      } else {
-        CACHE.remove(name);
       }
     });
   }
