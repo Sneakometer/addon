@@ -119,8 +119,7 @@ public class JsonAddonConfig implements AddonConfig {
       return addonConfig;
     }
 
-    try (InputStream inputStream = Files.newInputStream(configPath);
-         Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+    try (InputStream inputStream = Files.newInputStream(configPath); Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
       JsonObject config = Constants.JSON_PARSER.parse(reader).getAsJsonObject();
 
       if (!config.has("configuration") || config.get("configuration").isJsonNull()) {

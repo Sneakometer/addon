@@ -146,14 +146,6 @@ public class HDSkinManager extends SkinManager {
     Constants.EVENT_BUS.registerListener(clientListeners);
   }
 
-  public Cache<UUID, SkinHashWrapper> getCachedSkins() {
-    return this.uniqueIdToSkinHashCache;
-  }
-
-  public NetHandlerPlayClient getClientConnection() {
-    return this.netHandlerPlayerClient.get();
-  }
-
   @Override
   public ResourceLocation loadSkin(MinecraftProfileTexture texture, MinecraftProfileTexture.Type type) {
     return this.loadSkin(texture, type, null);
@@ -567,6 +559,14 @@ public class HDSkinManager extends SkinManager {
         }
       }
     }
+  }
+
+  public Cache<UUID, SkinHashWrapper> getCachedSkins() {
+    return this.uniqueIdToSkinHashCache;
+  }
+
+  public NetHandlerPlayClient getClientConnection() {
+    return this.netHandlerPlayerClient.get();
   }
 
   public AddonContext getAddonContext() {
