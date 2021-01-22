@@ -32,7 +32,7 @@ import java.util.Iterator;
 
 public final class ImageUtils {
 
-  private static final ImageReader PNG_READER = loadPngReader();
+  private static final ThreadLocal<ImageReader> PNG_READER = ThreadLocal.withInitial(ImageUtils::loadPngReader);
 
   private ImageUtils() {
     throw new UnsupportedOperationException();
@@ -40,8 +40,9 @@ public final class ImageUtils {
 
   @Nonnull
   public static BufferedImage readPngImage(@Nonnull InputStream stream) throws IOException {
-    if (PNG_READER != null) {
-      return doFastRead(stream, PNG_READER);
+    final ImageReader pngReader = PNG_READER.get();
+    if (pngReader != null) {
+      return doFastRead(stream, pngReader);
     }
     return ImageIO.read(stream);
   }

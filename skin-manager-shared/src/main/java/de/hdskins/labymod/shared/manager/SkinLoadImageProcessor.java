@@ -17,8 +17,9 @@
  */
 package de.hdskins.labymod.shared.manager;
 
+import de.hdskins.labymod.shared.utils.ImageUtils;
+
 import javax.annotation.Nonnull;
-import javax.imageio.ImageIO;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -36,7 +37,7 @@ public final class SkinLoadImageProcessor {
 
   @Nonnull
   public static BufferedImage process(@Nonnull InputStream stream) throws IOException {
-    BufferedImage in = ImageIO.read(stream);
+    BufferedImage in = ImageUtils.readPngImage(stream);
     BufferedImage transform = new BufferedImage(in.getWidth(), in.getWidth(), BufferedImage.TYPE_INT_ARGB);
     process(in, transform);
     return transform;
