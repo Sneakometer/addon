@@ -17,7 +17,6 @@
  */
 package de.hdskins.labymod.shared.asm.labyconnect;
 
-import de.hdskins.labymod.shared.utils.UnbanRequestUtils;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -30,7 +29,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 public class LabyConnectPacketHandlerTransformer implements IClassTransformer {
 
-  private static final String UNBAN_REQUEST_UTILS = UnbanRequestUtils.class.getName().replace('.', '/');
+  private static final String UNBAN_REQUEST_UTILS = "de/hdskins/labymod/shared/utils/UnbanRequestUtils";
 
   @Override
   public byte[] transform(String name, String transformedName, byte[] basicClass) {
