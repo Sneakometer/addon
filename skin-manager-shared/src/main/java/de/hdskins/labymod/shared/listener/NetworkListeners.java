@@ -31,6 +31,7 @@ import de.hdskins.labymod.shared.utils.LabyModUtils;
 import de.hdskins.protocol.listener.ChannelInactiveListener;
 import de.hdskins.protocol.listener.PacketListener;
 import de.hdskins.protocol.packets.general.PacketDisconnect;
+import de.hdskins.protocol.packets.reading.connection.PacketServerPong;
 import de.hdskins.protocol.packets.reading.live.PacketServerDisplayAchievement;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateDeletePlayer;
@@ -160,5 +161,10 @@ public final class NetworkListeners {
   @PacketListener
   public void handleRateLimitUpdate(PacketServerUpdateRateLimits packet) {
     this.hdSkinManager.getAddonContext().setRateLimits(packet.getRateLimits());
+  }
+
+  @PacketListener
+  public void handleRateLimitUpdate(PacketServerPong packet) {
+    this.hdSkinManager.getAddonContext().getPingHelper().handlePong(packet);
   }
 }

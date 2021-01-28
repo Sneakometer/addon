@@ -54,7 +54,7 @@ allprojects {
     }
   }
 
-  project.ext.set("dependencyNetworkClientVersion", "1.23-SNAPSHOT")
+  project.ext.set("dependencyNetworkClientVersion", "1.24-SNAPSHOT")
   project.ext.set("currentShortGitRevision", getCurrentShortGitRevision())
 }
 

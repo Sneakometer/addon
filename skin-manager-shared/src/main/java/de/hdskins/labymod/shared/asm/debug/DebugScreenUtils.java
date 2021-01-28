@@ -31,6 +31,7 @@ public final class DebugScreenUtils {
   private static final String FORMAT_LINE_1 = "HDSkins v%d, active: %b, reconnecting: %b";
   private static final String FORMAT_LINE_2 = "%d mojang, %d texture locations";
   private static final String FORMAT_LINE_3 = "%d uuid to skin-id, %d waiting unloads";
+  private static final String FORMAT_LINE_4 = "Last hdskins server ping: %dms";
 
   private DebugScreenUtils() {
     throw new UnsupportedOperationException();
@@ -50,5 +51,6 @@ public final class DebugScreenUtils {
     list.add(String.format(FORMAT_LINE_1, Constants.getAddonInfo().getVersion(), addonContext.getActive().get(), addonContext.getReconnecting().get()));
     list.add(String.format(FORMAT_LINE_2, manager.mojangSkinCacheSize(), manager.textureToLocationCacheSize()));
     list.add(String.format(FORMAT_LINE_3, manager.uuidToWrapperCache(), manager.queuedUnloads()));
+    list.add(String.format(FORMAT_LINE_4, manager.getAddonContext().getPingHelper().getLastPing()));
   }
 }

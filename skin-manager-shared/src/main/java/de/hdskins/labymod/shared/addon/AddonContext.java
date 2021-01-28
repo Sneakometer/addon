@@ -36,6 +36,8 @@ import de.hdskins.protocol.packets.reading.client.PacketClientReportSkin;
 import de.hdskins.protocol.packets.reading.client.PacketClientSetSlim;
 import de.hdskins.protocol.packets.reading.client.PacketClientSkinSettings;
 import de.hdskins.protocol.packets.reading.client.PacketClientUploadSkin;
+import de.hdskins.protocol.packets.reading.connection.PacketClientPing;
+import de.hdskins.protocol.packets.reading.connection.PacketServerPong;
 import de.hdskins.protocol.packets.reading.live.PacketServerLiveUpdateBan;
 import de.hdskins.protocol.packets.reading.ratelimit.PacketServerUpdateRateLimits;
 import net.labymod.api.LabyModAddon;
@@ -50,13 +52,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 @ParametersAreNonnullByDefault
 public class AddonContext {
 
   private static final Logger LOGGER = LogManager.getLogger(AddonContext.class);
   private static final ServerResult ERROR = new ServerResult(ExecutionStage.ERROR, null);
+  private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(1);
   private static final ServerResult NOT_CONNECTED = new ServerResult(ExecutionStage.NOT_CONNECTED, null);
   private static final PacketServerUpdateRateLimits.RateLimits EMPTY = PacketServerUpdateRateLimits.RateLimits.limits((short) -1, (short) -1, (short) -1, (short) -1);
 
@@ -64,6 +71,7 @@ public class AddonContext {
   private final LabyModAddon labyModAddon;
   private final NetworkClient networkClient;
   private final TranslationRegistry translationRegistry;
+  private final PingHelper pingHelper = new PingHelper();
   private final AtomicBoolean active = new AtomicBoolean(true);
   private final AtomicBoolean reconnecting = new AtomicBoolean(false);
   // changeable
@@ -104,6 +112,10 @@ public class AddonContext {
   public void setSkinManager(HDSkinManager skinManager) {
     Preconditions.checkArgument(this.skinManager == null, "Cannot redefine singleton skin manager");
     this.skinManager = skinManager;
+  }
+
+  public PingHelper getPingHelper() {
+    return this.pingHelper;
   }
 
   public AtomicBoolean getActive() {
@@ -268,6 +280,60 @@ public class AddonContext {
 
     public PacketServerLiveUpdateBan getInfo() {
       return this.info;
+    }
+  }
+
+  private static final class PingWrapper {
+
+    private long sentTime;
+    private PacketClientPing ping;
+
+    public long getSentTime() {
+      return this.sentTime;
+    }
+
+    @Nullable
+    public PacketClientPing getPing() {
+      return this.ping;
+    }
+
+    public void setPing(PacketClientPing ping) {
+      this.ping = ping;
+      this.sentTime = System.currentTimeMillis();
+    }
+  }
+
+  public final class PingHelper {
+
+    private final AtomicLong lastPing = new AtomicLong();
+    private final PingWrapper pingWrapper = new PingWrapper();
+
+    public PingHelper() {
+      SERVICE.scheduleAtFixedRate(() -> {
+        if (AddonContext.this.active.get() && !AddonContext.this.reconnecting.get()) {
+          byte transactionId = 0;
+          if (this.pingWrapper.getPing() != null) {
+            transactionId = this.pingWrapper.getPing().getTransactionId();
+            if (transactionId >= Byte.MAX_VALUE) {
+              transactionId = 0;
+            }
+          }
+
+          final PacketClientPing ping = new PacketClientPing(transactionId);
+          this.pingWrapper.setPing(ping);
+          AddonContext.this.networkClient.sendPacket(ping);
+        }
+      }, 0, 1, TimeUnit.MINUTES);
+    }
+
+    public void handlePong(@Nonnull PacketServerPong pong) {
+      if (this.pingWrapper.getPing() != null && this.pingWrapper.getPing().getTransactionId() == pong.getTransactionId()) {
+        this.lastPing.set(System.currentTimeMillis() - this.pingWrapper.getSentTime());
+      }
+    }
+
+    public long getLastPing() {
+      return this.lastPing.get();
     }
   }
 }
