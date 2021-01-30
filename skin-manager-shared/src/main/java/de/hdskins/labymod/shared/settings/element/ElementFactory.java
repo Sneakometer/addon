@@ -22,6 +22,7 @@ import de.hdskins.labymod.shared.settings.element.elements.BanDisplayElement;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
+import de.hdskins.labymod.shared.settings.element.elements.DiscordButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.EulaButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import de.hdskins.labymod.shared.settings.element.elements.UnbanRequestButtonElement;
@@ -61,6 +62,9 @@ public interface ElementFactory {
 
   @Nonnull
   EulaButtonElement brewEulaButtonElement(Runnable clickListener, Consumer<EulaButtonElement> customizer);
+
+  @Nonnull
+  DiscordButtonElement brewDiscordButtonElement(Runnable clickListener, Consumer<DiscordButtonElement> customizer);
 
   @Nonnull
   BanDisplayElement brewBanDisplayElement(AddonContext context, Consumer<BanDisplayElement> customizer);

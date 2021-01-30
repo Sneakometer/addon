@@ -22,6 +22,7 @@ import de.hdskins.labymod.shared.settings.element.elements.BanDisplayElement;
 import de.hdskins.labymod.shared.settings.element.elements.ButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.ChangeableBooleanElement;
 import de.hdskins.labymod.shared.settings.element.elements.CustomDropDownElement;
+import de.hdskins.labymod.shared.settings.element.elements.DiscordButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.EulaButtonElement;
 import de.hdskins.labymod.shared.settings.element.elements.PlayerSkinRenderElement;
 import de.hdskins.labymod.shared.settings.element.elements.UnbanRequestButtonElement;
@@ -92,6 +93,14 @@ import java.util.function.BiFunction;
   @Override
   public EulaButtonElement brewEulaButtonElement(Runnable clickListener, Consumer<EulaButtonElement> customizer) {
     EulaButtonElement element = new EulaButtonElement(clickListener);
+    customizer.accept(element);
+    return element;
+  }
+
+  @Nonnull
+  @Override
+  public DiscordButtonElement brewDiscordButtonElement(Runnable clickListener, Consumer<DiscordButtonElement> customizer) {
+    DiscordButtonElement element = new DiscordButtonElement(clickListener);
     customizer.accept(element);
     return element;
   }

@@ -20,6 +20,7 @@ package de.hdskins.labymod.shared.settings;
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
 import de.hdskins.labymod.shared.settings.delete.DeleteButtonClickHandler;
+import de.hdskins.labymod.shared.settings.discord.DiscordButtonClickListener;
 import de.hdskins.labymod.shared.settings.element.ElementFactory;
 import de.hdskins.labymod.shared.settings.eula.EulaButtonClickListener;
 import de.hdskins.labymod.shared.settings.slim.SlimButtonClickHandler;
@@ -99,6 +100,10 @@ public final class SettingsFactory {
       new EulaButtonClickListener(addonContext),
       element -> element.setPermanent(true)
     );
+    SettingsElement discordElement = ElementFactory.defaultFactory().brewDiscordButtonElement(
+      new DiscordButtonClickListener(),
+      element -> element.setPermanent(true)
+    );
     SettingsElement skinRenderElement = ElementFactory.defaultFactory().brewRenderElement(element -> {
     });
     SettingsElement banDisplayElement = ElementFactory.defaultFactory().brewBanDisplayElement(
@@ -118,7 +123,8 @@ public final class SettingsFactory {
       setSlimElement, uploadSkinElement,
       deleteSkinElement, toggleSkinVisibilityElement,
       maxResolutionLoadOption, skinRenderElement,
-      banDisplayElement, unbanRequestElement, eulaReadElement
+      banDisplayElement, unbanRequestElement,
+      eulaReadElement, discordElement
     );
   }
 }
