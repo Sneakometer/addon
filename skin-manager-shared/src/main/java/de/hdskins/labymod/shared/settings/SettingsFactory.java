@@ -19,6 +19,7 @@ package de.hdskins.labymod.shared.settings;
 
 import de.hdskins.labymod.shared.addon.AddonContext;
 import de.hdskins.labymod.shared.config.resolution.Resolution;
+import de.hdskins.labymod.shared.settings.cache.CacheInvalidateClickHandler;
 import de.hdskins.labymod.shared.settings.delete.DeleteButtonClickHandler;
 import de.hdskins.labymod.shared.settings.discord.DiscordButtonClickListener;
 import de.hdskins.labymod.shared.settings.element.ElementFactory;
@@ -73,6 +74,15 @@ public final class SettingsFactory {
         buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("delete-skin-option-description"));
       }
     );
+    SettingsElement invalidateSkinCacheElement = ElementFactory.defaultFactory().brewButtonElement(
+      addonContext.getTranslationRegistry().translateMessage("invalidate-skin-option-name"),
+      new ControlElement.IconData(Material.REDSTONE_COMPARATOR),
+      addonContext.getTranslationRegistry().translateMessage("button-click-here"),
+      new CacheInvalidateClickHandler(addonContext),
+      buttonElement -> {
+        buttonElement.setDescriptionText(addonContext.getTranslationRegistry().translateMessage("invalidate-skin-option-description"));
+      }
+    );
     SettingsElement toggleSkinVisibilityElement = ElementFactory.defaultFactory().brewBooleanElement(
       addonContext.getTranslationRegistry().translateMessage("show-all-skins"),
       new ControlElement.IconData(Material.SKULL_ITEM),
@@ -121,9 +131,9 @@ public final class SettingsFactory {
 
     return Arrays.asList(
       setSlimElement, uploadSkinElement,
-      deleteSkinElement, toggleSkinVisibilityElement,
-      maxResolutionLoadOption, skinRenderElement,
-      banDisplayElement, unbanRequestElement,
+      deleteSkinElement, invalidateSkinCacheElement,
+      toggleSkinVisibilityElement, maxResolutionLoadOption,
+      skinRenderElement, banDisplayElement, unbanRequestElement,
       eulaReadElement, discordElement
     );
   }

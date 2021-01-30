@@ -572,4 +572,8 @@ public class HDSkinManager extends SkinManager {
   public AddonContext getAddonContext() {
     return this.addonContext;
   }
+
+  public void invalidateUniqueIdToSkinMappings() {
+    this.uniqueIdToSkinHashCache.invalidateAll();
+  }
 }
