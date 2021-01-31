@@ -33,7 +33,7 @@ public class CacheInvalidateClickHandler implements Constants, Consumer<ButtonEl
 
   @Override
   public void accept(ButtonElement buttonElement) {
-    this.addonContext.getSkinManager().invalidateUniqueIdToSkinMappings();
+    this.addonContext.getSkinManager().invalidateAllSkins();
     LabyModUtils.displayAchievement(SUCCESS, this.addonContext.getTranslationRegistry().translateMessage("invalidate-skin-success"));
   }
 }
