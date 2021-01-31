@@ -12,6 +12,11 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
 public class TabOverlayGuiTransformer implements IClassTransformer {
 
   private static final String RENDERER_NAME = "de/hdskins/labymod/shared/gui/TabRenderer";
@@ -36,18 +41,14 @@ public class TabOverlayGuiTransformer implements IClassTransformer {
         list.add(new VarInsnNode(Opcodes.ILOAD, 1)); // load width
         list.add(new InsnNode(Opcodes.ICONST_2)); // load 2
         list.add(new InsnNode(Opcodes.IDIV)); // width / 2
-
         // calculate xOffset: var16 / 2
         list.add(new VarInsnNode(Opcodes.ILOAD, 20)); // load var16
         list.add(new InsnNode(Opcodes.ICONST_2)); // load 2
         list.add(new InsnNode(Opcodes.IDIV)); // var16 / 2
-
-        //list.add(new InsnNode(Opcodes.IREM)); // width / 2 - var16 / 2
-
-        list.add(this.invokeRenderMethod()); // invoke renderTabOverlay
+        // invoke renderTabOverlay
+        list.add(this.invokeRenderMethod());
 
         method.instructions.insertBefore(last, list);
-
       }
     }
 
@@ -56,6 +57,7 @@ public class TabOverlayGuiTransformer implements IClassTransformer {
     return classWriter.toByteArray();
   }
 
+  @Nonnull
   private MethodInsnNode invokeRenderMethod() {
     return new MethodInsnNode(
       Opcodes.INVOKESTATIC,
@@ -66,6 +68,7 @@ public class TabOverlayGuiTransformer implements IClassTransformer {
     );
   }
 
+  @Nullable
   private AbstractInsnNode findReturn(MethodNode method) {
     AbstractInsnNode node = method.instructions.getLast();
 
@@ -75,15 +78,4 @@ public class TabOverlayGuiTransformer implements IClassTransformer {
 
     return node;
   }
-
-  private AbstractInsnNode findInvokeVirtual(MethodNode method, String methodName) {
-    AbstractInsnNode node = method.instructions.getLast();
-
-    do {
-      node = node.getPrevious();
-    } while (node != null && (node.getOpcode() != Opcodes.INVOKEVIRTUAL || (node instanceof MethodInsnNode && !((MethodInsnNode) node).name.equals(methodName))));
-
-    return node;
-  }
-
 }
