@@ -1,4 +1,4 @@
-HDSkins ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/HDSkins/addon/Gradle%20Github%20Actions/master) ![License](https://img.shields.io/github/license/HDSkins/addon) ![LabyMod](https://img.shields.io/badge/LabyMod-3.7.7-blue)
+HDSkins ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/HDSkins/addon/Gradle%20Github%20Actions/master) ![License](https://img.shields.io/badge/license-GPL--3.0-orange) ![LabyMod](https://img.shields.io/badge/LabyMod-3.7.7-blue)
 ----
 
 A high performance [LabyMod](https://www.labymod.net/) addon which adds HDSkin support to your
