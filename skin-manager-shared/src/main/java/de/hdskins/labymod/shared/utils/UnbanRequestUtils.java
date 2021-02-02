@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class UnbanRequestUtils {
 
-  private static final String USER_LOOKUP_URL = "https://api.hdskins.de/labymod/chat/users";
+  private static final String USER_LOOKUP_URL = "http://api.hdskins.de/labymod/chat/users";
   private static final Set<LabyChatUser> EA_REQUEST_BOTS = loadUnbanRequestBotProfiles();
 
   private UnbanRequestUtils() {
@@ -63,7 +63,7 @@ public final class UnbanRequestUtils {
     if (hdSkins != null) {
       return CompletableFuture.completedFuture(redirectToChat(context, hdSkins));
     }
-    final LabyChatUser target = Iterables.get(EA_REQUEST_BOTS, ThreadLocalRandom.current().nextInt(EA_REQUEST_BOTS.size()), null);
+    final LabyChatUser target = EA_REQUEST_BOTS.isEmpty() ? null : Iterables.get(EA_REQUEST_BOTS, ThreadLocalRandom.current().nextInt(EA_REQUEST_BOTS.size()), null);
     if (target == null) {
       return CompletableFuture.completedFuture(RequestResult.failure(context.getTranslationRegistry().translateMessage("laby-connect-no-bots-available")));
     }
