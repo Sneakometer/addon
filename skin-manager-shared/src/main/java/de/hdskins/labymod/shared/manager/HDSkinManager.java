@@ -18,7 +18,6 @@
 package de.hdskins.labymod.shared.manager;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.RemovalCause;
@@ -99,29 +98,16 @@ public class HDSkinManager extends SkinManager {
   private final Executor requestTimeoutBacker = Executors.newCachedThreadPool();
   private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
   private final LoadingCache<MinecraftProfileTexture, HDResourceLocation> textureToLocationCache = Caffeine.newBuilder()
-    .build(new CacheLoader<MinecraftProfileTexture, HDResourceLocation>() {
-      @Override
-      public HDResourceLocation load(@Nonnull MinecraftProfileTexture texture) {
-        return HDResourceLocation.forProfileTexture(texture);
-      }
-    });
+    .build(texture -> HDResourceLocation.forProfileTexture(texture));
   private final LoadingCache<GameProfile, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>> mojangProfileCache = Caffeine.newBuilder()
     .executor(CACHE_REMOVAL_EXECUTOR)
     .expireAfterAccess(30, TimeUnit.SECONDS)
-    .build(new CacheLoader<GameProfile, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>>() {
-      @Override
-      public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> load(@Nonnull GameProfile gameProfile) {
-        return Minecraft.getMinecraft().getSessionService().getTextures(gameProfile, false);
-      }
-    });
+    .build(gameProfile -> Minecraft.getMinecraft().getSessionService().getTextures(gameProfile, false));
   private final Cache<UUID, SkinHashWrapper> uniqueIdToSkinHashCache = Caffeine.newBuilder()
     .executor(CACHE_REMOVAL_EXECUTOR)
-    .removalListener(new RemovalListener<UUID, SkinHashWrapper>() {
-      @Override
-      public void onRemoval(@Nullable UUID key, @Nullable SkinHashWrapper value, @Nonnull RemovalCause cause) {
-        if (key != null) {
-          HDSkinManager.this.handleWrapperCacheRemove(key, value, cause);
-        }
+    .removalListener((RemovalListener<UUID, SkinHashWrapper>) (key, value, cause) -> {
+      if (key != null) {
+        HDSkinManager.this.handleWrapperCacheRemove(key, value, cause);
       }
     })
     .expireAfterAccess(30, TimeUnit.SECONDS)
