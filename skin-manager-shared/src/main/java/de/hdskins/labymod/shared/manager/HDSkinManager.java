@@ -228,6 +228,13 @@ public class HDSkinManager extends SkinManager {
       return;
     }
 
+    // Fixes issue #5
+    if (!profile.getId().equals(profileId) && profile.getId().getLeastSignificantBits() != 0) {
+      LOGGER.debug("Not loading skin for profile: {} callback: {} secure: {} because the unique id differs from the profileId and it's not an npc", profile, callback, requireSecure);
+      super.loadProfileTextures(profile, callback, requireSecure);
+      return;
+    }
+
     final SkinHashWrapper response = this.uniqueIdToSkinHashCache.getIfPresent(profileId);
     if (response == null) {
       // We were disconnected from the server so we cannot load a skin from there
